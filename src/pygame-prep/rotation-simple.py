@@ -36,8 +36,8 @@ def rotation_matrix(rad_theta):
 def draw_step(screen, origin, point):
   pygame.Surface.fill(screen, (0,0,0))
   pygame.draw.line(screen, (255, 0, 0), origin, point, width=3)
-  pygame.display.update()
-  time.sleep(0.01)
+  # pygame.display.update()
+  # time.sleep(0.01)
 
 def rotate(screen, base_line, target_point):
   t_x, t_y = target_point
@@ -65,6 +65,8 @@ def rotate(screen, base_line, target_point):
   for p in range(len(new_point_set)):
     print(f'{p}\t {new_point_set[p]}')
     draw_step(screen, base_line.origin, new_point_set[p])
+    pygame.draw.circle(screen,(0,255,0), (t_x, t_y), 2)
+    pygame.display.update()
     time.sleep(0.01)
   return 1
 
