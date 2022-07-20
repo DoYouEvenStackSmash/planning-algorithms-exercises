@@ -44,15 +44,16 @@ def rotate(screen, base_line, target_point):
   
   target_rad = np.arctan2(t_y - base_line.y_off_t, t_x - base_line.x_off_t)
   rotation = target_rad - base_line.rad_angle
-  moves = rotation * 180 / np.pi
-  
-  increment = rotation / abs(moves)
+  moves = abs(rotation * 180 / np.pi)
+  if abs(moves) > 180:
+    moves = 360 - abs(moves)
+  increment = rotation / moves
   
   new_point_set = []
   x_o,y_o = base_line.x_off_t, base_line.y_off_t
   new_point_set = [base_line.get_point()]
   print(f'moves: {moves}')
-  for i in range(abs(int(moves))):
+  for i in range(int(moves)):
     # for p in point_set:
     lp_x, lp_y = new_point_set[-1]
     step = np.matmul(rotation_matrix(increment),np.array([[lp_x - x_o], [lp_y - y_o]]))
