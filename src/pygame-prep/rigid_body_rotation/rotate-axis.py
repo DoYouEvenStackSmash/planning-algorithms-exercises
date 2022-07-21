@@ -40,8 +40,10 @@ def draw_step(screen, origin, point):
 def rotate(screen, base_line, target_point):
   t_x, t_y = target_point
   print(f"{'-' * 100}")
+
   target_rad = np.arctan2(t_y - base_line.y_off_t, t_x - base_line.x_off_t)
   rotation = target_rad - base_line.rad_angle
+  
   if rotation > np.pi:
     rotation = rotation - (2 * np.pi)
   if rotation < -np.pi:

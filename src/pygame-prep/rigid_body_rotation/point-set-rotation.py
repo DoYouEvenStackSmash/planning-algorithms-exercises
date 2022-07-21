@@ -42,7 +42,7 @@ def rotation(screen, rb, target_point):
   
   moves = abs(rotation * 180 / np.pi)
   
-  if moves == 0:
+  if int(moves) == 0:
     moves = 1
   
   step_rad = rotation / int(moves)
