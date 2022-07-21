@@ -18,8 +18,6 @@ class line:
     x = np.cos(self.rad_angle) * self.r
     y = np.sin(self.rad_angle) * self.r
     return (x + x_o, y + y_o)
-
-
     
 def create_display(width, height):
   return pygame.display.set_mode((width,height))
@@ -35,24 +33,36 @@ def rotation_matrix(rad_theta):
   
 def draw_step(screen, origin, point):
   pygame.Surface.fill(screen, (0,0,0))
-  pygame.draw.line(screen, (255, 0, 0), origin, point, width=3)
+  pygame.draw.aaline(screen, (255, 0, 0), origin, point)
   # pygame.display.update()
   # time.sleep(0.01)
 
 def rotate(screen, base_line, target_point):
   t_x, t_y = target_point
-  
+  print(f"{'-' * 100}")
   target_rad = np.arctan2(t_y - base_line.y_off_t, t_x - base_line.x_off_t)
   rotation = target_rad - base_line.rad_angle
-  moves = abs(rotation * 180 / np.pi)
-  if abs(moves) > 180:
-    moves = 360 - abs(moves)
-  increment = rotation / moves
+  if rotation > np.pi:
+    rotation = rotation - (2 * np.pi)
+  if rotation < -np.pi:
+    rotation = rotation + 2 * (np.pi)
   
+  original_moves = rotation * 180 / np.pi
+  moves = abs(original_moves)
+  
+  print(f"t_r:\t{target_rad}\nb_r:\t{base_line.rad_angle}")
+  print(f"rot:\t{rotation}")
+  
+  # if abs(moves) > 180:
+  #   moves = 360 - abs(moves)
+  print(f"mvs:\t{original_moves}\t {moves}")
+
+  increment = rotation / moves
+  print(f"inc:\t{increment}")
   new_point_set = []
   x_o,y_o = base_line.x_off_t, base_line.y_off_t
   new_point_set = [base_line.get_point()]
-  print(f'moves: {moves}')
+  # print(f'moves: {moves}')
   for i in range(int(moves)):
     # for p in point_set:
     lp_x, lp_y = new_point_set[-1]
@@ -63,7 +73,7 @@ def rotate(screen, base_line, target_point):
   new_point_set.append(base_line.get_point())
 
   for p in range(len(new_point_set)):
-    print(f'{p}\t {new_point_set[p]}')
+    # print(f'{p}\t {new_point_set[p]}')
     draw_step(screen, base_line.origin, new_point_set[p])
     pygame.draw.circle(screen,(0,255,0), (t_x, t_y), 2)
     pygame.display.update()
