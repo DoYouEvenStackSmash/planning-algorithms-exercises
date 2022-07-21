@@ -51,6 +51,8 @@ def rotation(screen, rb, target_point):
   for i in range(int(moves)):
     point_set = rotate(origin, rb.get_point_set(), cc_rotation_matrix)
     draw_polygon(screen, point_set)
+    pygame.draw.circle(screen,(0,255,0), (t_x, t_y), 2)
+    pygame.display.update()
     rb.set_point_set(point_set)
     time.sleep(0.01)
   
@@ -60,6 +62,10 @@ def create_rectangle(origin, length, width):
   o_x, o_y = origin
   return [(o_x, o_y), (o_x + length, o_y), (o_x + length, o_y + width), (o_x, o_y + width)]
 
+def create_rigid_body(origin, length, width):
+  o_x, o_y = origin
+  off_y = width/2
+  return [(o_x, o_y - off_y), (o_x + length, o_y - off_y), (o_x + length, o_y + off_y), (o_x, o_y + off_y)]
 
 
 def main():
@@ -68,7 +74,8 @@ def main():
   screen = create_display(w,h)
   origin = [250,250]
   length, width = 100, 20
-  ps = create_rectangle(origin, length, width)
+  # ps = create_rectangle(origin, length, width)
+  ps = create_rigid_body(origin, length, width)
   rb = RigidBody(origin, ps)
   draw_polygon(screen, ps)
 
