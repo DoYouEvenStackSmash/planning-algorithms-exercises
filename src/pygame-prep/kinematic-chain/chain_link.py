@@ -15,6 +15,8 @@ class Link:
     self.origin = origin
     # distance between origin and end member
     self.link_len = link_len
+    # unit circle for arithmetic
+    self.r = 1
     # angle from center in radians
     self.rad_angle = rad_angle
     # outline of link
@@ -22,6 +24,19 @@ class Link:
   
   def get_point_set(self):
     return self.point_set
+  
+  def get_origin(self):
+    return self.origin
+  
+  def get_end_member(self):
+    e_x, e_y = self.origin.get_coord()
+    return (e_x + self.link_len, e_y + self.link_len)
+  
+  def get_end_point(self):
+    x_o, y_o = self.origin.get_coord()
+    x = np.cos(self.rad_angle) * self.link_len
+    y = np.sin(self.rad_angle) * self.link_len
+    return (x + x_o, y + y_o)
 
 # radius = linkage_len
 # chord_len = distance_to_target
