@@ -3,7 +3,7 @@ import pygame
 import time
 import sys
 import numpy as np
-from chain_link import Point,Link
+from chain_link import Point,Link, TransformStruct
 
 
 def create_display(width, height):
@@ -49,7 +49,8 @@ def rotate_link(origin, target_link, rotation_matrix):
   
 
 
-def rotation(screen, link_base, link_chain, target_point):
+
+def rotation(screen, link_base, link_chain, target_point, t):
   t_x, t_y = target_point
   o_x, o_y = link_base.get_origin().get_coord()
   base_rad = link_base.get_rad_angle()
@@ -67,15 +68,23 @@ def rotation(screen, link_base, link_chain, target_point):
     moves = 1
   
   step_rad = rotation / int(moves)
-  orig = link_base.get_origin()
+  # orig = link_base.get_origin()
   cc_rotation_matrix = get_cc_rotation_matrix(step_rad)
-  for i in range(int(moves)):
-    for j in range(len(link_chain)):
-      rotate_link(orig, link_chain[j], cc_rotation_matrix)
-    draw_frame(screen, link_chain)
-    time.sleep(0.01)
   
-  link_base.set_rad_angle(target_rad)
+  
+  t.rotation_matrix = cc_rotation_matrix
+  t.target_rad = target_rad
+  t.moves = moves
+  t.step_rad = step_rad
+  
+  
+  # for i in range(int(moves)):
+  #   for j in range(len(link_chain)):
+  #     rotate_link(orig, link_chain[j], cc_rotation_matrix)
+  #   draw_frame(screen, link_chain)
+  #   time.sleep(0.01)
+  
+  # link_base.set_rad_angle(target_rad)
     
 
 def main():
@@ -98,6 +107,10 @@ def main():
   # for i in a:
   #   b.append(i.get_coord())
   draw_frame(screen, link_chain)
+  t = TransformStruct()
+  t.link_chain = link_chain
+  t.anchor_link_index = 0
+  t.pivot_link_index = 1
   # draw_polygon(screen, b)
   # draw_dot(screen, link_1.get_origin())
 
@@ -105,7 +118,13 @@ def main():
     for event in pygame.event.get():
       if event.type ==pygame.QUIT: sys.exit()
       if event.type == pygame.MOUSEBUTTONUP:
-        rotation(screen, link_1, link_chain, pygame.mouse.get_pos())
+        rotation(screen, t.get_link(1), [], pygame.mouse.get_pos(), t)
+        for i in range(int(t.moves)):
+          for j in range(t.pivot_link_index, len(t.link_chain)):
+            rotate_link(t.get_link(t.pivot_link_index).get_origin(), t.link_chain[j], t.rotation_matrix)
+          draw_frame(screen, t.link_chain)
+          time.sleep(0.01)
+        t.get_link(t.pivot_link_index).set_rad_angle(t.target_rad)
   
 main()
 

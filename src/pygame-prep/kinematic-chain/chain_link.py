@@ -50,6 +50,18 @@ class Link:
   def get_rad_angle(self):
     return self.rad_angle
 
+class TransformStruct:
+  def __init__(self):
+    self.rotation_matrix = None
+    self.target_rad = None
+    self.link_chain = None
+    self.anchor_link_index = None
+    self.pivot_link_index = None
+    self.moves = None
+    self.step_rad = None
+  
+  def get_link(self, index):
+    return self.link_chain[index]
 # radius = linkage_len
 # chord_len = distance_to_target
 # center_angle = np.arcsin(chord_len / 2 * radius)
