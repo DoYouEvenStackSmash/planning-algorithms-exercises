@@ -25,8 +25,17 @@ class Link:
   def get_point_set(self):
     return self.point_set
   
+  def set_point_set(self, point_set):
+    self.point_set = point_set
+  
   def get_origin(self):
     return self.origin
+  
+  def set_origin(self, origin):
+    self.origin = origin
+  
+  def set_rad_angle(self, rad_angle):
+    self.rad_angle = rad_angle
   
   def get_end_member(self):
     e_x, e_y = self.origin.get_coord()
@@ -37,6 +46,9 @@ class Link:
     x = np.cos(self.rad_angle) * self.link_len
     y = np.sin(self.rad_angle) * self.link_len
     return (x + x_o, y + y_o)
+  
+  def get_rad_angle(self):
+    return self.rad_angle
 
 # radius = linkage_len
 # chord_len = distance_to_target
