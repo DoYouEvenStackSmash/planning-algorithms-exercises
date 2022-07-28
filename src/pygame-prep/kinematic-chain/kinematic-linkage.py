@@ -10,7 +10,9 @@ from linkage import *
 colors = {
   "black" : (0,0,0),
   "yellow" : (255,255,0),
-  "cyan" : (0,255,255)
+  "cyan" : (0,255,255),
+  "green" : (0,255,0),
+  "magenta" : (255, 0, 255)
 }
 
 def create_display(width, height):
@@ -74,61 +76,37 @@ def rotate_chain(base_link, target_point):
     rotate_link(origin, link, r_theta)
     link = link.m_next
   base_link.set_rad_angle(target_rad + base_link.get_local_rad_angle())
-  
-def calculate_center_angle(r, d, R):
-  
 
-  # d = link_1.link_len
-
-  # R = link_2.link_len
-
-  # x = (np.square(d) - np.square(r) + np.square(R) / (2 * d))
-
-  a = (1 / d) * np.sqrt((-d + r - R) * (-d - r + R) * (-d + r + R) * (d + r + R))
-
-  half_a = a / 2
-
-  center_angle = np.arcsin( half_a / R)
-  
-  return center_angle
-
-def move_to_target(screen, base_link, target_point):
-  draw_origin_dot(screen, target_point, colors["yellow"])
-  # calculate distance between world frame origin and target point
-  link = base_link
-  while link.m_prev:
-    link = link.m_prev
-  # centerpoint world frame
-  origin = link.get_origin()
-  x1,y1 = origin.get_coord()
-  x2,y2 = target_point
-  r = np.sqrt(np.square((x2 - x1)) + np.square((y2 - y1)))
-  draw_circle(screen, r, origin.get_coord(), colors["yellow"])
-  # get distance between center of link circle and global origin
-  h, k = base_link.get_origin().get_coord()
-  d = np.sqrt(np.square((h - x1)) + np.square((k - y1)))
-  
-  # get radius of link circle
-  R = base_link.link_len
-  draw_circle(screen, R, base_link.get_origin().get_coord(), colors["cyan"])
-  
-  # get center angle in radians with respect to world frame
-  center_angle = calculate_center_angle(r, d, R)
-  
-  tp = transform_target_point(origin, target_point, link.get_local_rad_angle())
-  
-  draw_origin_dot(screen, tp.get_coord(), colors["cyan"])
-
-def transform_target_point(origin, target_point, body_rad):
-  target_rad = body_rad
-  o_x, o_y = origin.get_coord()
+def transform_point(base_link, target_point):
+  o_x, o_y = base_link.get_origin().get_coord()
   lp_x, lp_y = target_point
-  rotation_matrix = get_cc_rotation_matrix(target_rad)
-  step = np.matmul(rotation_matrix, np.array([[lp_x - o_x], [lp_y - o_y]]))
-  new_point = Point(step[0][0] + o_x, step[1][0] + o_y)
-  return new_point
+
+  r_m = get_cc_rotation_matrix(base_link.get_local_rad_angle())
+  step = np.matmul(r_m, np.array([[lp_x - o_x], [lp_y - o_y]]))
+  return Point(step[0][0] + o_x, step[1][0] + o_y)
 
 
+
+def target_circle(screen, base_link, target_point):
+  t_x, t_y = target_point
+  link = base_link
+  while link.m_prev != None:
+    link = link.m_prev
+  
+  o_x, o_y = link.get_origin().get_coord()
+  inner_len = link.link_len
+  outer_len = base_link.link_len
+
+  target_distance = np.sqrt(np.square(t_x - o_x) + np.square(t_y - o_y))
+  x = np.divide((np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (2 * inner_len))
+  
+  y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
+  
+  draw_circle(screen, target_distance, (o_x, o_y), colors["yellow"])
+  draw_circle(screen, outer_len, base_link.get_origin().get_coord(), colors["cyan"])
+  draw_circle(screen, x, (o_x, o_y), colors["green"])
+  # tp = transform_point(link, (o_x + x, o_y))
+  draw_circle(screen, y, (o_x + x, o_y), colors["magenta"])
 
 def create_link(origin, side_length, side_width, link_len = 0):
   back_two = [Point(origin.x - side_length/10, origin.y - side_width/2), Point(origin.x - side_length/10, origin.y + side_width/2)]
@@ -138,7 +116,7 @@ def create_link(origin, side_length, side_width, link_len = 0):
   return new_link
 
 def main():
-  w,h = 500, 500
+  w,h = 1000,1000
   pygame.init()
 
   lalt = 256
@@ -148,12 +126,12 @@ def main():
   origin = [w/2,h/2]
   screen = create_display(w,h)
   
-  origin = Point(250,250)
-  l,w = 50, 10
-  link_1 = create_link(origin, l, w, 45)
+  origin = Point(500,500)
+  l,w = 100, 20
+  link_1 = create_link(origin, l, w, 95)
   link_1.absolute_offset = origin
   x, y = link_1.get_end_point()
-  link_2 = create_link(Point(x,y), l, w, 45)
+  link_2 = create_link(Point(x,y), l, w, 95)
   link_2.absolute_offset = origin
   link_2.m_prev = link_1
   link_1.m_next = link_2
@@ -168,7 +146,7 @@ def main():
       if event.type == pygame.MOUSEBUTTONUP:
         p = pygame.mouse.get_pos()
         if pygame.key.get_mods() == ctrl:
-          move_to_target(screen, link_2, p)
+          target_circle(screen, link_2, p)
           continue
         elif pygame.key.get_mods() == lalt:
           draw_origin_dot(screen, p)
