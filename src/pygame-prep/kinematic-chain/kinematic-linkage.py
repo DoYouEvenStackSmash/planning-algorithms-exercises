@@ -85,7 +85,15 @@ def transform_point(base_link, target_point):
   step = np.matmul(r_m, np.array([[lp_x - o_x], [lp_y - o_y]]))
   return Point(step[0][0] + o_x, step[1][0] + o_y)
 
-
+def transform_point_set(base_link, point_set):
+  o_x, o_y = base_link.get_origin().get_coord()
+  r_m = get_cc_rotation_matrix(base_link.get_local_rad_angle())
+  nps = []
+  for p in point_set:
+    lp_x, lp_y = p
+    step = np.matmul(r_m, np.array([[lp_x - o_x], [lp_y - o_y]]))
+    nps.append(Point(step[0][0] + o_x, step[1][0] + o_y))
+  return nps
 
 def target_circle(screen, base_link, target_point):
   t_x, t_y = target_point
@@ -105,8 +113,12 @@ def target_circle(screen, base_link, target_point):
   draw_circle(screen, target_distance, (o_x, o_y), colors["yellow"])
   draw_circle(screen, outer_len, base_link.get_origin().get_coord(), colors["cyan"])
   draw_circle(screen, x, (o_x, o_y), colors["green"])
+  ps = [(o_x + x, o_y + y), (o_x + x, o_y), (o_x + x, o_y - y)]
+  pps = transform_point_set(link, ps)
   # tp = transform_point(link, (o_x + x, o_y))
-  draw_circle(screen, y, (o_x + x, o_y), colors["magenta"])
+  for i in pps:
+    draw_origin_dot(screen, i.get_coord(), colors["magenta"])
+  # draw_circle(screen, y, tp.get_coord(), colors["magenta"])
 
 def create_link(origin, side_length, side_width, link_len = 0):
   back_two = [Point(origin.x - side_length/10, origin.y - side_width/2), Point(origin.x - side_length/10, origin.y + side_width/2)]
