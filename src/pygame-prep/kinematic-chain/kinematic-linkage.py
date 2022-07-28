@@ -7,8 +7,18 @@ import time
 
 from linkage import *
 
+colors = {
+  "black" : (0,0,0),
+  "yellow" : (255,255,0),
+  "cyan" : (0,255,255)
+}
+
 def create_display(width, height):
   return pygame.display.set_mode((width, height))
+
+def draw_circle(screen, radius, center, color = (0,0,0)):
+  pygame.draw.circle(screen, color, center, radius, 1)
+  pygame.display.update()
 
 def draw_polygon(screen, point_set):  
   pygame.draw.polygon(screen, (255,0,0), point_set, width=2)
@@ -21,8 +31,8 @@ def draw_frame(screen, polygons):
     draw_origin_dot(screen, polygons[i].get_origin().get_coord())
   pygame.display.update()
 
-def draw_origin_dot(screen, dot_pt):
-  pygame.draw.circle(screen, (0,0,255), dot_pt, 2)
+def draw_origin_dot(screen, dot_pt, color = (0,0,255)) :
+  pygame.draw.circle(screen, color, dot_pt, 2)
   pygame.display.update()
 
 def draw_dot(screen, dot_pt):
@@ -65,6 +75,60 @@ def rotate_chain(base_link, target_point):
     link = link.m_next
   base_link.set_rad_angle(target_rad + base_link.get_local_rad_angle())
   
+def calculate_center_angle(r, d, R):
+  
+
+  # d = link_1.link_len
+
+  # R = link_2.link_len
+
+  # x = (np.square(d) - np.square(r) + np.square(R) / (2 * d))
+
+  a = (1 / d) * np.sqrt((-d + r - R) * (-d - r + R) * (-d + r + R) * (d + r + R))
+
+  half_a = a / 2
+
+  center_angle = np.arcsin( half_a / R)
+  
+  return center_angle
+
+def move_to_target(screen, base_link, target_point):
+  draw_origin_dot(screen, target_point, colors["yellow"])
+  # calculate distance between world frame origin and target point
+  link = base_link
+  while link.m_prev:
+    link = link.m_prev
+  # centerpoint world frame
+  origin = link.get_origin()
+  x1,y1 = origin.get_coord()
+  x2,y2 = target_point
+  r = np.sqrt(np.square((x2 - x1)) + np.square((y2 - y1)))
+  draw_circle(screen, r, origin.get_coord(), colors["yellow"])
+  # get distance between center of link circle and global origin
+  h, k = base_link.get_origin().get_coord()
+  d = np.sqrt(np.square((h - x1)) + np.square((k - y1)))
+  
+  # get radius of link circle
+  R = base_link.link_len
+  draw_circle(screen, R, base_link.get_origin().get_coord(), colors["cyan"])
+  
+  # get center angle in radians with respect to world frame
+  center_angle = calculate_center_angle(r, d, R)
+  
+  tp = transform_target_point(origin, target_point, link.get_local_rad_angle())
+  
+  draw_origin_dot(screen, tp.get_coord(), colors["cyan"])
+
+def transform_target_point(origin, target_point, body_rad):
+  target_rad = body_rad
+  o_x, o_y = origin.get_coord()
+  lp_x, lp_y = target_point
+  rotation_matrix = get_cc_rotation_matrix(target_rad)
+  step = np.matmul(rotation_matrix, np.array([[lp_x - o_x], [lp_y - o_y]]))
+  new_point = Point(step[0][0] + o_x, step[1][0] + o_y)
+  return new_point
+
+
 
 def create_link(origin, side_length, side_width, link_len = 0):
   back_two = [Point(origin.x - side_length/10, origin.y - side_width/2), Point(origin.x - side_length/10, origin.y + side_width/2)]
@@ -79,6 +143,7 @@ def main():
 
   lalt = 256
   lshift = 1
+  ctrl = 64
 
   origin = [w/2,h/2]
   screen = create_display(w,h)
@@ -102,11 +167,13 @@ def main():
         sys.exit()
       if event.type == pygame.MOUSEBUTTONUP:
         p = pygame.mouse.get_pos()
-        
-        if pygame.key.get_mods() == lalt:
+        if pygame.key.get_mods() == ctrl:
+          move_to_target(screen, link_2, p)
+          continue
+        elif pygame.key.get_mods() == lalt:
           draw_origin_dot(screen, p)
           rotate_chain(link_2, p)
-          print(link_2.get_local_rad_angle())
+          print(f"link2:{link_2.get_local_rad_angle()}\nlink1:{link_1.get_local_rad_angle()}")
           # print(link_2.compute_rotation_rad(p))
         # if pygame.key.get_pressed()[] == True:
           # draw_dot(screen, p)
@@ -116,7 +183,8 @@ def main():
           print(link_1.get_local_rad_angle())
           # print(link_1.compute_rotation_rad(p))
           # draw_red_dot(screen,p)
-        else:
+        elif pygame.key.get_mods() == ctrl:
+
           print("nothing pressed")
         draw_frame(screen, cl)
 
