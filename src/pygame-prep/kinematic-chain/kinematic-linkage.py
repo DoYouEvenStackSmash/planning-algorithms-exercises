@@ -95,6 +95,24 @@ def transform_point_set(base_link, point_set):
     nps.append(Point(step[0][0] + o_x, step[1][0] + o_y))
   return nps
 
+def target_point_set(base_link, target_point):
+  t_x, t_y = target_point
+  link = base_link
+  while link.m_prev != None:
+    link = link.m_prev
+  
+  o_x, o_y = link.get_origin().get_coord()
+  inner_len = link.link_len
+  outer_len = base_link.link_len
+
+  target_distance = np.sqrt(np.square(t_x - o_x) + np.square(t_y - o_y))
+  x = np.divide((np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (2 * inner_len))
+  
+  y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
+  ps = [(o_x + x, o_y + y), (o_x + x, o_y), (o_x + x, o_y - y)]
+  pps = transform_point_set(link, ps)
+  return pps
+
 def target_circle(screen, base_link, target_point):
   t_x, t_y = target_point
   link = base_link
@@ -109,10 +127,13 @@ def target_circle(screen, base_link, target_point):
   x = np.divide((np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (2 * inner_len))
   
   y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
-  
+  max_radius = outer_len
+  curr_radius = abs(outer_len - x)
+  y = min(np.sqrt(np.square(max_radius) - np.square(curr_radius)), y)
   draw_circle(screen, target_distance, (o_x, o_y), colors["yellow"])
   draw_circle(screen, outer_len, base_link.get_origin().get_coord(), colors["cyan"])
   draw_circle(screen, x, (o_x, o_y), colors["green"])
+
   ps = [(o_x + x, o_y + y), (o_x + x, o_y), (o_x + x, o_y - y)]
   pps = transform_point_set(link, ps)
   # tp = transform_point(link, (o_x + x, o_y))
