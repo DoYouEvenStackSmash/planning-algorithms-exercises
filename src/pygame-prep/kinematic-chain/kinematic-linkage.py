@@ -95,6 +95,13 @@ def transform_point_set(base_link, point_set):
     nps.append(Point(step[0][0] + o_x, step[1][0] + o_y))
   return nps
 
+def radius_target_point(base_link, target_point):
+  pps = target_point_set(base_link, target_point)
+  chosen_point = pps[0]
+  if abs(base_link.compute_rotation_rad(pps[-1].get_coord())) < abs(base_link.compute_rotation_rad(chosen_point.get_coord())):
+    chosen_point = pps[-1]
+  return chosen_point
+
 def target_point_set(base_link, target_point):
   t_x, t_y = target_point
   link = base_link
@@ -109,6 +116,9 @@ def target_point_set(base_link, target_point):
   x = np.divide((np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (2 * inner_len))
   
   y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
+  max_radius = abs(outer_len)
+  curr_radius = abs(outer_len - x)
+  y = min(abs(np.sqrt(np.square(max_radius) - np.square(curr_radius))), y)
   ps = [(o_x + x, o_y + y), (o_x + x, o_y), (o_x + x, o_y - y)]
   pps = transform_point_set(link, ps)
   return pps
@@ -127,9 +137,9 @@ def target_circle(screen, base_link, target_point):
   x = np.divide((np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (2 * inner_len))
   
   y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
-  max_radius = outer_len
+  max_radius = abs(outer_len)
   curr_radius = abs(outer_len - x)
-  y = min(np.sqrt(np.square(max_radius) - np.square(curr_radius)), y)
+  y = min(np.sqrt(abs(np.square(max_radius) - np.square(curr_radius))), y)
   draw_circle(screen, target_distance, (o_x, o_y), colors["yellow"])
   draw_circle(screen, outer_len, base_link.get_origin().get_coord(), colors["cyan"])
   draw_circle(screen, x, (o_x, o_y), colors["green"])
@@ -180,6 +190,9 @@ def main():
         p = pygame.mouse.get_pos()
         if pygame.key.get_mods() == ctrl:
           target_circle(screen, link_2, p)
+          pt = radius_target_point(link_2, p)
+          rotate_chain(link_2, pt.get_coord())
+          
           continue
         elif pygame.key.get_mods() == lalt:
           draw_origin_dot(screen, p)
