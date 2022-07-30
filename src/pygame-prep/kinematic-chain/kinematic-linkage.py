@@ -76,16 +76,28 @@ def rotate_link(origin, link, rotation_matrix):
     and update coordinate systems of all attached links 
 '''
   # return new_point_set
-def rotate_chain(base_link, target_point):
+def rotate_chain(base_link, target_point, screen = None, cl = None):
   origin = base_link.get_origin()
   prev_rad = base_link.get_relative_rad_angle() - base_link.get_local_rad_angle()
   target_rad = base_link.compute_rotation_rad(target_point)
-  r_theta = get_cc_rotation_matrix(target_rad)
-  link = base_link
-  while link != None:
-    rotate_link(origin, link, r_theta)
-    link = link.m_next
-  base_link.set_rad_angle(target_rad + base_link.get_local_rad_angle())
+
+  moves = abs(target_rad * 180 / np.pi)
+  
+  if int(moves) == 0:
+    moves = 1
+  
+  step_rad = target_rad / moves
+  # if screen
+  r_step_theta = get_cc_rotation_matrix(step_rad)
+  # r_theta = get_cc_rotation_matrix(target_rad)
+  for i in range(int(moves)):
+    link = base_link
+    while link != None:
+      rotate_link(origin, link, r_step_theta)
+      link = link.m_next
+    base_link.set_rad_angle(step_rad + base_link.get_local_rad_angle())
+    draw_frame(screen, cl)
+    time.sleep(0.01)
 
 '''
   embedding a point into the body frame of base_link, by rotating about base_link origin
@@ -143,7 +155,8 @@ def target_point_set(base_link, target_point):
   y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
   max_radius = abs(outer_len)
   curr_radius = abs(outer_len - x)
-  y = min(abs(np.sqrt(np.square(max_radius) - np.square(curr_radius))), y)
+  # print(f"y:\t{y}\nmax_r:\t{max_radius}\ncurr_r:\t{curr_radius}")
+  y = min(np.sqrt(abs(np.square(max_radius) - np.square(curr_radius))), y)
   ps = [(o_x + x, o_y + y), (o_x + x, o_y), (o_x + x, o_y - y)]
   pps = transform_point_set(link, ps)
   return pps
@@ -259,30 +272,32 @@ def main():
           draw_origin_dot(screen, p, colors["yellow"])
           target_circle(screen, link_2, p)
           pt = radius_target_point(link_2, p)
-          rotate_chain(link_2, pt.get_coord())
+          rotate_chain(link_2, pt.get_coord(), screen, cl)
           a = cheat_target_angle(link_1.get_origin().get_coord(), link_2.get_end_point(), p)
           apt = cheat_target_point(link_1.get_origin().get_coord(), a, link_1.get_end_point())
-          rotate_chain(link_1, apt.get_coord())
+          rotate_chain(link_1, apt.get_coord(), screen, cl)
+          draw_origin_dot(screen, p, colors["yellow"])
+          draw_origin_dot(screen,pt.get_coord(), colors["cyan"])
           # print(f"angle: {a}")
           # print(f"{pt.get_coord()}, vs {link_2.get_end_point()}")
           
           continue
-        elif pygame.key.get_mods() == lalt:
-          draw_origin_dot(screen, p)
-          rotate_chain(link_2, p)
-          print(f"link2:{link_2.get_local_rad_angle()}\nlink1:{link_1.get_local_rad_angle()}")
-          # print(link_2.compute_rotation_rad(p))
-        # if pygame.key.get_pressed()[] == True:
-          # draw_dot(screen, p)
-        elif pygame.key.get_mods() == lshift:
-          draw_origin_dot(screen, p)
-          rotate_chain(link_1, p)
-          print(link_1.get_local_rad_angle())
-          # print(link_1.compute_rotation_rad(p))
-          # draw_red_dot(screen,p)
-        elif pygame.key.get_mods() == ctrl:
+        # elif pygame.key.get_mods() == lalt:
+        #   draw_origin_dot(screen, p)
+        #   rotate_chain(link_2, p)
+        #   print(f"link2:{link_2.get_local_rad_angle()}\nlink1:{link_1.get_local_rad_angle()}")
+        #   # print(link_2.compute_rotation_rad(p))
+        # # if pygame.key.get_pressed()[] == True:
+        #   # draw_dot(screen, p)
+        # elif pygame.key.get_mods() == lshift:
+        #   draw_origin_dot(screen, p)
+        #   rotate_chain(link_1, p)
+        #   print(link_1.get_local_rad_angle())
+        #   # print(link_1.compute_rotation_rad(p))
+        #   # draw_red_dot(screen,p)
+        # elif pygame.key.get_mods() == ctrl:
 
-          print("nothing pressed")
+        #   print("nothing pressed")
         draw_frame(screen, cl)
 
 main()
