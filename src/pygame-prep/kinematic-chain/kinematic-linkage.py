@@ -7,8 +7,20 @@ import time
 
 from linkage import *
 
+colors = {
+  "black" : (0,0,0),
+  "yellow" : (255,255,0),
+  "cyan" : (0,255,255),
+  "green" : (0,255,0),
+  "magenta" : (255, 0, 255)
+}
+
 def create_display(width, height):
   return pygame.display.set_mode((width, height))
+
+def draw_circle(screen, radius, center, color = (0,0,0)):
+  pygame.draw.circle(screen, color, center, radius, 1)
+  pygame.display.update()
 
 def draw_polygon(screen, point_set):  
   pygame.draw.polygon(screen, (255,0,0), point_set, width=2)
@@ -21,8 +33,8 @@ def draw_frame(screen, polygons):
     draw_origin_dot(screen, polygons[i].get_origin().get_coord())
   pygame.display.update()
 
-def draw_origin_dot(screen, dot_pt):
-  pygame.draw.circle(screen, (0,0,255), dot_pt, 2)
+def draw_origin_dot(screen, dot_pt, color = (0,0,255)) :
+  pygame.draw.circle(screen, color, dot_pt, 2)
   pygame.display.update()
 
 def draw_dot(screen, dot_pt):
@@ -64,7 +76,80 @@ def rotate_chain(base_link, target_point):
     rotate_link(origin, link, r_theta)
     link = link.m_next
   base_link.set_rad_angle(target_rad + base_link.get_local_rad_angle())
+
+def transform_point(base_link, target_point):
+  o_x, o_y = base_link.get_origin().get_coord()
+  lp_x, lp_y = target_point
+
+  r_m = get_cc_rotation_matrix(base_link.get_local_rad_angle())
+  step = np.matmul(r_m, np.array([[lp_x - o_x], [lp_y - o_y]]))
+  return Point(step[0][0] + o_x, step[1][0] + o_y)
+
+def transform_point_set(base_link, point_set):
+  o_x, o_y = base_link.get_origin().get_coord()
+  r_m = get_cc_rotation_matrix(base_link.get_local_rad_angle())
+  nps = []
+  for p in point_set:
+    lp_x, lp_y = p
+    step = np.matmul(r_m, np.array([[lp_x - o_x], [lp_y - o_y]]))
+    nps.append(Point(step[0][0] + o_x, step[1][0] + o_y))
+  return nps
+
+def radius_target_point(base_link, target_point):
+  pps = target_point_set(base_link, target_point)
+  chosen_point = pps[0]
+  if abs(base_link.compute_rotation_rad(pps[-1].get_coord())) < abs(base_link.compute_rotation_rad(chosen_point.get_coord())):
+    chosen_point = pps[-1]
+  return chosen_point
+
+def target_point_set(base_link, target_point):
+  t_x, t_y = target_point
+  link = base_link
+  while link.m_prev != None:
+    link = link.m_prev
   
+  o_x, o_y = link.get_origin().get_coord()
+  inner_len = link.link_len
+  outer_len = base_link.link_len
+
+  target_distance = np.sqrt(np.square(t_x - o_x) + np.square(t_y - o_y))
+  x = np.divide((np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (2 * inner_len))
+  
+  y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
+  max_radius = abs(outer_len)
+  curr_radius = abs(outer_len - x)
+  y = min(abs(np.sqrt(np.square(max_radius) - np.square(curr_radius))), y)
+  ps = [(o_x + x, o_y + y), (o_x + x, o_y), (o_x + x, o_y - y)]
+  pps = transform_point_set(link, ps)
+  return pps
+
+def target_circle(screen, base_link, target_point):
+  t_x, t_y = target_point
+  link = base_link
+  while link.m_prev != None:
+    link = link.m_prev
+  
+  o_x, o_y = link.get_origin().get_coord()
+  inner_len = link.link_len
+  outer_len = base_link.link_len
+
+  target_distance = np.sqrt(np.square(t_x - o_x) + np.square(t_y - o_y))
+  x = np.divide((np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (2 * inner_len))
+  
+  y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
+  max_radius = abs(outer_len)
+  curr_radius = abs(outer_len - x)
+  y = min(np.sqrt(abs(np.square(max_radius) - np.square(curr_radius))), y)
+  draw_circle(screen, target_distance, (o_x, o_y), colors["yellow"])
+  draw_circle(screen, outer_len, base_link.get_origin().get_coord(), colors["cyan"])
+  draw_circle(screen, x, (o_x, o_y), colors["green"])
+
+  ps = [(o_x + x, o_y + y), (o_x + x, o_y), (o_x + x, o_y - y)]
+  pps = transform_point_set(link, ps)
+  # tp = transform_point(link, (o_x + x, o_y))
+  for i in pps:
+    draw_origin_dot(screen, i.get_coord(), colors["magenta"])
+  # draw_circle(screen, y, tp.get_coord(), colors["magenta"])
 
 def create_link(origin, side_length, side_width, link_len = 0):
   back_two = [Point(origin.x - side_length/10, origin.y - side_width/2), Point(origin.x - side_length/10, origin.y + side_width/2)]
@@ -74,21 +159,22 @@ def create_link(origin, side_length, side_width, link_len = 0):
   return new_link
 
 def main():
-  w,h = 500, 500
+  w,h = 1000,1000
   pygame.init()
 
   lalt = 256
   lshift = 1
+  ctrl = 64
 
   origin = [w/2,h/2]
   screen = create_display(w,h)
   
-  origin = Point(250,250)
-  l,w = 50, 10
-  link_1 = create_link(origin, l, w, 45)
+  origin = Point(500,500)
+  l,w = 100, 20
+  link_1 = create_link(origin, l, w, 95)
   link_1.absolute_offset = origin
   x, y = link_1.get_end_point()
-  link_2 = create_link(Point(x,y), l, w, 45)
+  link_2 = create_link(Point(x,y), l, w, 95)
   link_2.absolute_offset = origin
   link_2.m_prev = link_1
   link_1.m_next = link_2
@@ -102,11 +188,16 @@ def main():
         sys.exit()
       if event.type == pygame.MOUSEBUTTONUP:
         p = pygame.mouse.get_pos()
-        
-        if pygame.key.get_mods() == lalt:
+        if pygame.key.get_mods() == ctrl:
+          target_circle(screen, link_2, p)
+          pt = radius_target_point(link_2, p)
+          rotate_chain(link_2, pt.get_coord())
+          
+          continue
+        elif pygame.key.get_mods() == lalt:
           draw_origin_dot(screen, p)
           rotate_chain(link_2, p)
-          print(link_2.get_local_rad_angle())
+          print(f"link2:{link_2.get_local_rad_angle()}\nlink1:{link_1.get_local_rad_angle()}")
           # print(link_2.compute_rotation_rad(p))
         # if pygame.key.get_pressed()[] == True:
           # draw_dot(screen, p)
@@ -116,7 +207,8 @@ def main():
           print(link_1.get_local_rad_angle())
           # print(link_1.compute_rotation_rad(p))
           # draw_red_dot(screen,p)
-        else:
+        elif pygame.key.get_mods() == ctrl:
+
           print("nothing pressed")
         draw_frame(screen, cl)
 
