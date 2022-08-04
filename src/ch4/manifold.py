@@ -67,6 +67,92 @@ def draw_frame_lines(screen, line_segments, line_colors):
     frame_draw_line(screen, line_segments[i], line_colors[i])
   pygame.display.update()
 
+def compute_lines(origin, l, theta, x_max, y_max):
+
+  s, e = l
+  x1,y1 = s
+  x2,y2 = e
+
+  delta_y = y2 - y1
+
+  opposite = y_max
+  
+  adjacent = opposite / np.tan(theta)
+  print(f"adj: {adjacent}")
+  n = int(adjacent / x_max)
+  print(f"n:\t{n}")
+  xs, ys = origin
+  
+  ls = [((x1,y1),(x2,y2))]
+  lc = [colors["green"]]
+  
+  for i in range(1,n):
+    '''
+    ls[-1] =  (
+            0   (x1, y1),
+            1   (x2, y2)
+              )
+    '''
+    last_x1, last_y1 = ls[-1][0][0],ls[-1][0][1]
+    last_x2, last_y2 = ls[-1][1][0],ls[-1][1][1]
+    curr_x1, curr_y1 = last_x1, last_y2
+    curr_x2, curr_y2 = last_x2, last_y2 + delta_y
+    
+    ls.append(((curr_x1, curr_y1), (curr_x2, curr_y2)))
+    lc.append(colors["green"])
+
+  return ls,lc
+
+def m_flat_cylinder(screen):
+  
+  origin = [100, 100]
+  x_len, y_len = 800,800
+  x_rad, y_rad = 0, np.pi / 2
+  xa = create_axis(origin, x_len, x_rad)
+  ya = create_axis(origin, y_len, y_rad)
+  o_xa = create_axis(ya.get_endpoint(), x_len, x_rad)
+  o_ya = create_axis(xa.get_endpoint(), y_len, y_rad)
+  p = create_plane(origin, xa, ya)
+  
+  
+  
+  x_axis = p.get_x_axis_segment()
+  y_axis = p.get_y_axis_segment()
+  cx_axis = o_xa.get_segment()
+  cy_axis = o_ya.get_segment()
+  x_color = colors["cyan"]
+  y_color = colors["magenta"]
+  line_segments = [x_axis, y_axis, cx_axis, cy_axis]
+  line_colors = [x_color, y_color, x_color, y_color]
+  
+  draw_frame_lines(screen, line_segments, line_colors)
+  # line_segments.append(None)
+  # line_colors.append(colors["green"])
+  
+  
+  for i in range(2,45):
+    line_segments = [x_axis, y_axis, cx_axis, cy_axis]
+    line_colors = [x_color, y_color, x_color, y_color]
+  
+    theta = i * np.pi / 180
+
+    l = p.make_segment(origin, theta)
+    print(l)
+    # draw_line(screen, l, colors["green"])
+    # return
+    ls, lc = compute_lines(origin, l, theta, x_len, y_len)
+    for j in range(len(ls)):
+      line_segments.append(ls[j])
+      line_colors.append(lc[j])
+      # line_segments[-1] = ls[j]
+      # line_colors[-1] = lc[j]
+    print(len(ls))
+      
+    draw_frame_lines(screen, line_segments, line_colors)
+    time.sleep(0.2)
+  
+  
+
 def m_R2(screen):
   origin = [100, 100]
   x_len, y_len = 800,800
@@ -114,7 +200,8 @@ def main():
   w,h = 1000,1000
   pygame.init()
   s = create_display(w,h)
-  m_R2(s)
+  # m_R2(s)
+  m_flat_cylinder(s)
   # lalt = 256
   # lshift = 1
   # ctrl = 64
