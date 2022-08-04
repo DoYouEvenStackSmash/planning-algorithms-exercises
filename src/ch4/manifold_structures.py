@@ -35,7 +35,7 @@ class Line:
     return self.length
 
   def get_rad_angle(self):
-    return sef.rad_angle
+    return self.rad_angle
   
 class Plane:
   def __init__(self, origin = Point(), x_axis = Line(), y_axis = Line()):
@@ -60,7 +60,7 @@ class Plane:
       a =  self.y_axis.get_length()
       # angle is complementary to input
       r_theta = self.y_axis.get_rad_angle() - rad_angle
-      x_e = opp(a, r_theta)
+      x_e = opp(a, r_theta) + x_o
       y_e = y_o + a
       # y axis is bounding, compute x
     else:
@@ -68,7 +68,7 @@ class Plane:
       
       r_theta = rad_angle
       a = self.x_axis.get_length()
-      y_e = opp(a, r_theta)
+      y_e = opp(a, r_theta) + y_o
       x_e = x_o + a
     
     return ((x_o, y_o), (x_e, y_e))
