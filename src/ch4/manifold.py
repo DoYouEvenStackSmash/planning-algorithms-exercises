@@ -114,8 +114,6 @@ def m_flat_cylinder(screen):
   o_ya = create_axis(xa.get_endpoint(), y_len, y_rad)
   p = create_plane(origin, xa, ya)
   
-  
-  
   x_axis = p.get_x_axis_segment()
   y_axis = p.get_y_axis_segment()
   cx_axis = o_xa.get_segment()
@@ -126,10 +124,7 @@ def m_flat_cylinder(screen):
   line_colors = [x_color, y_color, x_color, y_color]
   
   draw_frame_lines(screen, line_segments, line_colors)
-  # line_segments.append(None)
-  # line_colors.append(colors["green"])
-  
-  
+
   for i in range(2,45):
     line_segments = [x_axis, y_axis, cx_axis, cy_axis]
     line_colors = [x_color, y_color, x_color, y_color]
@@ -144,8 +139,6 @@ def m_flat_cylinder(screen):
     for j in range(len(ls)):
       line_segments.append(ls[j])
       line_colors.append(lc[j])
-      # line_segments[-1] = ls[j]
-      # line_colors[-1] = lc[j]
     print(len(ls))
       
     draw_frame_lines(screen, line_segments, line_colors)
