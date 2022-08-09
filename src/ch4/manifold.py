@@ -23,7 +23,7 @@ def draw_polygon(screen, point_set, color = (0,0,0)):
   pygame.display.update()
 
 def draw_dot(screen, point, color = (0,0,0)):
-  pygame.draw.circle(screen, color, point, 2 , 2)
+  pygame.draw.circle(screen, color, point, 4 , 4)
   pygame.display.update()
 
 def draw_line(screen, point_set, color = (0,0,0)):
@@ -78,9 +78,11 @@ def compute_lines(origin, l, theta, x_max, y_max):
   opposite = y_max
   
   adjacent = opposite / np.tan(theta)
-  print(f"adj: {adjacent}")
+  # print(f"adj: {adjacent}")
   n = int(adjacent / x_max)
-  print(f"n:\t{n}")
+  # print(f"n:\t{n}")
+  final_x = adjacent - (n * x_max) + x1
+  final_y = y_max + y1
   xs, ys = origin
   
   ls = [((x1,y1),(x2,y2))]
@@ -101,6 +103,14 @@ def compute_lines(origin, l, theta, x_max, y_max):
     ls.append(((curr_x1, curr_y1), (curr_x2, curr_y2)))
     lc.append(colors["green"])
 
+  last_x1, last_y1 = ls[-1][0][0],ls[-1][0][1]
+  last_x2, last_y2 = ls[-1][1][0],ls[-1][1][1]
+  curr_x1, curr_y1 = last_x1, last_y2
+  # curr_x2, curr_y2 = last_x2, last_y2 + delta_y
+  
+  ls.append(((curr_x1, curr_y1), (final_x, final_y)))
+  lc.append(colors["green"])
+  
   return ls,lc
 
 def m_flat_cylinder(screen):
@@ -125,7 +135,7 @@ def m_flat_cylinder(screen):
   
   draw_frame_lines(screen, line_segments, line_colors)
 
-  for i in range(2,45):
+  for i in range(2,46):
     line_segments = [x_axis, y_axis, cx_axis, cy_axis]
     line_colors = [x_color, y_color, x_color, y_color]
   
@@ -142,7 +152,8 @@ def m_flat_cylinder(screen):
     print(len(ls))
       
     draw_frame_lines(screen, line_segments, line_colors)
-    time.sleep(0.2)
+    draw_dot(screen, origin, colors["red"])
+    time.sleep(0.15)
   
   
 
