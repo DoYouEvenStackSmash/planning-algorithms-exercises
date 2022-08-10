@@ -65,7 +65,8 @@ class HalfPlane:
     elif theta_0 > 0:
       theta_0_prime = theta_0 + np.pi
     else:
-      print("why is theta_0 == 0?")
+      theta_0_prime = np.pi
+      # print("why is theta_0 == 0?")
     
     f = 0
     if rad_theta > 0: # implies arrow is pointing up
@@ -83,7 +84,11 @@ class HalfPlane:
         f = 1
         #inside shape
     else:
-      print("why is rad_theta == 0")
+      if theta_1 > theta_0_prime:
+        # outside shape
+        f = -1
+      else:
+        f = 1
     
     return f
     

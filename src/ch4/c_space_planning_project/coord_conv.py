@@ -3,6 +3,27 @@ import numpy as np
 
 from half_plane import *
 # class CoordConv:
+
+def create_edge(world_origin, ray_origin, ray_target):
+  x0,y0 = world_origin.get_point()
+  
+  x1,y1 = ray_origin.get_point()
+  x2,y2 = ray_target.get_point()
+
+  delta_x = x0 - x1
+  delta_y = y0 - y1
+  shift_x = x2 + delta_x
+  shift_y = y2 + delta_y
+
+  rad_theta = np.arctan2(shift_y - y0, shift_x - x0)
+  # rad_theta = np.arctan2(delta_y, delta_x)
+  print(f"two point slope rad_theta: {rad_theta}")
+  dist = np.sqrt(np.square(x2 - x1) + np.square(y2 - y1))
+  l = Line(Point(x1,y1),dist, rad_theta)
+  print(l.get_origin())
+  
+  return l
+  
 def two_point_slope(origin, pt1, pt2):
   x0,y0 = origin.get_point()
   
