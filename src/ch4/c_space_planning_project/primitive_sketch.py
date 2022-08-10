@@ -20,6 +20,7 @@
   standard form Ax + By = C
 
 '''
+from operator import ge
 import pygame
 import numpy as np
 import sys
@@ -105,6 +106,51 @@ def test_single_left_cross_edge(w = 0, h = 0):
   
   return get_single_edge(o, pt1, pt2)
 
+def test_polygon(w = 0, h = 0):
+  origin = [w/2,h/2]
+  
+  o = Point(origin[0], origin[1])
+  # screen = create_display(w,h)
+  pt1 = Point(600,600)
+  pt2 = Point(400,600)
+  pt3 = Point(400,400)
+  h1 = get_single_edge(o,pt1,pt2)
+  h2 = get_single_edge(o,pt2,pt3)
+  h3 = get_single_edge(o,pt3,pt1)
+  e1 = Edge(h1)
+  e2 = Edge(h2)
+  e3 = Edge(h3)
+  e1.m_next = e2
+  e2.m_next = e3
+  e3.m_next = e1
+  p = Polygon()
+  p.half_planes_head = e1
+  return p
+
+def polygon_pygame_loop(screen, polygon = None):
+  # print(polygon.get_segments())
+  x = polygon.get_segments()
+  for i in x:
+    draw_line(screen, i, colors["white"])
+  # draw_polygon(screen, polygon.get_segments(), colors["white"])
+  while 1:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        sys.exit()
+      if event.type == pygame.MOUSEBUTTONUP:
+        p = pygame.mouse.get_pos()
+        val = polygon.check_collision(p)
+        if val == False:
+          print(f"{p} is right of the line")
+          draw_dot(screen, p, colors["cyan"])
+        elif val == True:
+          print(f"{p} is left of the line")
+          draw_dot(screen, p, colors["magenta"])
+        else:
+          print(f"{p} is unknown?")
+        # print(hp.test_point(p))
+        print(p)
+
 def pygame_loop(screen,hp = None):
   draw_polygon(screen, hp.line.get_segment(), colors["white"])
   s,e = hp.line.get_segment()
@@ -144,12 +190,13 @@ def main():
   # x1 -> x2 
   # hp = test_single_right_cross_edge(w,h)
   # hp = test_single_down_left_edge(w,h)
-  
+  p = test_polygon(w,h)
+  polygon_pygame_loop(screen, p)
 
   # broken
-  hp = test_single_left_cross_edge(w,h)
+  # hp = test_single_left_cross_edge(w,h)
 
-  pygame_loop(screen, hp)
+  # pygame_loop(screen, hp)
   # a,b = Point(400,400),Point(300,600)
   # l = two_point_slope(o, b, a)
   # hp = HalfPlane(l)
