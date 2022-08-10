@@ -34,7 +34,8 @@ colors = {
   "cyan" : (0,255,255),
   "green" : (0,255,0),
   "magenta" : (255, 0, 255),
-  "red" : (255, 0, 0)
+  "red" : (255, 0, 0),
+  "white" : (255,255,255)
 }
 
 def create_display(width, height):
@@ -68,12 +69,14 @@ def main():
   origin = [w/2,h/2]
   o = Point(origin[0], origin[1])
   screen = create_display(w,h)
-  a,b = Point(490,490),Point(480,510)
+  a,b = Point(400,400),Point(300,600)
   l = two_point_slope(o, b, a)
-  draw_polygon(screen, l.get_segment(), colors["magenta"])
+  hp = HalfPlane(l)
+  print(hp.line.get_rad_angle())
+  draw_polygon(screen, l.get_segment(), colors["white"])
   s,e = l.get_segment()
   draw_dot(screen, s, colors["green"])
-  draw_dot(screen, e, colors["cyan"])
+  draw_dot(screen, e, colors["red"])
   # hp = HalfPlane(o, [l, r])
   # print(hp.set_rad_angle())
   
@@ -85,6 +88,15 @@ def main():
         sys.exit()
       if event.type == pygame.MOUSEBUTTONUP:
         p = pygame.mouse.get_pos()
+        val = hp.test_point(p)
+        if val < 0:
+          print(f"{p} is right of the line")
+          draw_dot(screen, p, colors["cyan"])
+        elif val > 0:
+          print(f"{p} is left of the line")
+          draw_dot(screen, p, colors["magenta"])
+        else:
+          print(f"{p} is unknown?")
         # print(hp.test_point(p))
         print(p)
       
