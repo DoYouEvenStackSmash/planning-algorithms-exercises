@@ -25,7 +25,7 @@ import pygame
 import numpy as np
 import sys
 import time
-from coord_conv import create_edge, two_point_slope
+from coord_conv import create_edge
 from half_plane import *
 
 
@@ -132,6 +132,9 @@ def polygon_pygame_loop(screen, polygon = None):
   x = polygon.get_segments()
   for i in x:
     draw_line(screen, i, colors["white"])
+  y = polygon.get_in_vec_segments()
+  for i in y:
+    draw_line(screen, i, colors["yellow"])
   # draw_polygon(screen, polygon.get_segments(), colors["white"])
   while 1:
     for event in pygame.event.get():
