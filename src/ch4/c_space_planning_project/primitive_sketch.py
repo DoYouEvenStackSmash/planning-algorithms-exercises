@@ -37,7 +37,8 @@ colors = {
   "green" : (0,255,0),
   "magenta" : (255, 0, 255),
   "red" : (255, 0, 0),
-  "white" : (255,255,255)
+  "white" : (255,255,255),
+  "indigo" : (48,79,254)
 }
 
 def create_display(width, height):
@@ -107,7 +108,29 @@ def test_single_left_cross_edge(w = 0, h = 0):
   
   return get_single_edge(o, pt1, pt2)
 
-def test_triangle_polygon(w = 0, h = 0):
+def test_offset_triangle_polygon(w = 0, h = 0):
+  origin = [w/2,h/2]
+  # origin = [700,700]
+  o = Point(origin[0], origin[1])
+  # screen = create_display(w,h)
+  #(-1,3),(-5,1),(-4,-1) scaled by 30, from origin 500,500
+  pt1 = Point(470,590)
+  pt2 = Point(350,530)
+  pt3 = Point(380,470)
+  h1 = get_single_edge(o,pt1,pt2)
+  h2 = get_single_edge(o,pt2,pt3)
+  h3 = get_single_edge(o,pt3,pt1)
+  e1 = Edge(h1)
+  e2 = Edge(h2)
+  e3 = Edge(h3)
+  e1.m_next = e2
+  e2.m_next = e3
+  e3.m_next = e1
+  p = Polygon()
+  p.half_planes_head = e1
+  return p
+
+def test_right_triangle_polygon(w = 0, h = 0):
   origin = [w/2,h/2]
   # origin = [700,700]
   o = Point(origin[0], origin[1])
@@ -207,45 +230,13 @@ def main():
   # x1 -> x2 
   # hp = test_single_right_cross_edge(w,h)
   # hp = test_single_down_left_edge(w,h)
-  p = test_triangle_polygon(w,h)
+  # p = test_right_triangle_polygon(w,h)
+  draw_dot(screen, (500,500), colors["indigo"])
+  p = test_offset_triangle_polygon(w,h)
   display_polygon_edges(screen, p)
   display_out_vectors(screen, p)
-  # display_in_vectors(screen, p)
+  display_in_vectors(screen, p)
   polygon_pygame_loop(screen, p)
 
-  # broken
-  # hp = test_single_left_cross_edge(w,h)
-
-  # pygame_loop(screen, hp)
-  # a,b = Point(400,400),Point(300,600)
-  # l = two_point_slope(o, b, a)
-  # hp = HalfPlane(l)
-  # print(hp.line.get_rad_angle())
-  # draw_polygon(screen, l.get_segment(), colors["white"])
-  # s,e = l.get_segment()
-  # draw_dot(screen, s, colors["green"])
-  # draw_dot(screen, e, colors["red"])
-  # # hp = HalfPlane(o, [l, r])
-  # # print(hp.set_rad_angle())
-  
-  # # draw_line(screen, hp.get_end_points(), colors["magenta"])
-  
-  # while 1:
-  #   for event in pygame.event.get():
-  #     if event.type == pygame.QUIT:
-  #       sys.exit()
-  #     if event.type == pygame.MOUSEBUTTONUP:
-  #       p = pygame.mouse.get_pos()
-  #       val = hp.test_point(p)
-  #       if val < 0:
-  #         print(f"{p} is right of the line")
-  #         draw_dot(screen, p, colors["cyan"])
-  #       elif val > 0:
-  #         print(f"{p} is left of the line")
-  #         draw_dot(screen, p, colors["magenta"])
-  #       else:
-  #         print(f"{p} is unknown?")
-  #       # print(hp.test_point(p))
-  #       print(p)
       
 main()
