@@ -249,21 +249,23 @@ def conv_func(theta):
       return 2 * np.pi - abs(theta)
     return theta
 
-def sort_edge_vectors(edge_vector_list):
-  adjust = lambda line_obj : conv_func(line_obj.get_rad_angle())
-  sorted_edge_list = sorted(edge_vector_list, key=adjust)
+def edge_key(e):
+  return conv_func(e[1].get_rad_angle())
+
+def sort_edge_vectors(edge_list):
+  adjust = lambda edge_obj : edge_key(edge_obj)
+  sorted_edge_list = sorted(edge_list, key=adjust)
   return sorted_edge_list
 
 def add_robot_vectors(polygon, edge_vector_list):
   in_el = polygon.get_edge_list()
   for e in in_el:
-    edge_vector_list.append(e.get_in_vec())
+    edge_vector_list.append((e,e.get_in_vec()))
 
-def add_obstacle_vectors(polygon, edge_vector_list):
+def add_obstacle_vectors(polygon, edge_list):
   out_el = polygon.get_edge_list()
   for e in out_el:
-    edge_vector_list.append(e.get_out_vec())
-
+    edge_list.append((e,e.get_out_vec()))
 
 
 def main():
@@ -287,16 +289,17 @@ def main():
   # p = test_offset_triangle_polygon(w,h)
   rectangle_p = test_rectangular_polygon(w,h)
   offset_triangle_p = test_offset_triangle_polygon(w,h)
-  edge_vector_list = []
+  edge_list = []
   # obs_el = rectangle_p.get_edge_list()
   # rob_el = offset_triangle_p.get_edge_list()
-  add_robot_vectors(offset_triangle_p, edge_vector_list)
-  add_obstacle_vectors(rectangle_p, edge_vector_list)
-  print(len(edge_vector_list))
-  sel = sort_edge_vectors(edge_vector_list)
-  for i in sel:
-    draw_line(screen, i.get_segment(),colors["red"])
-    time.sleep(2)
+  add_robot_vectors(offset_triangle_p, edge_list)
+  add_obstacle_vectors(rectangle_p, edge_list)
+  print(len(edge_list))
+  # sel = tuples (Edge, radian key)
+  sel = sort_edge_vectors(edge_list)
+  for i,j in sel:
+    draw_line(screen, i.H.line.get_segment(),colors["white"])
+    time.sleep(1)
   
   # display_polygon_attr(screen, rectangle_p)
   # display_polygon_attr(screen, offset_triangle_p, colors["green"])
