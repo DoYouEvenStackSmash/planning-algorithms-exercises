@@ -27,6 +27,7 @@ import sys
 import time
 from coord_conv import create_edge
 from half_plane import *
+from polygon_support import *
 
 
 colors = {
@@ -106,9 +107,9 @@ def test_single_left_cross_edge(w = 0, h = 0):
   
   return get_single_edge(o, pt1, pt2)
 
-def test_polygon(w = 0, h = 0):
+def test_triangle_polygon(w = 0, h = 0):
   origin = [w/2,h/2]
-  
+  # origin = [700,700]
   o = Point(origin[0], origin[1])
   # screen = create_display(w,h)
   pt1 = Point(600,600)
@@ -127,14 +128,27 @@ def test_polygon(w = 0, h = 0):
   p.half_planes_head = e1
   return p
 
-def polygon_pygame_loop(screen, polygon = None):
-  # print(polygon.get_segments())
+def display_in_vectors(screen, polygon = None):
+  x = polygon.get_in_vec_segments()
+  for i in x:
+    draw_line(screen, i, colors["yellow"])
+
+def display_out_vectors(screen, polygon = None):
+  x = polygon.get_out_vec_segments()
+  for i in x:
+    draw_line(screen, i, colors["red"])
+
+def display_polygon_edges(screen, polygon = None):
   x = polygon.get_segments()
   for i in x:
     draw_line(screen, i, colors["white"])
-  y = polygon.get_in_vec_segments()
-  for i in y:
-    draw_line(screen, i, colors["yellow"])
+
+def polygon_pygame_loop(screen, polygon = None):
+  # print(polygon.get_segments())
+  
+  # y = polygon.get_in_vec_segments()
+  # for i in y:
+  #   draw_line(screen, i, colors["yellow"])
   # draw_polygon(screen, polygon.get_segments(), colors["white"])
   while 1:
     for event in pygame.event.get():
@@ -193,7 +207,10 @@ def main():
   # x1 -> x2 
   # hp = test_single_right_cross_edge(w,h)
   # hp = test_single_down_left_edge(w,h)
-  p = test_polygon(w,h)
+  p = test_triangle_polygon(w,h)
+  display_polygon_edges(screen, p)
+  display_out_vectors(screen, p)
+  # display_in_vectors(screen, p)
   polygon_pygame_loop(screen, p)
 
   # broken
