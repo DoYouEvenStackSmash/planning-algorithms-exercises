@@ -175,6 +175,21 @@ def test_right_triangle_polygon(w = 0, h = 0):
   p.half_planes_head = e1
   return p
 
+def points_to_polygon(origin, point_list):
+  o = Point(origin[0], origin[1])
+  edge_list = []
+  for i in range(1,len(point_list)):
+    h = get_single_edge(o,point_list[i - 1], point_list[i])
+    edge_list.append(Edge(h))
+  h = get_single_edge(o,point_list[-1], point_list[0])
+  edge_list.append(Edge(h))
+  for i in range(1,len(edge_list)):
+    edge_list[i - 1].m_next = edge_list[i]
+  edge_list[-1].m_next = edge_list[0]
+  p = Polygon()
+  p.half_planes_head = edge_list[0]
+  return p
+
 def display_in_vectors(screen, polygon = None):
   x = polygon.get_in_vec_segments()
   for i in x:
@@ -267,6 +282,20 @@ def add_obstacle_vectors(polygon, edge_list):
   for e in out_el:
     edge_list.append((e,e.get_out_vec()))
 
+def solve_cross_angle(cross_angle):
+  theta_0 = cross_angle
+  if theta_0 < np.pi / 2:
+    theta_1 = theta_0 + np.pi / 2
+  else:
+    theta_1 = -2 * np.pi + theta_0 + np.pi / 2
+  return theta_1
+
+def compute_end_point(origin, length, rad_angle):
+  ox,oy = origin
+  r = length
+  x = r * np.cos(rad_angle)
+  y = r * np.sin(rad_angle)
+  return Point(ox + x, oy + y)
 
 def main():
   w,h = 1000,1000
@@ -296,10 +325,37 @@ def main():
   add_obstacle_vectors(rectangle_p, edge_list)
   print(len(edge_list))
   # sel = tuples (Edge, radian key)
-  sel = sort_edge_vectors(edge_list)
-  for i,j in sel:
-    draw_line(screen, i.H.line.get_segment(),colors["white"])
-    time.sleep(1)
+  sorted_edge_tuple_list = sort_edge_vectors(edge_list)
+  e,r = sorted_edge_tuple_list[0]
+  print(f"first_edge\t{r.get_rad_angle()}")
+  x1,y1 = e.H.line.get_endpoint()
+  first_point = Point(x1,y1)
+  print(f"first point\t{first_point.get_point()}")
+  point_list = [first_point]
+  c = 1
+  for i,j in sorted_edge_tuple_list[1:]:
+    edge_object = i
+    norm_v = j
+    rad_angle = solve_cross_angle(norm_v.get_rad_angle())
+    
+    print(norm_v.get_rad_angle())
+    length = i.H.line.get_length()
+    # print(length)
+    # print(rad_angle * 180 / np.pi)
+    point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+    print(f"pt {c}:\t{point_list[-1].get_point()}")
+    c+=1
+    # point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+
+  c_obs = points_to_polygon((500,500),point_list)
+  display_polygon_attr(screen,c_obs,colors["magenta"])
+  display_polygon_attr(screen, rectangle_p, colors["white"])
+  display_polygon_attr(screen, offset_triangle_p, colors["green"])
+    # print(conv_func(j.get_rad_angle()))
+  
+    # print(i.H.line.get_length())
+    # draw_line(screen, i.H.line.get_segment(),colors["white"])
+    # time.sleep(1)
   
   # display_polygon_attr(screen, rectangle_p)
   # display_polygon_attr(screen, offset_triangle_p, colors["green"])
