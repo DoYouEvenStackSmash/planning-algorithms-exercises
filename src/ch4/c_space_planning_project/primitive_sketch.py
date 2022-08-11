@@ -297,23 +297,8 @@ def compute_end_point(origin, length, rad_angle):
   y = r * np.sin(rad_angle)
   return Point(ox + x, oy + y)
 
-def main():
+def triangle_robot(screen):
   w,h = 1000,1000
-  pygame.init()
-
-  lalt = 256
-  lshift = 1
-  ctrl = 64
-
-  # origin = [w/2,h/2]
-  # o = Point(origin[0], origin[1])
-  screen = create_display(w,h)
-  # hp = test_single_up_left_edge(w,h)
-  
-  # x1 -> x2 
-  # hp = test_single_right_cross_edge(w,h)
-  # hp = test_single_down_left_edge(w,h)
-  # p = test_right_triangle_polygon(w,h)
   draw_dot(screen, (500,500), colors["indigo"])
   # p = test_offset_triangle_polygon(w,h)
   rectangle_p = test_rectangular_polygon(w,h)
@@ -351,6 +336,109 @@ def main():
   display_polygon_attr(screen,c_obs,colors["magenta"])
   display_polygon_attr(screen, rectangle_p, colors["white"])
   display_polygon_attr(screen, offset_triangle_p, colors["green"])
+  polygon_pygame_loop(screen, offset_triangle_p)
+
+def triangle_obstacle(screen):
+  w,h = 1000,1000
+  draw_dot(screen, (500,500), colors["indigo"])
+  # p = test_offset_triangle_polygon(w,h)
+  rectangle_p = test_right_triangle_polygon(w,h)
+  # test_right_triangle_polygon(w,h)
+  # test_rectangular_polygon(w,h)
+  offset_triangle_p = test_rectangular_polygon(w,h)
+  offset_triangle_p = test_offset_triangle_polygon(w,h)
+  edge_list = []
+  # obs_el = rectangle_p.get_edge_list()
+  # rob_el = offset_triangle_p.get_edge_list()
+  add_robot_vectors(offset_triangle_p, edge_list)
+  add_obstacle_vectors(rectangle_p, edge_list)
+  print(len(edge_list))
+  # sel = tuples (Edge, radian key)
+  sorted_edge_tuple_list = sort_edge_vectors(edge_list)
+  e,r = sorted_edge_tuple_list[0]
+  print(f"first_edge\t{r.get_rad_angle()}")
+  x1,y1 = e.H.line.get_endpoint()
+  first_point = Point(x1,y1)
+  print(f"first point\t{first_point.get_point()}")
+  point_list = [first_point]
+  c = 1
+  for i,j in sorted_edge_tuple_list[1:]:
+    edge_object = i
+    norm_v = j
+    rad_angle = solve_cross_angle(norm_v.get_rad_angle())
+    
+    print(norm_v.get_rad_angle())
+    length = i.H.line.get_length()
+    # print(length)
+    # print(rad_angle * 180 / np.pi)
+    point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+    print(f"pt {c}:\t{point_list[-1].get_point()}")
+    c+=1
+    # point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+
+  c_obs = points_to_polygon((500,500),point_list)
+  display_polygon_attr(screen,c_obs,colors["magenta"])
+  display_polygon_attr(screen, rectangle_p, colors["white"])
+  display_polygon_attr(screen, offset_triangle_p, colors["green"])
+  polygon_pygame_loop(screen, offset_triangle_p)
+  
+
+def main():
+  w,h = 1000,1000
+  pygame.init()
+
+  lalt = 256
+  lshift = 1
+  ctrl = 64
+
+  # origin = [w/2,h/2]
+  # o = Point(origin[0], origin[1])
+  screen = create_display(w,h)
+  # hp = test_single_up_left_edge(w,h)
+  
+  # x1 -> x2 
+  # hp = test_single_right_cross_edge(w,h)
+  # hp = test_single_down_left_edge(w,h)
+  # p = test_right_triangle_polygon(w,h)
+  # triangle_robot(screen)
+  triangle_obstacle(screen)
+  # draw_dot(screen, (500,500), colors["indigo"])
+  # p = test_offset_triangle_polygon(w,h)
+  # rectangle_p = test_rectangular_polygon(w,h)
+  # offset_triangle_p = test_offset_triangle_polygon(w,h)
+  # edge_list = []
+  # # obs_el = rectangle_p.get_edge_list()
+  # # rob_el = offset_triangle_p.get_edge_list()
+  # add_robot_vectors(offset_triangle_p, edge_list)
+  # add_obstacle_vectors(rectangle_p, edge_list)
+  # print(len(edge_list))
+  # # sel = tuples (Edge, radian key)
+  # sorted_edge_tuple_list = sort_edge_vectors(edge_list)
+  # e,r = sorted_edge_tuple_list[0]
+  # print(f"first_edge\t{r.get_rad_angle()}")
+  # x1,y1 = e.H.line.get_endpoint()
+  # first_point = Point(x1,y1)
+  # print(f"first point\t{first_point.get_point()}")
+  # point_list = [first_point]
+  # c = 1
+  # for i,j in sorted_edge_tuple_list[1:]:
+  #   edge_object = i
+  #   norm_v = j
+  #   rad_angle = solve_cross_angle(norm_v.get_rad_angle())
+    
+  #   print(norm_v.get_rad_angle())
+  #   length = i.H.line.get_length()
+  #   # print(length)
+  #   # print(rad_angle * 180 / np.pi)
+  #   point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+  #   print(f"pt {c}:\t{point_list[-1].get_point()}")
+  #   c+=1
+  #   # point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+
+  # c_obs = points_to_polygon((500,500),point_list)
+  # display_polygon_attr(screen,c_obs,colors["magenta"])
+  # display_polygon_attr(screen, rectangle_p, colors["white"])
+  # display_polygon_attr(screen, offset_triangle_p, colors["green"])
     # print(conv_func(j.get_rad_angle()))
   
     # print(i.H.line.get_length())
@@ -362,7 +450,7 @@ def main():
   # display_polygon_edges(screen, p)
   # display_out_vectors(screen, p)
   # display_in_vectors(screen, p)
-  polygon_pygame_loop(screen, offset_triangle_p)
+  # polygon_pygame_loop(screen, offset_triangle_p)
 
       
 main()
