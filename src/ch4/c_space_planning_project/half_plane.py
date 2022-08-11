@@ -41,6 +41,7 @@ class HalfPlane:
   def __init__(self, line = Line()):
     self.line = line
   
+
   def test_point(self, pt = (0, 0)):
     # get vector from from ray origin to target point
     ox, oy = self.line.get_origin()
@@ -91,42 +92,6 @@ class HalfPlane:
         f = 1
     
     return f
-    
-class Edge:
-  def __init__(self, hp = None, m_next = None):
-    self.H = hp
-    self.m_next = m_next
-  
-  def test_pt(self, pt = (0,0)):
-    return self.H.test_point(pt)
-  
-class Polygon:
-  def __init__(self):
-    self.half_planes_head = None
-  
-  def check_collision(self, target_point):
-    
-    hold = self.half_planes_head
-    if hold == None:
-      return False
-    if hold.test_pt(target_point) != 1:
-      return False
-    hold = hold.m_next
-    
-    while hold != self.half_planes_head:
-      if hold.test_pt(target_point) != 1:
-        return False
-      hold = hold.m_next
-    return True
-  
-  def get_segments(self):
-    hold = self.half_planes_head
-    x = [hold.H.line.get_segment()]
-    hold = hold.m_next
-    while hold != self.half_planes_head:
-      x.append(hold.H.line.get_segment())
-      hold = hold.m_next
-    return x
 
   
 
