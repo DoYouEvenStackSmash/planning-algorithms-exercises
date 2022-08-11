@@ -14,6 +14,16 @@ class Edge:
   def test_pt(self, pt = (0,0)):
     return self.H.test_point(pt)
   
+  def get_in_vec(self):
+    if not self.in_vec:
+      self.in_vec = self.compute_vec(self.calculate_in_vec_angle())
+    return self.in_vec
+
+  def get_out_vec(self):
+    if not self.out_vec:
+      self.out_vec = self.compute_vec(self.calculate_out_vec_angle())
+    return self.out_vec
+  
   def get_out_vec_segment(self):
     if not self.out_vec:
       self.out_vec = self.compute_vec(self.calculate_out_vec_angle())
@@ -105,5 +115,16 @@ class Polygon:
       x.append(hold.get_out_vec_segment())
       hold = hold.m_next
     return x
-
+  
+  
+  def get_edge_list(self):
+    hold = self.half_planes_head
+    edgelist = [hold]
+    hold = hold.m_next
+    while hold != self.half_planes_head:
+      edgelist.append(hold)
+      hold = hold.m_next
+    return edgelist
+  
+    
   

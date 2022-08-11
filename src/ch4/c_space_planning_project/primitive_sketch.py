@@ -108,6 +108,30 @@ def test_single_left_cross_edge(w = 0, h = 0):
   
   return get_single_edge(o, pt1, pt2)
 
+def test_rectangular_polygon(w = 0, h = 0):
+  origin = [w/2,h/2]
+  # origin = [700,700]
+  o = Point(origin[0], origin[1])
+  pt1 = Point(590,590)
+  pt2 = Point(770,590)
+  pt3 = Point(770,710)
+  pt4 = Point(590,710)
+  h1 = get_single_edge(o,pt1,pt2)
+  h2 = get_single_edge(o,pt2,pt3)
+  h3 = get_single_edge(o,pt3,pt4)
+  h4 = get_single_edge(o,pt4,pt1)
+  e1 = Edge(h1)
+  e2 = Edge(h2)
+  e3 = Edge(h3)
+  e4 = Edge(h4)
+  e1.m_next = e2
+  e2.m_next = e3
+  e3.m_next = e4
+  e4.m_next = e1
+  p = Polygon()
+  p.half_planes_head = e1
+  return p
+
 def test_offset_triangle_polygon(w = 0, h = 0):
   origin = [w/2,h/2]
   # origin = [700,700]
@@ -161,10 +185,10 @@ def display_out_vectors(screen, polygon = None):
   for i in x:
     draw_line(screen, i, colors["red"])
 
-def display_polygon_edges(screen, polygon = None):
+def display_polygon_edges(screen, polygon = None, color = colors["white"]):
   x = polygon.get_segments()
   for i in x:
-    draw_line(screen, i, colors["white"])
+    draw_line(screen, i, color)
 
 def polygon_pygame_loop(screen, polygon = None):
   # print(polygon.get_segments())
@@ -214,6 +238,34 @@ def pygame_loop(screen,hp = None):
         # print(hp.test_point(p))
         print(p)
 
+def display_polygon_attr(screen, polygon = None,color = colors["white"]):
+  display_polygon_edges(screen, polygon, color)
+  display_out_vectors(screen, polygon)
+  display_in_vectors(screen, polygon)
+
+
+def conv_func(theta):
+    if theta < 0:
+      return 2 * np.pi - abs(theta)
+    return theta
+
+def sort_edge_vectors(edge_vector_list):
+  adjust = lambda line_obj : conv_func(line_obj.get_rad_angle())
+  sorted_edge_list = sorted(edge_vector_list, key=adjust)
+  return sorted_edge_list
+
+def add_robot_vectors(polygon, edge_vector_list):
+  in_el = polygon.get_edge_list()
+  for e in in_el:
+    edge_vector_list.append(e.get_in_vec())
+
+def add_obstacle_vectors(polygon, edge_vector_list):
+  out_el = polygon.get_edge_list()
+  for e in out_el:
+    edge_vector_list.append(e.get_out_vec())
+
+
+
 def main():
   w,h = 1000,1000
   pygame.init()
@@ -232,11 +284,26 @@ def main():
   # hp = test_single_down_left_edge(w,h)
   # p = test_right_triangle_polygon(w,h)
   draw_dot(screen, (500,500), colors["indigo"])
-  p = test_offset_triangle_polygon(w,h)
-  display_polygon_edges(screen, p)
-  display_out_vectors(screen, p)
-  display_in_vectors(screen, p)
-  polygon_pygame_loop(screen, p)
+  # p = test_offset_triangle_polygon(w,h)
+  rectangle_p = test_rectangular_polygon(w,h)
+  offset_triangle_p = test_offset_triangle_polygon(w,h)
+  edge_vector_list = []
+  # obs_el = rectangle_p.get_edge_list()
+  # rob_el = offset_triangle_p.get_edge_list()
+  add_robot_vectors(offset_triangle_p, edge_vector_list)
+  add_obstacle_vectors(rectangle_p, edge_vector_list)
+  print(len(edge_vector_list))
+  sel = sort_edge_vectors(edge_vector_list)
+  for i in sel:
+    draw_line(screen, i.get_segment(),colors["red"])
+    time.sleep(2)
+  
+  # display_polygon_attr(screen, rectangle_p)
+  # display_polygon_attr(screen, offset_triangle_p, colors["green"])
+  # display_polygon_edges(screen, p)
+  # display_out_vectors(screen, p)
+  # display_in_vectors(screen, p)
+  polygon_pygame_loop(screen, offset_triangle_p)
 
       
 main()
