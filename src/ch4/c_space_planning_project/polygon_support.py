@@ -72,7 +72,20 @@ class Edge:
 
 class Polygon:
   def __init__(self):
+    # head of half planes circular linked list
     self.half_planes_head = None
+    # orientation line for the polygon. contains the origin to rotate around
+    self.orient_axis = None
+  
+  def get_orient_axis(self):
+    return self.orient_axis
+  
+  # returns a tuple of the polygon origin
+  def get_origin(self):
+    return self.half_planes_head.H.line.get_origin()
+  
+  def get_base_line(self):
+    return self.half_planes_head.H.line
   
   def check_collision(self, target_point):
     
@@ -140,4 +153,31 @@ def points_to_polygon(origin, point_list):
   p = Polygon()
   p.half_planes_head = edge_list[0]
   return p
+  
+def get_cc_rotation_matrix(rad_theta):
+  return np.array([[np.cos(rad_theta), -np.sin(rad_theta)], [np.sin(rad_theta), np.cos(rad_theta)]])
+
+def rotate_edge_vector(origin, edge_vector, rotation_matrix):
+  ox,oy = origin.get_point()
+  ev_x,ev_y = edge_vector.get_origin()
+  step = np.matmul(rotation_matrix, np.array([[ev_x - ox], [ev_y - oy]]))
+  edge_vector.origin = Point(step[0][0] + ox, step[1][0] + oy)
+  # edge_vector.rad_angle = edge_vector.rad_angle + target_rad
+
+def rotate_polygon(polygon, target_point):
+  base_line = polygon.get_base_line()
+  # ox,oy = base_line.get_origin()
+  target_rad = base_line.compute_rotation_rad(target_point)
+  r_theta = get_cc_rotation_matrix(target_rad)
+  el = polygon.get_edge_list()
+  h = polygon.half_planes_head
+  rotate_edge_vector(base_line.origin,h.H.line,r_theta)
+  h.H.line.rad_angle = h.H.line.get_rad_angle() + target_rad
+  h = h.m_next
+  while h != polygon.half_planes_head:
+  # for i in range(len(el)):
+    # l = el[i].H.line
+    rotate_edge_vector(base_line.origin,h.H.line,r_theta)
+    h.H.line.rad_angle = h.H.line.get_rad_angle() + target_rad
+    h = h.m_next
   

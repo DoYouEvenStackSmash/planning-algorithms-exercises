@@ -29,7 +29,7 @@ import time
 from half_plane import *
 from polygon_support import *
 from render_support import *
-
+from pygame_loop_support import *
 
 def create_display(width, height):
   return pygame.display.set_mode((width, height))
@@ -142,56 +142,6 @@ def test_right_triangle_polygon(w = 0, h = 0):
   p.half_planes_head = e1
   return p
 
-
-def polygon_pygame_loop(screen, polygon = None):
-  # print(polygon.get_segments())
-  
-  # y = polygon.get_in_vec_segments()
-  # for i in y:
-  #   draw_line(screen, i, colors["yellow"])
-  # draw_polygon(screen, polygon.get_segments(), colors["white"])
-  while 1:
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        sys.exit()
-      if event.type == pygame.MOUSEBUTTONUP:
-        p = pygame.mouse.get_pos()
-        val = polygon.check_collision(p)
-        if val == False:
-          print(f"{p} is right of the line")
-          draw_dot(screen, p, colors["cyan"])
-        elif val == True:
-          print(f"{p} is left of the line")
-          draw_dot(screen, p, colors["magenta"])
-        else:
-          print(f"{p} is unknown?")
-        # print(hp.test_point(p))
-        print(p)
-
-def pygame_loop(screen,hp = None):
-  draw_polygon(screen, hp.line.get_segment(), colors["white"])
-  s,e = hp.line.get_segment()
-  draw_dot(screen, s, colors["green"])
-  draw_dot(screen, e, colors["red"])
-  while 1:
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        sys.exit()
-      if event.type == pygame.MOUSEBUTTONUP:
-        p = pygame.mouse.get_pos()
-        val = hp.test_point(p)
-        if val < 0:
-          print(f"{p} is right of the line")
-          draw_dot(screen, p, colors["cyan"])
-        elif val > 0:
-          print(f"{p} is left of the line")
-          draw_dot(screen, p, colors["magenta"])
-        else:
-          print(f"{p} is unknown?")
-        # print(hp.test_point(p))
-        print(p)
-
-
 def conv_func(theta):
     if theta < 0:
       return 2 * np.pi - abs(theta)
@@ -230,12 +180,84 @@ def compute_end_point(origin, length, rad_angle):
   y = r * np.sin(rad_angle)
   return Point(ox + x, oy + y)
 
+def compute_obs_polygon(robot, obstacle):
+  edge_list = []
+  # obs_el = rectangle_p.get_edge_list()
+  # rob_el = offset_triangle_p.get_edge_list()
+  add_robot_vectors(robot, edge_list)
+  add_obstacle_vectors(obstacle, edge_list)
+  print(len(edge_list))
+  # sel = tuples (Edge, radian key)
+  sorted_edge_tuple_list = sort_edge_vectors(edge_list)
+  e,r = sorted_edge_tuple_list[0]
+  print(f"first_edge\t{r.get_rad_angle()}")
+  x1,y1 = e.H.line.get_endpoint()
+  first_point = Point(x1,y1)
+  print(f"first point\t{first_point.get_point()}")
+  point_list = [first_point]
+  c = 1
+  for i,j in sorted_edge_tuple_list[1:]:
+    edge_object = i
+    norm_v = j
+    rad_angle = solve_cross_angle(norm_v.get_rad_angle())
+    
+    print(norm_v.get_rad_angle())
+    length = i.H.line.get_length()
+    # print(length)
+    # print(rad_angle * 180 / np.pi)
+    point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+    print(f"pt {c}:\t{point_list[-1].get_point()}")
+    c+=1
+    # point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+
+  c_obs = points_to_polygon((500,500),point_list)
+  return c_obs
+
+def clear_frame(screen):
+  pygame.Surface.fill(screen, (0,0,0))
+
+def draw_frame_polygons(screen, polygon_list, polygon_colors):
+  for i in range(len(polygon_list)):
+    display_polygon_attr(screen, polygon_list[i], polygon_colors[i])  
+
+def triangle_rotation(screen):
+  w,h = 1000,1000
+  draw_dot(screen, (500,500), colors["indigo"])
+  # p = test_offset_triangle_polygon(w,h)
+  offset_triangle_p = test_offset_triangle_polygon(w,h)
+  base_line = offset_triangle_p.get_base_line()
+  a,b = base_line.get_origin()
+  new_line = Line(Point(a,b),300 , base_line.get_rad_angle())
+  draw_line(screen, new_line.get_segment(), colors["indigo"])
+  pygame_polygon_rotation_loop(screen, offset_triangle_p)
+  # base_line.length = 100
+
+def triangle_robot_rotation(screen):
+  w,h = 1000,1000
+  draw_dot(screen, (500,500), colors["indigo"])
+  # p = test_offset_triangle_polygon(w,h)
+  offset_triangle_p = test_offset_triangle_polygon(w,h)
+  rectangle_p = test_rectangular_polygon(w,h)
+  base_line = offset_triangle_p.get_base_line()
+  a,b = base_line.get_origin()
+  new_line = Line(Point(a,b),300 , base_line.get_rad_angle())
+  draw_line(screen, new_line.get_segment(), colors["indigo"])
+  pygame_polygon_rotation_loop(screen, offset_triangle_p)
+  # base_line.length = 100
+
+
 def triangle_robot(screen):
   w,h = 1000,1000
   draw_dot(screen, (500,500), colors["indigo"])
   # p = test_offset_triangle_polygon(w,h)
   rectangle_p = test_rectangular_polygon(w,h)
   offset_triangle_p = test_offset_triangle_polygon(w,h)
+  base_line = offset_triangle_p.get_base_line()
+  a,b = base_line.get_origin()
+  new_line = Line(Point(a,b),300 , base_line.get_rad_angle())
+  # base_line.length = 100
+  # print(new_line.get_segment())
+  
   edge_list = []
   # obs_el = rectangle_p.get_edge_list()
   # rob_el = offset_triangle_p.get_edge_list()
@@ -269,6 +291,7 @@ def triangle_robot(screen):
   display_polygon_attr(screen,c_obs,colors["magenta"])
   display_polygon_attr(screen, rectangle_p, colors["white"])
   display_polygon_attr(screen, offset_triangle_p, colors["green"])
+  draw_line(screen, new_line.get_segment(), colors["indigo"])
   polygon_pygame_loop(screen, offset_triangle_p)
 
 def triangle_obstacle(screen):
@@ -325,8 +348,8 @@ def main():
   ctrl = 64
 
   screen = create_display(w,h)
-  
-  triangle_robot(screen)
+  triangle_rotation(screen)
+  # triangle_robot(screen)
 
       
 main()

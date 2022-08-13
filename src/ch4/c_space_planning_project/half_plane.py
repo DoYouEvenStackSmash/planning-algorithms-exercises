@@ -37,6 +37,21 @@ class Line:
   def get_rad_angle(self):
     return self.rad_angle
 
+  def compute_rotation_rad(self, target_point):
+    tx, ty = target_point
+    ox, oy = self.get_origin()
+
+    base_rad = self.get_rad_angle()
+    target_rad = np.arctan2((ty - oy), (tx - ox))
+    rotation = target_rad - base_rad
+    if rotation > np.pi:
+      rotation = rotation - (2 * np.pi)
+    if rotation < -np.pi:
+      rotation = rotation + (2 * np.pi)
+    
+    return rotation
+
+
 class HalfPlane:
   def __init__(self, line = Line()):
     self.line = line
