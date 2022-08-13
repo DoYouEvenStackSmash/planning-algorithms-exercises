@@ -78,11 +78,12 @@ def test_single_left_cross_edge(w = 0, h = 0):
 def test_rectangular_polygon(w = 0, h = 0):
   origin = [w/2,h/2]
   # origin = [700,700]
-  o = Point(origin[0], origin[1])
+  # o = Point(origin[0], origin[1])
   pt1 = Point(590,590)
   pt2 = Point(770,590)
   pt3 = Point(770,710)
   pt4 = Point(590,710)
+  o = pt1
   h1 = get_single_edge(o,pt1,pt2)
   h2 = get_single_edge(o,pt2,pt3)
   h3 = get_single_edge(o,pt3,pt4)
@@ -102,12 +103,13 @@ def test_rectangular_polygon(w = 0, h = 0):
 def test_offset_triangle_polygon(w = 0, h = 0):
   origin = [w/2,h/2]
   # origin = [700,700]
-  o = Point(origin[0], origin[1])
+  # o = Point(origin[0], origin[1])
   # screen = create_display(w,h)
   #(-1,3),(-5,1),(-4,-1) scaled by 30, from origin 500,500
   pt1 = Point(470,590)
   pt2 = Point(350,530)
   pt3 = Point(380,470)
+  o = pt1
   h1 = get_single_edge(o,pt1,pt2)
   h2 = get_single_edge(o,pt2,pt3)
   h3 = get_single_edge(o,pt3,pt1)
@@ -142,76 +144,76 @@ def test_right_triangle_polygon(w = 0, h = 0):
   p.half_planes_head = e1
   return p
 
-def conv_func(theta):
-    if theta < 0:
-      return 2 * np.pi - abs(theta)
-    return theta
+# def conv_func(theta):
+#     if theta < 0:
+#       return 2 * np.pi - abs(theta)
+#     return theta
 
-def edge_key(e):
-  return conv_func(e[1].get_rad_angle())
+# def edge_key(e):
+#   return conv_func(e[1].get_rad_angle())
 
-def sort_edge_vectors(edge_list):
-  adjust = lambda edge_obj : edge_key(edge_obj)
-  sorted_edge_list = sorted(edge_list, key=adjust)
-  return sorted_edge_list
+# def sort_edge_vectors(edge_list):
+#   adjust = lambda edge_obj : edge_key(edge_obj)
+#   sorted_edge_list = sorted(edge_list, key=adjust)
+#   return sorted_edge_list
 
-def add_robot_vectors(polygon, edge_vector_list):
-  in_el = polygon.get_edge_list()
-  for e in in_el:
-    edge_vector_list.append((e,e.get_in_vec()))
+# def add_robot_vectors(polygon, edge_vector_list):
+#   in_el = polygon.get_edge_list()
+#   for e in in_el:
+#     edge_vector_list.append((e,e.get_in_vec()))
 
-def add_obstacle_vectors(polygon, edge_list):
-  out_el = polygon.get_edge_list()
-  for e in out_el:
-    edge_list.append((e,e.get_out_vec()))
+# def add_obstacle_vectors(polygon, edge_list):
+#   out_el = polygon.get_edge_list()
+#   for e in out_el:
+#     edge_list.append((e,e.get_out_vec()))
 
-def solve_cross_angle(cross_angle):
-  theta_0 = cross_angle
-  if theta_0 < np.pi / 2:
-    theta_1 = theta_0 + np.pi / 2
-  else:
-    theta_1 = -2 * np.pi + theta_0 + np.pi / 2
-  return theta_1
+# def solve_cross_angle(cross_angle):
+#   theta_0 = cross_angle
+#   if theta_0 < np.pi / 2:
+#     theta_1 = theta_0 + np.pi / 2
+#   else:
+#     theta_1 = -2 * np.pi + theta_0 + np.pi / 2
+#   return theta_1
 
-def compute_end_point(origin, length, rad_angle):
-  ox,oy = origin
-  r = length
-  x = r * np.cos(rad_angle)
-  y = r * np.sin(rad_angle)
-  return Point(ox + x, oy + y)
+# def compute_end_point(origin, length, rad_angle):
+#   ox,oy = origin
+#   r = length
+#   x = r * np.cos(rad_angle)
+#   y = r * np.sin(rad_angle)
+#   return Point(ox + x, oy + y)
 
-def compute_obs_polygon(robot, obstacle):
-  edge_list = []
-  # obs_el = rectangle_p.get_edge_list()
-  # rob_el = offset_triangle_p.get_edge_list()
-  add_robot_vectors(robot, edge_list)
-  add_obstacle_vectors(obstacle, edge_list)
-  print(len(edge_list))
-  # sel = tuples (Edge, radian key)
-  sorted_edge_tuple_list = sort_edge_vectors(edge_list)
-  e,r = sorted_edge_tuple_list[0]
-  print(f"first_edge\t{r.get_rad_angle()}")
-  x1,y1 = e.H.line.get_endpoint()
-  first_point = Point(x1,y1)
-  print(f"first point\t{first_point.get_point()}")
-  point_list = [first_point]
-  c = 1
-  for i,j in sorted_edge_tuple_list[1:]:
-    edge_object = i
-    norm_v = j
-    rad_angle = solve_cross_angle(norm_v.get_rad_angle())
+# def compute_obs_polygon(robot, obstacle):
+#   edge_list = []
+#   # obs_el = rectangle_p.get_edge_list()
+#   # rob_el = offset_triangle_p.get_edge_list()
+#   add_robot_vectors(robot, edge_list)
+#   add_obstacle_vectors(obstacle, edge_list)
+#   print(len(edge_list))
+#   # sel = tuples (Edge, radian key)
+#   sorted_edge_tuple_list = sort_edge_vectors(edge_list)
+#   e,r = sorted_edge_tuple_list[0]
+#   print(f"first_edge\t{r.get_rad_angle()}")
+#   x1,y1 = e.H.line.get_endpoint()
+#   first_point = Point(x1,y1)
+#   print(f"first point\t{first_point.get_point()}")
+#   point_list = [first_point]
+#   c = 1
+#   for i,j in sorted_edge_tuple_list[1:]:
+#     edge_object = i
+#     norm_v = j
+#     rad_angle = solve_cross_angle(norm_v.get_rad_angle())
     
-    print(norm_v.get_rad_angle())
-    length = i.H.line.get_length()
-    # print(length)
-    # print(rad_angle * 180 / np.pi)
-    point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
-    print(f"pt {c}:\t{point_list[-1].get_point()}")
-    c+=1
-    # point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+#     print(norm_v.get_rad_angle())
+#     length = i.H.line.get_length()
+#     # print(length)
+#     # print(rad_angle * 180 / np.pi)
+#     point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+#     print(f"pt {c}:\t{point_list[-1].get_point()}")
+#     c+=1
+#     # point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
 
-  c_obs = points_to_polygon((500,500),point_list)
-  return c_obs
+#   c_obs = points_to_polygon((500,500),point_list)
+#   return c_obs
 
 # def clear_frame(screen):
 #   pygame.Surface.fill(screen, (0,0,0))
@@ -242,7 +244,7 @@ def triangle_robot_rotation(screen):
   a,b = base_line.get_origin()
   new_line = Line(Point(a,b),300 , base_line.get_rad_angle())
   draw_line(screen, new_line.get_segment(), colors["indigo"])
-  pygame_polygon_rotation_loop(screen, offset_triangle_p)
+  pygame_polygon_obstacle_rotation_loop(screen, offset_triangle_p,rectangle_p)
   # base_line.length = 100
 
 
@@ -348,8 +350,8 @@ def main():
   ctrl = 64
 
   screen = create_display(w,h)
-  triangle_rotation(screen)
-  # triangle_robot(screen)
+  # triangle_rotation(screen)
+  triangle_robot_rotation(screen)
 
       
 main()

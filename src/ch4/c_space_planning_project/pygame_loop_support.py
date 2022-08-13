@@ -70,6 +70,7 @@ def pygame_polygon_rotation_loop(screen, polygon = None):
         if pygame.key.get_mods() == ctrl:
           clear_frame(screen)
           draw_dot(screen, p, colors["white"])
+          
           rotate_polygon(polygon, p)
           base_line = polygon.get_base_line()
           a,b = base_line.get_origin()
@@ -91,8 +92,14 @@ def pygame_polygon_rotation_loop(screen, polygon = None):
 def pygame_polygon_obstacle_rotation_loop(screen, polygon = None, obstacle_polygon = None):
   ctrl = 64
   polygon_list = [polygon, obstacle_polygon]
+  obs = compute_obs_polygon(polygon, obstacle_polygon)
+  polygon_colors = [colors["green"],colors["white"],colors["magenta"]]
+  polygon_list.append(obs)
+  draw_frame_polygons(screen, polygon_list, polygon_colors)
   
-  display_polygon_attr(screen, polygon, colors["green"])
+  # display_polygon_attr(screen, polygon, colors["green"])
+  # display_polygon_attr(screen, obstacle_polygon, colors["white"])
+  
   while 1:
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
@@ -103,12 +110,26 @@ def pygame_polygon_obstacle_rotation_loop(screen, polygon = None, obstacle_polyg
         if pygame.key.get_mods() == ctrl:
           clear_frame(screen)
           draw_dot(screen, p, colors["white"])
-          rotate_polygon(polygon, p)
-          base_line = polygon.get_base_line()
-          a,b = base_line.get_origin()
-          new_line = Line(Point(a,b),300 , base_line.get_rad_angle())
-          draw_line(screen, new_line.get_segment(), colors["indigo"])
-          display_polygon_attr(screen, polygon, colors["green"])  
+          rrad = get_polygon_point_rotation(polygon, p)
+          moves = abs(rrad * 180 / np.pi)
+          if int(moves) == 0:
+            moves = 1
+          step_rad = rrad / moves 
+          r_step_theta = get_cc_rotation_matrix(step_rad)
+          for i in range(int(moves)):
+            clear_frame(screen)
+            rotate_polygon(polygon, None, r_step_theta, step_rad)
+          # rotate_polygon(polygon, p)
+            obstacle_polygon.update_edges()
+            polygon_list[-1] = compute_obs_polygon(polygon, obstacle_polygon)
+            base_line = polygon.get_base_line()
+            a,b = base_line.get_origin()
+            draw_dot(screen, (a,b), colors["yellow"])
+            new_line = Line(Point(a,b),300 , base_line.get_rad_angle())
+            draw_line(screen, new_line.get_segment(), colors["indigo"])
+            draw_frame_polygons(screen, polygon_list, polygon_colors)
+            time.sleep(0.02)
+          # display_polygon_attr(screen, polygon, colors["green"])  
         val = polygon.check_collision(p)
         if val == False:
           print(f"{p} is right of the line")

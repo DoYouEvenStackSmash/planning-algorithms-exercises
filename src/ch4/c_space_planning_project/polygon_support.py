@@ -183,12 +183,24 @@ def rotate_edge_vector(origin, edge_vector, rotation_matrix):
   edge_vector.origin = Point(step[0][0] + ox, step[1][0] + oy)
   # edge_vector.rad_angle = edge_vector.rad_angle + target_rad
 
-def rotate_polygon(polygon, target_point):
+
+# def rotate_polygon_rad(polygon, rotation_matr):
+
+def get_polygon_point_rotation(polygon, target_point):
+  base_line = polygon.get_base_line()
+  target_rad = base_line.compute_rotation_rad(target_point)
+  return target_rad
+
+def rotate_polygon(polygon, target_point, rotation_matrix = None, target_angle = None):
   base_line = polygon.get_base_line()
   # ox,oy = base_line.get_origin()
-  target_rad = base_line.compute_rotation_rad(target_point)
-  r_theta = get_cc_rotation_matrix(target_rad)
-  el = polygon.get_edge_list()
+  if target_point == None:
+    target_rad = target_angle
+    r_theta = rotation_matrix
+  else:
+    target_rad = base_line.compute_rotation_rad(target_point)
+    r_theta = get_cc_rotation_matrix(target_rad)
+  # el = polygon.get_edge_list()
   h = polygon.half_planes_head
   rotate_edge_vector(base_line.origin,h.H.line,r_theta)
   if h.H.line.get_rad_angle() + target_rad > np.pi:
@@ -197,9 +209,9 @@ def rotate_polygon(polygon, target_point):
     h.H.line.rad_angle = 2 * np.pi + h.H.line.get_rad_angle() + target_rad
   else:
     h.H.line.rad_angle = h.H.line.get_rad_angle() + target_rad
-    print("all is well")
+    # print("all is well")
   
-  print(f"rad_angle:\t{h.H.line.rad_angle}")
+  # print(f"rad_angle:\t{h.H.line.rad_angle}")
   # print(f"rad_angle:\t{target_rad}")
   h = h.m_next
   while h != polygon.half_planes_head:
@@ -212,6 +224,78 @@ def rotate_polygon(polygon, target_point):
       h.H.line.rad_angle = 2 * np.pi + h.H.line.get_rad_angle() + target_rad
     else:
       h.H.line.rad_angle = h.H.line.get_rad_angle() + target_rad
-      print("all is well")
+      # print("all is well")
     h = h.m_next
   polygon.update_edges()
+
+
+def conv_func(theta):
+    if theta < 0:
+      return 2 * np.pi - abs(theta)
+    return theta
+
+def edge_key(e):
+  return conv_func(e[1].get_rad_angle())
+
+def sort_edge_vectors(edge_list):
+  adjust = lambda edge_obj : edge_key(edge_obj)
+  sorted_edge_list = sorted(edge_list, key=adjust)
+  return sorted_edge_list
+
+def add_robot_vectors(polygon, edge_vector_list):
+  in_el = polygon.get_edge_list()
+  for e in in_el:
+    edge_vector_list.append((e,e.get_in_vec()))
+
+def add_obstacle_vectors(polygon, edge_list):
+  out_el = polygon.get_edge_list()
+  for e in out_el:
+    edge_list.append((e,e.get_out_vec()))
+
+def solve_cross_angle(cross_angle):
+  theta_0 = cross_angle
+  if theta_0 < np.pi / 2:
+    theta_1 = theta_0 + np.pi / 2
+  else:
+    theta_1 = -2 * np.pi + theta_0 + np.pi / 2
+  return theta_1
+
+def compute_end_point(origin, length, rad_angle):
+  ox,oy = origin
+  r = length
+  x = r * np.cos(rad_angle)
+  y = r * np.sin(rad_angle)
+  return Point(ox + x, oy + y)
+
+def compute_obs_polygon(robot, obstacle):
+  edge_list = []
+  # obs_el = rectangle_p.get_edge_list()
+  # rob_el = offset_triangle_p.get_edge_list()
+  add_robot_vectors(robot, edge_list)
+  add_obstacle_vectors(obstacle, edge_list)
+  # print(len(edge_list))
+  # sel = tuples (Edge, radian key)
+  sorted_edge_tuple_list = sort_edge_vectors(edge_list)
+  e,r = sorted_edge_tuple_list[0]
+  # print(f"first_edge\t{r.get_rad_angle()}")
+  x1,y1 = e.H.line.get_endpoint()
+  first_point = Point(x1,y1)
+  # print(f"first point\t{first_point.get_point()}")
+  point_list = [first_point]
+  c = 1
+  for i,j in sorted_edge_tuple_list[1:]:
+    edge_object = i
+    norm_v = j
+    rad_angle = solve_cross_angle(norm_v.get_rad_angle())
+    
+    # print(norm_v.get_rad_angle())
+    length = i.H.line.get_length()
+    # print(length)
+    # print(rad_angle * 180 / np.pi)
+    point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+    # print(f"pt {c}:\t{point_list[-1].get_point()}")
+    c+=1
+    # point_list.append(compute_end_point(point_list[-1].get_point(),length, rad_angle))
+
+  c_obs = points_to_polygon((500,500),point_list)
+  return c_obs
