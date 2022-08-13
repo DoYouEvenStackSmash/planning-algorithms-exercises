@@ -126,5 +126,18 @@ class Polygon:
       hold = hold.m_next
     return edgelist
   
-    
+def points_to_polygon(origin, point_list):
+  o = Point(origin[0], origin[1])
+  edge_list = []
+  for i in range(1,len(point_list)):
+    h = get_single_edge(o,point_list[i - 1], point_list[i])
+    edge_list.append(Edge(h))
+  h = get_single_edge(o,point_list[-1], point_list[0])
+  edge_list.append(Edge(h))
+  for i in range(1,len(edge_list)):
+    edge_list[i - 1].m_next = edge_list[i]
+  edge_list[-1].m_next = edge_list[0]
+  p = Polygon()
+  p.half_planes_head = edge_list[0]
+  return p
   
