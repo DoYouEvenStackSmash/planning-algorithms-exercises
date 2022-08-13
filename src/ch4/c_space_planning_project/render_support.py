@@ -50,3 +50,10 @@ def display_polygon_edges(screen, polygon = None, color = colors["white"]):
   x = polygon.get_segments()
   for i in x:
     draw_line(screen, i, color)
+
+def clear_frame(screen):
+  pygame.Surface.fill(screen, (0,0,0))
+
+def draw_frame_polygons(screen, polygon_list, polygon_colors):
+  for i in range(len(polygon_list)):
+    display_polygon_attr(screen, polygon_list[i], polygon_colors[i])  

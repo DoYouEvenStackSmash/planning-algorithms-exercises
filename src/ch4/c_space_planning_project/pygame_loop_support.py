@@ -68,6 +68,7 @@ def pygame_polygon_rotation_loop(screen, polygon = None):
 
         p = pygame.mouse.get_pos()
         if pygame.key.get_mods() == ctrl:
+          clear_frame(screen)
           draw_dot(screen, p, colors["white"])
           rotate_polygon(polygon, p)
           base_line = polygon.get_base_line()
@@ -100,6 +101,7 @@ def pygame_polygon_obstacle_rotation_loop(screen, polygon = None, obstacle_polyg
 
         p = pygame.mouse.get_pos()
         if pygame.key.get_mods() == ctrl:
+          clear_frame(screen)
           draw_dot(screen, p, colors["white"])
           rotate_polygon(polygon, p)
           base_line = polygon.get_base_line()

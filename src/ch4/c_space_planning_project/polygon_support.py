@@ -14,6 +14,16 @@ class Edge:
   def test_pt(self, pt = (0,0)):
     return self.H.test_point(pt)
   
+  def reset_all_vec(self):
+    self.reset_in_vec()
+    self.reset_out_vec()
+  
+  def reset_in_vec(self):
+    self.in_vec = self.compute_vec(self.calculate_in_vec_angle())
+  
+  def reset_out_vec(self):
+    self.out_vec = self.compute_vec(self.calculate_out_vec_angle())
+  
   def get_in_vec(self):
     if not self.in_vec:
       self.in_vec = self.compute_vec(self.calculate_in_vec_angle())
@@ -79,6 +89,15 @@ class Polygon:
   
   def get_orient_axis(self):
     return self.orient_axis
+  
+  def update_edges(self):
+    hold = self.half_planes_head
+    hold.reset_all_vec()
+    hold = hold.m_next
+    while hold != self.half_planes_head:
+      hold.reset_all_vec()
+      hold = hold.m_next
+    
   
   # returns a tuple of the polygon origin
   def get_origin(self):
@@ -172,12 +191,27 @@ def rotate_polygon(polygon, target_point):
   el = polygon.get_edge_list()
   h = polygon.half_planes_head
   rotate_edge_vector(base_line.origin,h.H.line,r_theta)
-  h.H.line.rad_angle = h.H.line.get_rad_angle() + target_rad
+  if h.H.line.get_rad_angle() + target_rad > np.pi:
+    h.H.line.rad_angle = -2 * np.pi + h.H.line.get_rad_angle() + target_rad
+  elif h.H.line.get_rad_angle() + target_rad < -np.pi:
+    h.H.line.rad_angle = 2 * np.pi + h.H.line.get_rad_angle() + target_rad
+  else:
+    h.H.line.rad_angle = h.H.line.get_rad_angle() + target_rad
+    print("all is well")
+  
+  print(f"rad_angle:\t{h.H.line.rad_angle}")
+  # print(f"rad_angle:\t{target_rad}")
   h = h.m_next
   while h != polygon.half_planes_head:
   # for i in range(len(el)):
     # l = el[i].H.line
     rotate_edge_vector(base_line.origin,h.H.line,r_theta)
-    h.H.line.rad_angle = h.H.line.get_rad_angle() + target_rad
+    if h.H.line.get_rad_angle() + target_rad > np.pi:
+      h.H.line.rad_angle = -2 * np.pi + h.H.line.get_rad_angle() + target_rad
+    elif h.H.line.get_rad_angle() + target_rad < -np.pi:
+      h.H.line.rad_angle = 2 * np.pi + h.H.line.get_rad_angle() + target_rad
+    else:
+      h.H.line.rad_angle = h.H.line.get_rad_angle() + target_rad
+      print("all is well")
     h = h.m_next
-  
+  polygon.update_edges()

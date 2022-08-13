@@ -213,12 +213,12 @@ def compute_obs_polygon(robot, obstacle):
   c_obs = points_to_polygon((500,500),point_list)
   return c_obs
 
-def clear_frame(screen):
-  pygame.Surface.fill(screen, (0,0,0))
+# def clear_frame(screen):
+#   pygame.Surface.fill(screen, (0,0,0))
 
-def draw_frame_polygons(screen, polygon_list, polygon_colors):
-  for i in range(len(polygon_list)):
-    display_polygon_attr(screen, polygon_list[i], polygon_colors[i])  
+# def draw_frame_polygons(screen, polygon_list, polygon_colors):
+#   for i in range(len(polygon_list)):
+#     display_polygon_attr(screen, polygon_list[i], polygon_colors[i])  
 
 def triangle_rotation(screen):
   w,h = 1000,1000
