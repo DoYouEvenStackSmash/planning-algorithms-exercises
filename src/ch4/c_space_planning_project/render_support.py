@@ -33,8 +33,8 @@ def frame_draw_line(screen, point_set, color = (0,0,0)):
 
 def display_polygon_attr(screen, polygon = None,color = colors["white"]):
   display_polygon_edges(screen, polygon, color)
-  display_out_vectors(screen, polygon)
-  display_in_vectors(screen, polygon)
+  # display_out_vectors(screen, polygon)
+  # display_in_vectors(screen, polygon)
 
 def display_in_vectors(screen, polygon = None):
   x = polygon.get_in_vec_segments()
