@@ -52,6 +52,29 @@ class HalfPlane:
     
     return f
     
+def get_cc_rotation_matrix(rad_theta):
+  return np.array([[np.cos(rad_theta), -np.sin(rad_theta)], [np.sin(rad_theta), np.cos(rad_theta)]])
 
+def rotate_edge_vector(origin, edge_vector, rotation_matrix):
+  ox,oy = origin.get_point()
+  ev_x,ev_y = edge_vector.get_origin()
+  step = np.matmul(rotation_matrix, np.array([[ev_x - ox], [ev_y - oy]]))
+  edge_vector.origin = Point(step[0][0] + ox, step[0][1] + oy)
+  edge_vector.rad_angle = edge_vector.rad_angle + target_rad
+
+
+def rotate_polygon(polygon, target_point):
+  base_line = polygon.get_base_line()
+  # ox,oy = base_line.get_origin()
+  target_rad = base_line.compute_rotation_rad(target_point)
+  r_theta = get_cc_rotation_matrix(target_rad)
+  el = polygon.get_edge_list()
+  for i in range(len(el)):
+    l = el[i].H.line
+    rotate_edge_vector(l.origin,el[i].H.line,r_theta)
+    el[i].H.line.rad_angle = el[i].H.line.rad_angle + target_rad
+  
 
   
+
+
