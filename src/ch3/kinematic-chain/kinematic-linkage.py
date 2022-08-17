@@ -95,7 +95,13 @@ def rotate_chain(base_link, target_point, screen = None, cl = None):
     while link != None:
       rotate_link(origin, link, r_step_theta)
       link = link.m_next
-    base_link.set_rad_angle(step_rad + base_link.get_local_rad_angle())
+    # correct for constantly increasing radian thing
+    if (base_link.get_local_rad_angle() + step_rad > np.pi):
+      base_link.set_rad_angle( -2 * np.pi + base_link.get_local_rad_angle() + step_rad)
+    elif (base_link.get_local_rad_angle() + step_rad < -np.pi):
+      base_link.set_rad_angle( 2 * np.pi + base_link.get_local_rad_angle() + step_rad)
+    else:
+      base_link.set_rad_angle(step_rad + base_link.get_local_rad_angle())
     draw_frame(screen, cl)
     time.sleep(0.01)
 
@@ -134,6 +140,8 @@ def radius_target_point(base_link, target_point):
   chosen_point = pps[0]
   if abs(base_link.compute_rotation_rad(pps[-1].get_coord())) < abs(base_link.compute_rotation_rad(chosen_point.get_coord())):
     chosen_point = pps[-1]
+  if abs(base_link.compute_rotation_rad(pps[1].get_coord())) < abs(base_link.compute_rotation_rad(chosen_point.get_coord())):
+    chosen_point = pps[1]
   return chosen_point
 
 '''
@@ -238,17 +246,13 @@ def calculate_angle(origin, start_point, target_point):
 
   return theta
 
-def main():
-  w,h = 1000,1000
-  pygame.init()
-
+def two_link():
   lalt = 256
   lshift = 1
   ctrl = 64
-
-  origin = [w/2,h/2]
+  w,h = 1000,1000
   screen = create_display(w,h)
-  
+
   origin = Point(500,500)
   l,w = 100, 20
   link_1 = create_link(origin, l, w, 95)
@@ -299,5 +303,88 @@ def main():
 
         #   print("nothing pressed")
         draw_frame(screen, cl)
+
+
+def three_link():
+  lalt = 256
+  lshift = 1
+  ctrl = 64
+  w,h = 1000,1000
+  screen = create_display(w,h)
+
+  origin = Point(500,500)
+  l,w = 100, 20
+  link_1 = create_link(origin, l, w, 95)
+  link_1.absolute_offset = origin
+  x, y = link_1.get_end_point()
+  link_2 = create_link(Point(x,y), l, w, 95)
+  link_2.absolute_offset = origin
+  link_2.m_prev = link_1
+  link_1.m_next = link_2
+  cl = [link_1, link_2]
+  draw_frame(screen, cl)
+
+
+def main():
+  # w,h = 1000,1000
+  pygame.init()
+  two_link()
+  # lalt = 256
+  # lshift = 1
+  # ctrl = 64
+
+  # origin = [w/2,h/2]
+  # screen = create_display(w,h)
+  
+  # origin = Point(500,500)
+  # l,w = 100, 20
+  # link_1 = create_link(origin, l, w, 95)
+  # link_1.absolute_offset = origin
+  # x, y = link_1.get_end_point()
+  # link_2 = create_link(Point(x,y), l, w, 95)
+  # link_2.absolute_offset = origin
+  # link_2.m_prev = link_1
+  # link_1.m_next = link_2
+  # cl = [link_1, link_2]
+  # draw_frame(screen, cl)
+
+
+  # while 1:
+  #   for event in pygame.event.get():
+  #     if event.type == pygame.QUIT: 
+  #       sys.exit()
+  #     if event.type == pygame.MOUSEBUTTONUP:
+  #       p = pygame.mouse.get_pos()
+  #       if pygame.key.get_mods() == ctrl:
+  #         draw_origin_dot(screen, p, colors["yellow"])
+  #         target_circle(screen, link_2, p)
+  #         pt = radius_target_point(link_2, p)
+  #         rotate_chain(link_2, pt.get_coord(), screen, cl)
+  #         a = cheat_target_angle(link_1.get_origin().get_coord(), link_2.get_end_point(), p)
+  #         apt = cheat_target_point(link_1.get_origin().get_coord(), a, link_1.get_end_point())
+  #         rotate_chain(link_1, apt.get_coord(), screen, cl)
+  #         draw_origin_dot(screen, p, colors["yellow"])
+  #         draw_origin_dot(screen,pt.get_coord(), colors["cyan"])
+  #         # print(f"angle: {a}")
+  #         # print(f"{pt.get_coord()}, vs {link_2.get_end_point()}")
+          
+  #         continue
+  #       # elif pygame.key.get_mods() == lalt:
+  #       #   draw_origin_dot(screen, p)
+  #       #   rotate_chain(link_2, p)
+  #       #   print(f"link2:{link_2.get_local_rad_angle()}\nlink1:{link_1.get_local_rad_angle()}")
+  #       #   # print(link_2.compute_rotation_rad(p))
+  #       # # if pygame.key.get_pressed()[] == True:
+  #       #   # draw_dot(screen, p)
+  #       # elif pygame.key.get_mods() == lshift:
+  #       #   draw_origin_dot(screen, p)
+  #       #   rotate_chain(link_1, p)
+  #       #   print(link_1.get_local_rad_angle())
+  #       #   # print(link_1.compute_rotation_rad(p))
+  #       #   # draw_red_dot(screen,p)
+  #       # elif pygame.key.get_mods() == ctrl:
+
+  #       #   print("nothing pressed")
+  #       draw_frame(screen, cl)
 
 main()
