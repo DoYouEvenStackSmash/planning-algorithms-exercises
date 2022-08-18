@@ -4,6 +4,7 @@ from venv import create
 from identification_objects import *
 from flat_cylinder_manifold import *
 from mobius_manifold import *
+from torus_manifold import *
 import sys
 import numpy as np
 import pygame
@@ -41,7 +42,8 @@ def main():
     frame_draw_line(screen, [by[2 * i], by[2 * i + 1]], colors["magenta"])
 
   # l = flat_cylinder(o, 60)
-  l = mobius_strip(o, 20)
+  # l = mobius_strip(o, 20)
+  l = torus(o, 7)
   # print(l)
   for i in l:
     frame_draw_line(screen, i, colors["green"])
