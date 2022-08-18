@@ -6,6 +6,7 @@ from flat_cylinder_manifold import *
 from mobius_manifold import *
 from torus_manifold import *
 from klein_bottle_manifold import *
+from projective_plane import *
 import sys
 import numpy as np
 import pygame
@@ -43,8 +44,9 @@ def change_angle(screen, o):
     
     # l = flat_cylinder(o, deg)
     # l = mobius_strip(o, deg)
-    # l = torus(o, deg)
-    l = klein_bottle(o, deg)
+    l = torus(o, deg)
+    # l = klein_bottle(o, deg)
+    # l = projective_plane(o, deg)
     # print(l)
     
     for segment in l:
@@ -62,7 +64,8 @@ def single_angle(screen, o):
   # l = flat_cylinder(o, 60)
   # l = mobius_strip(o, 20)
   # l = torus(o, 7)
-  l = klein_bottle(o, 60)
+  # l = klein_bottle(o, 60)
+  l = projective_plane(o, 80)
   # print(l)
   
   for i in l:
