@@ -35,7 +35,7 @@ def clear_frame(screen):
 def change_angle(screen, o):
   bx = o.get_x_borders()
   by = o.get_y_borders()
-  for deg in range(1,90, 7):
+  for deg in range(1,90, 1):
     clear_frame(screen)
     for i in range(2):
       frame_draw_line(screen, [bx[2 * i], bx[2 * i + 1]], colors["cyan"])
@@ -50,7 +50,7 @@ def change_angle(screen, o):
     for segment in l:
       frame_draw_line(screen, segment, colors["green"])
     pygame.display.update()
-    time.sleep(1)
+    time.sleep(0.1)
 
 def single_angle(screen, o):
   bx = o.get_x_borders()
@@ -71,27 +71,13 @@ def single_angle(screen, o):
 
 def main():
   pygame.init()
-  screen = create_display(1000, 1000)
+  w, h = 500, 500
+  screen = create_display(w, h)
 
-  o = blank_object(100, 900, 100, 900)
+  o = blank_object(w/10, w - w/10, h/10, h - h/10)
   change_angle(screen,o)
   # single_angle(screen, o)
 
-
-  # bx = o.get_x_borders()
-  # by = o.get_y_borders()
-  # for i in range(2):
-  #   frame_draw_line(screen, [bx[2 * i], bx[2 * i + 1]], colors["cyan"])
-  #   frame_draw_line(screen, [by[2 * i], by[2 * i + 1]], colors["magenta"])
-
-  # # l = flat_cylinder(o, 60)
-  # # l = mobius_strip(o, 20)
-  # l = torus(o, 7)
-  # # print(l)
-  
-  # for i in l:
-  #   frame_draw_line(screen, i, colors["green"])
-  # pygame.display.update()
   while 1:
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
