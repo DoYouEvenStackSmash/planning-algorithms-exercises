@@ -30,6 +30,7 @@ def flat_cylinder_next_segment(O, x_curr, y_curr, rad_angle):
 def flat_cylinder(o, angle_degrees):
   # o = Obj(10, 100, 10, 100)
   # x_max_rules
+  o.end_flag = False
   o.x_identify = lambda O,x: flat_cylinder_x_identify(O, x)
   # y_max_rules
   # print(o.x_identify(o,.5))
