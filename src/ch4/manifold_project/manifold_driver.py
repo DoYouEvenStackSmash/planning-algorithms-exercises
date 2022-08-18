@@ -2,7 +2,7 @@
 
 from venv import create
 from identification_objects import *
-from manifolds import *
+from flat_cylinder_manifold import *
 import sys
 import numpy as np
 import pygame
@@ -38,7 +38,7 @@ def main():
     frame_draw_line(screen, [bx[2 * i], bx[2 * i + 1]], colors["cyan"])
     frame_draw_line(screen, [by[2 * i], by[2 * i + 1]], colors["magenta"])
 
-  l = flat_cylinder(o, 5)
+  l = flat_cylinder(o, 60)
   # print(l)
   for i in l:
     frame_draw_line(screen, i, colors["green"])
