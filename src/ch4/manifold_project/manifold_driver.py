@@ -3,6 +3,7 @@
 from venv import create
 from identification_objects import *
 from flat_cylinder_manifold import *
+from mobius_manifold import *
 import sys
 import numpy as np
 import pygame
@@ -25,6 +26,7 @@ def frame_draw_line(screen, point_set, color = (0,0,0)):
   s,e = point_set
   pygame.draw.aaline(screen, color, s, e)
 
+
 def main():
   pygame.init()
   screen = create_display(1000, 1000)
@@ -38,7 +40,8 @@ def main():
     frame_draw_line(screen, [bx[2 * i], bx[2 * i + 1]], colors["cyan"])
     frame_draw_line(screen, [by[2 * i], by[2 * i + 1]], colors["magenta"])
 
-  l = flat_cylinder(o, 60)
+  # l = flat_cylinder(o, 60)
+  l = mobius_strip(o, 20)
   # print(l)
   for i in l:
     frame_draw_line(screen, i, colors["green"])
