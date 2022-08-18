@@ -137,6 +137,9 @@ def transform_point_set(base_link, point_set):
 '''
 def radius_target_point(base_link, target_point):
   pps = target_point_set(base_link, target_point)
+  print(pps)
+  for i,j in enumerate(pps):
+    print(f"coord {i}:{base_link.compute_rotation_rad(j.get_coord())}")
   chosen_point = pps[0]
   if abs(base_link.compute_rotation_rad(pps[-1].get_coord())) < abs(base_link.compute_rotation_rad(chosen_point.get_coord())):
     chosen_point = pps[-1]
