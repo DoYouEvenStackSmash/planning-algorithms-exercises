@@ -30,6 +30,9 @@ def frame_draw_line(screen, point_set, color = (0,0,0)):
   s,e = point_set
   pygame.draw.aaline(screen, color, s, e)
 
+def frame_draw_dot(screen, point, color = (0,0,0)):
+  pygame.draw.circle(screen, color, point, 4, 4)
+
 def clear_frame(screen):
   pygame.Surface.fill(screen, (0,0,0))
 
@@ -64,13 +67,17 @@ def single_angle(screen, o):
   # l = flat_cylinder(o, 60)
   # l = mobius_strip(o, 20)
   # l = torus(o, 7)
-  # l = klein_bottle(o, 60)
-  l = projective_plane(o, 80)
+  l = klein_bottle(o, 60)
+  # l = projective_plane(o, 80)
   # print(l)
   
   for i in l:
     frame_draw_line(screen, i, colors["green"])
-  pygame.display.update()
+    frame_draw_dot(screen, i[0], colors["yellow"])
+    frame_draw_dot(screen, i[1], colors["red"])
+    pygame.display.update()
+    time.sleep(0.1)
+  # pygame.display.update()
 
 def main():
   pygame.init()
@@ -78,8 +85,8 @@ def main():
   screen = create_display(w, h)
 
   o = blank_object(w/10, w - w/10, h/10, h - h/10)
-  change_angle(screen,o)
-  # single_angle(screen, o)
+  # change_angle(screen,o)
+  single_angle(screen, o)
 
   while 1:
     for event in pygame.event.get():
