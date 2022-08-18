@@ -54,7 +54,6 @@ class Plane:
 
     x_o, y_o = origin_pt
     
-    
     # if angle > 45 degrees, compute x val 
     if rad_angle > (np.pi / 4):
       a =  self.y_axis.get_length()
