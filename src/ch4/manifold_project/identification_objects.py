@@ -45,5 +45,11 @@ class Obj:
   def check_x_min(self, x_curr):
     return x_curr <= self.x_min
   
+  def get_x_dist(self):
+    return self.x_max - self.x_min
+  
+  def get_y_dist(self):
+    return self.y_max - self.y_min
+  
 def blank_object(x_min, x_max, y_min, y_max):
   return Obj(x_min, x_max, y_min, y_max)

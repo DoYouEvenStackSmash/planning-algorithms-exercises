@@ -8,6 +8,7 @@ from torus_manifold import *
 from klein_bottle_manifold import *
 from projective_plane import *
 from two_sphere_manifold import *
+from double_torus_manifold import *
 import sys
 import numpy as np
 import pygame
@@ -72,7 +73,8 @@ def single_angle(screen, o):
   # l = torus(o, 7)
   # l = klein_bottle(o, 60)
   # l = projective_plane(o, 80)
-  l = two_sphere(o, 10)
+  # l = two_sphere(o, 10)
+  l = double_torus(o, 70)
   # print(l)
   
   for i in l:
@@ -80,7 +82,7 @@ def single_angle(screen, o):
     frame_draw_dot(screen, i[0], colors["yellow"])
     frame_draw_dot(screen, i[1], colors["red"])
     pygame.display.update()
-    time.sleep(0.1)
+    time.sleep(1)
   # pygame.display.update()
 
 def main():
@@ -89,8 +91,8 @@ def main():
   screen = create_display(w, h)
 
   o = blank_object(w/10, w - w/10, h/10, h - h/10)
-  change_angle(screen,o)
-  # single_angle(screen, o)
+  # change_angle(screen,o)
+  single_angle(screen, o)
 
   while 1:
     for event in pygame.event.get():
