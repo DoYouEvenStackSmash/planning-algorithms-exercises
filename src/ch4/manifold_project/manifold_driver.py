@@ -49,15 +49,16 @@ def change_angle(screen, o):
     # l = flat_cylinder(o, deg)
     # l = mobius_strip(o, deg)
     # l = torus(o, deg)
-    # l = klein_bottle(o, deg)
+    l = klein_bottle(o, deg)
     # l = projective_plane(o, deg)
-    l = two_sphere(o, deg)
+    # l = two_sphere(o, deg)
+    print(f"theta: {deg}")
     # print(l)
-    
+    # frame_draw_line(screen, [(o.get_x_min(), o.get_y_min()),(o.get_x_max(), o.get_y_max())], colors["red"])
     for segment in l:
       frame_draw_line(screen, segment, colors["green"])
     pygame.display.update()
-    time.sleep(0.1)
+    time.sleep(0.15)
 
 def single_angle(screen, o):
   bx = o.get_x_borders()

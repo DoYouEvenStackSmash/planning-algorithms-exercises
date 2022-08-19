@@ -11,7 +11,7 @@ def klein_bottle_y_identify(O, y, flip = False):
   if flip:
     return O.get_y_max() - y + O.get_y_min()
   elif O.check_y_max(y):
-    print("Fire")
+    # print("Fire")
     return O.get_y_min()
   else:
     return y
@@ -56,7 +56,7 @@ def klein_bottle(o, angle_degrees):
   ox,oy = o.get_x_min(),o.get_y_min()
   r = angle_degrees * np.pi / 180
   counter = 0
-  while not o.end_flag and counter < 10:
+  while not o.end_flag and counter < 20:
     lines.append(o.next_segment(o,ox,oy,r))
     ox,oy = lines[-1][1]
     counter+=1

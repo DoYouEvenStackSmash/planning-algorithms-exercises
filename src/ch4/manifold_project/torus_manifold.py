@@ -50,8 +50,8 @@ def torus(o, angle_degrees):
     lines.append(o.next_segment(o,ox,oy,r))
     ox,oy = lines[-1][1]
     counter+=1
-  for i in lines:
-    print(i)
+  # for i in lines:
+  #   print(i)
   return lines
 
   
