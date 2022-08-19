@@ -92,8 +92,8 @@ def main():
   screen = create_display(w, h)
 
   o = blank_object(w/10, w - w/10, h/10, h - h/10)
-  # change_angle(screen,o)
-  single_angle(screen, o)
+  change_angle(screen,o)
+  # single_angle(screen, o)
 
   while 1:
     for event in pygame.event.get():
