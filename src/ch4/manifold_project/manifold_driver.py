@@ -50,9 +50,10 @@ def change_angle(screen, o):
     # l = flat_cylinder(o, deg)
     # l = mobius_strip(o, deg)
     # l = torus(o, deg)
-    l = klein_bottle(o, deg)
+    # l = klein_bottle(o, deg)
     # l = projective_plane(o, deg)
     # l = two_sphere(o, deg)
+    l = double_torus(o, deg)
     print(f"theta: {deg}")
     # print(l)
     # frame_draw_line(screen, [(o.get_x_min(), o.get_y_min()),(o.get_x_max(), o.get_y_max())], colors["red"])
@@ -74,7 +75,7 @@ def single_angle(screen, o):
   # l = klein_bottle(o, 60)
   # l = projective_plane(o, 80)
   # l = two_sphere(o, 10)
-  l = double_torus(o, 70)
+  l = double_torus(o, 75)
   # print(l)
   
   for i in l:
