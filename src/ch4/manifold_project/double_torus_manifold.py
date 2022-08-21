@@ -92,7 +92,7 @@ def double_torus(o, angle_degrees):
   ox,oy = o.get_x_min(), o.get_y_min()
   r = angle_degrees * np.pi / 180
   counter = 0
-  while not o.end_flag and counter < 2:
+  while not o.end_flag and counter < 10:
     lines.append(o.next_segment(o, ox, oy, r))
     ox, oy = lines[-1][1]
     counter+=1
