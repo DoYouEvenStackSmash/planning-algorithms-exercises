@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
 import pygame
+import time
 colors = {
   "black" : (0,0,0),
+  "sky-blue": (15,173,237),
   "yellow" : (255,255,0),
   "cyan" : (0,255,255),
   "green" : (0,255,0),
@@ -27,4 +29,19 @@ def frame_draw_dot(screen, point, color = (0,0,0)):
 
 def clear_frame(screen):
   pygame.Surface.fill(screen, (0,0,0))
+
+def draw_lines_between_points(screen, pts, color = colors["white"]):
+  # draw_test_vectors(pts)
+  color_arr = [colors["red"], colors["yellow"], colors["white"]]
+  for i in range(1, len(pts)):
+    frame_draw_dot(screen, pts[i - 1], colors["red"])
+    pygame.display.update()
+    time.sleep(.1)
+    frame_draw_line(screen, (pts[i - 1], pts[i]), color)
+    pygame.display.update()
+    time.sleep(.1)
+  frame_draw_dot(screen, pts[-1], colors["red"])
+  frame_draw_line(screen, (pts[-1], pts[0]), color)
+  pygame.display.update()
+
 

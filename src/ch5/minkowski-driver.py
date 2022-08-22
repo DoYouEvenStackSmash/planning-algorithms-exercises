@@ -1,0 +1,62 @@
+#!/usr/bin/python3
+
+from norms import *
+from polygon import *
+from pygame_loop_support import pygame_loop
+from render_support import *
+from point_file_loader import *
+from primitive_support import *
+from norms import *
+from world import *
+from star_algorithm import *
+import sys
+import time
+
+def build_polygon(filename):
+  pts = load_json_file(filename)
+  if not len(pts):
+    print("no polygon can be built.")
+    return None
+  P = Polygon(pts)
+  return P
+
+
+def sanity_check_polygon(screen, P):
+  draw_lines_between_points(screen, P.dump_points(), P.color)
+  pygame.display.update()
+  s = P.dump_segments()
+  for i in s:
+    a,b = i
+    l = get_unit_norm(a,b)
+    # should draw outward vectors
+    frame_draw_line(screen, l.get_segment(), colors["yellow"])
+    # should draw inward vectors
+    l.toggle_switch()
+    frame_draw_line(screen, l.get_segment(), colors["sky-blue"])
+  pygame.display.update()
+  
+  # draw_lines_between_points(screen, O.dump_points(), O.color)
+
+def main():
+  if len(sys.argv) < 3:
+    print("provide two files")
+    sys.exit()
+  pygame.init()
+  screen = create_display(1000,1000)
+  
+  A,O = build_polygon(sys.argv[1]),build_polygon(sys.argv[2])
+  if A == None or O == None:
+    print("one of the regions is none.")
+    sys.exit()
+
+  A.color = colors["green"]
+  O.color = colors["white"]
+  sanity_check_polygon(screen, A)
+  sanity_check_polygon(screen, O)
+  
+  pygame_loop(screen)
+
+main()
+
+
+

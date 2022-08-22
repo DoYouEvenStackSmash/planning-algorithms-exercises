@@ -27,18 +27,34 @@ def create_edge(ray_origin, ray_target):
   dist = np.sqrt(np.square(x2 - x1) + np.square(y2 - y1))
   return Line([x1,y1],dist, rad_theta)
 
+def get_original_rad_angle(l):
+  return l.rad_angle
+
+def get_flipped_rad_angle(l):
+  if l.rad_angle > 0:
+    return l.rad_angle - np.pi
+  return l.rad_angle + np.pi
 
 class Line:
   def __init__(self, origin = [], length = 0, rad_angle = 0):
     self.origin = origin
     self.length = length
     self.rad_angle = rad_angle
-
+    self.rad_angle_fxn = [lambda l: get_original_rad_angle(l), lambda l: get_flipped_rad_angle(l)]
+    self.switch = 0
+  
+  def toggle_switch(self):
+    self.switch = abs(self.switch - 1)
+  
+  def switch_status(self):
+    if self.switch == 0:
+      return False
+    return True
 
   def get_endpoint(self):
     x_o, y_o = self.origin
     r = self.length
-    theta = self.rad_angle
+    theta = self.get_rad_angle()
     x_e = r * np.cos(theta)
     y_e = r * np.sin(theta)
     return (x_o + x_e, y_o + y_e)
@@ -55,7 +71,8 @@ class Line:
     return self.length
 
   def get_rad_angle(self):
-    return self.rad_angle
+    return self.rad_angle_fxn[self.switch](self)
+    # return self.rad_angle
 
   def compute_rotation_rad(self, target_point):
     tx, ty = target_point

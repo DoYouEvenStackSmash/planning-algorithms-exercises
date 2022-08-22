@@ -6,6 +6,7 @@ class Polygon:
     self._id = None
     self.data_structure = DoublyConnectedEdgeList()
     self.init_face(point_list)
+    self.color = None
 
   def init_face(self, point_list):
     if len(point_list) < 3:
@@ -50,6 +51,10 @@ class Polygon:
     return segment_list
 
 
-
+  def get_front_edge(self):
+    if self._id == None:
+      print(f"No front edge!")
+      return None
+    return self.data_structure.get_face_half_edge(self._id)
 
 
