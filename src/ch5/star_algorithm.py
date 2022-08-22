@@ -49,9 +49,17 @@ def build_star(A, O):
   load_edge_normal_vectors(ha, star_list, True)
   load_edge_normal_vectors(ho, star_list, False)
   sort_edge_normal_vectors(star_list)
+  return star_list
 
   
-  
+def get_star_segments(star_list, origin):
+  segments = []
+  r = 60
+  ox,oy = origin
+  for edge_tuple in star_list:
+    segments.append(((ox,oy),(r * np.cos(edge_tuple[0]) + ox, r * np.sin(edge_tuple[0]) + oy)))
+  return segments
+
 
 
   

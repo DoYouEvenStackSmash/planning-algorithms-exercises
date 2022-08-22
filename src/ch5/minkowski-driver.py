@@ -37,12 +37,20 @@ def sanity_check_polygon(screen, P):
   
   # draw_lines_between_points(screen, O.dump_points(), O.color)
 
+def construct_star_diagram(A, O, origin):
+  sl = build_star(A,O)
+  segments = get_star_segments(sl, origin)
+  return segments
+  # print(len(sl))
+
+
 def main():
   if len(sys.argv) < 3:
     print("provide two files")
     sys.exit()
   pygame.init()
-  screen = create_display(1000,1000)
+  screen = create_display(1600,1000)
+  # pygame_loop(screen)
   
   A,O = build_polygon(sys.argv[1]),build_polygon(sys.argv[2])
   if A == None or O == None:
@@ -53,6 +61,12 @@ def main():
   O.color = colors["white"]
   sanity_check_polygon(screen, A)
   sanity_check_polygon(screen, O)
+  origin = (1000,500)
+  segments = construct_star_diagram(A, O,origin)
+  for i in segments:
+    print(i)
+    frame_draw_line(screen, i, colors["tangerine"])
+  pygame.display.update()
   
   pygame_loop(screen)
 

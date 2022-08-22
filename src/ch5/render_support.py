@@ -4,14 +4,19 @@ import pygame
 import time
 colors = {
   "black" : (0,0,0),
-  "sky-blue": (15,173,237),
+  "indigo" : (48,79,254),
+  "faded-blue": (15,173,237),
+  "sky-blue": (111,205,244),
+  "darker-green": (47,178,35),
   "yellow" : (255,255,0),
+  "tangerine":(255,119,34),
+  "pink":(255,122,173),
   "cyan" : (0,255,255),
   "green" : (0,255,0),
   "magenta" : (255, 0, 255),
   "red" : (255, 0, 0),
-  "white" : (255,255,255),
-  "indigo" : (48,79,254)
+  "white" : (255,255,255)
+  
 }
 
 def create_display(width, height):

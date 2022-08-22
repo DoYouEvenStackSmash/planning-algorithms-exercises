@@ -23,7 +23,7 @@ def get_unit_norm(ray_origin, ray_target):
   r = dist / 2
   norm_x = r * np.cos(rad_theta)
   norm_y = r * np.sin(rad_theta)
-  return Line([x1 + norm_x,y1 + norm_y], r / 2, rad_prime)
+  return Line([x1 + norm_x,y1 + norm_y], r, rad_prime)
 
 '''
   Returns the angle in radians of the vector normal to the line between two

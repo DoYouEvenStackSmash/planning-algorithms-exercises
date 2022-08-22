@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import pygame
+import sys
 
 def pygame_loop(screen):
   lalt = 256
