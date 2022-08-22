@@ -13,7 +13,7 @@ class Point:
 def json_point_unpack(json_point_list):
   pts = []
   for p in json_point_list:
-    pts.append(Point([p['x'], p['y']]))
+    pts.append([p['x'], p['y']])
   return pts
 
 def load_json_file(filename):
