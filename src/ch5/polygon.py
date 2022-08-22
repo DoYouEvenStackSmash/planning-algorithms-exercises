@@ -30,8 +30,26 @@ class Polygon:
     if self._id == None:
       print(f"WARN: no points to dump!")
       return []
-    v = self.data_structure.get_face_vertices(self._id)
-    point_list = [pt.get_point_coordinate() for pt in v]
+    # v = self.data_structure.get_face_vertices(self._id)
+    # point_list = [pt.get_point_coordinate() for pt in v]
+    point_list = self.data_structure.get_face_points(self._id)
     return point_list
+
+  
+  def dump_segments(self):
+    if self._id == None:
+      print(f"WARN: no segments to dump!")
+      return []
+    point_list = self.data_structure.get_face_points(self._id)
+    
+    segment_list = []
+    for i in range(1,len(point_list)):
+      segment_list.append((point_list[i - 1], point_list[i]))
+    
+    segment_list.append((point_list[-1], point_list[0]))
+    return segment_list
+
+
+
 
 

@@ -46,6 +46,14 @@ class DoublyConnectedEdgeList:
     self.vertex_records = []
     self.face_records = []
     
+  def get_face_points(self, face_id = None):
+    if face_id == None:
+      print(f"WARN: no face id specified")
+      return []
+    elif face_id >= len(self.face_records):
+      print(f"WARN: face id not present in records!")
+      return []
+    return [pt.get_point_coordinate() for pt in self.face_records[face_id].get_vertices()]
   
   def get_face_vertices(self, face_id = None):
     if face_id == None:
