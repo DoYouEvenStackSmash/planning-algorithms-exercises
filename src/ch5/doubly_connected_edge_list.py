@@ -85,7 +85,7 @@ class HalfEdge:
     self._id = None
 
 '''
-  Data structure for 
+  Data structure for representing polyhedron
 '''
 class DoublyConnectedEdgeList:
   def __init__(self):
