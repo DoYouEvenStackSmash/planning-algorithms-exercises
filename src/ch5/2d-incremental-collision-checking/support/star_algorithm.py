@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
-from doubly_connected_edge_list import *
-from polygon import *
-from world import *
-from norms import *
-from primitive_support import *
+from support.doubly_connected_edge_list import *
+# from Polygon import *
+# from World import *
+from support.unit_norms import *
+# from primitive_support import *
 
 
 '''
@@ -43,10 +43,10 @@ def sort_edge_normal_vectors(star_list):
   star_list = sorted(star_list,key=angle_sort_key)
   return star_list
 
-def build_star(A, O):
+def build_star(ha, ho):
   star_list = []
-  ha = A.get_front_edge()
-  ho = O.get_front_edge()
+  # ha = A.get_front_edge()
+  # ho = O.get_front_edge()
   load_edge_normal_vectors(ha, star_list, True)
   load_edge_normal_vectors(ho, star_list, False)
   star_list = sort_edge_normal_vectors(star_list)

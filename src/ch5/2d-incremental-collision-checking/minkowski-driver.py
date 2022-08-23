@@ -1,14 +1,17 @@
 #!/usr/bin/python3
 
-from norms import *
-from polygon import *
-from pygame_loop_support import pygame_loop
-from render_support import *
-from polygon_loader import *
-from primitive_support import *
-from norms import *
-from world import *
-from star_algorithm import *
+from support.unit_norms import *
+from support.Polygon import *
+from support.Line import *
+from support.Point import *
+from support.World import *
+from support.star_algorithm import *
+from support.doubly_connected_edge_list import *
+from pygame_rendering.pygame_loop_support import *
+from pygame_rendering.render_support import *
+
+from file_loader import *
+
 import sys
 import time
 
@@ -39,7 +42,8 @@ def sanity_check_polygon(screen, P):
 
 
 def construct_star_diagram(A, O, origin):
-  sl = build_star(A,O)
+
+  sl = build_star(A.get_front_edge(),O.get_front_edge())
   for e in sl:
     print(f"angle:\t{e[0]}")
   obs_spc = derive_obstacle_space_points(sl)
