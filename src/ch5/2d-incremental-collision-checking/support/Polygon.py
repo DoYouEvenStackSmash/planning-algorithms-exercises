@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from doubly_connected_edge_list import *
+from support.doubly_connected_edge_list import *
 
 class Polygon:
   def __init__(self, point_list = []):

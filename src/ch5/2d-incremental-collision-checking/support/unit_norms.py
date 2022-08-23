@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import numpy as np
-from primitive_support import *
+from support.Line import *
 
 '''
   returns a vector normal to the line between two points

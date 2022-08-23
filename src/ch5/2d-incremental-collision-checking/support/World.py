@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 
 import numpy as np
-from primitive_support import *
+from support.Line import *
 
 class World:
   def __init__(self):
     self.half_planes = []
     # self.
-  
   
   def create_half_plane(self, p1, p2):
     self.half_planes.append(create_edge(p1, p2))

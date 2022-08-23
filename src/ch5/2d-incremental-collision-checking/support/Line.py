@@ -2,38 +2,6 @@
 
 import numpy as np
 
-class Point:
-  def __init__(self, x = 0, y = 0):
-    self.x = x
-    self.y = y
-  
-  def get_point(self):
-    return (self.x, self.y)
-  
-  def dump(self):
-    return f"{self.get_point()}"
-
-def create_edge(ray_origin, ray_target):
-  # x0,y0 = world_origin.get_point()
-  
-  x1,y1 = ray_origin
-  x2,y2 = ray_target
-  # placeholder for global origin
-  # y2 + (y0 - y1) - y0 = y2 - y1
-  # x2 + (x0 - x1) - x0 = x2 - x1
-  
-  rad_theta = np.arctan2(y2 - y1, x2 - x1)
-  print(rad_theta)
-  dist = np.sqrt(np.square(x2 - x1) + np.square(y2 - y1))
-  return Line([x1,y1],dist, rad_theta)
-
-def get_original_rad_angle(l):
-  return l.rad_angle
-
-def get_flipped_rad_angle(l):
-  if l.rad_angle > 0:
-    return l.rad_angle - np.pi
-  return l.rad_angle + np.pi
 
 class Line:
   def __init__(self, origin = [], length = 0, rad_angle = 0):
@@ -139,3 +107,25 @@ class Line:
         f = 1
     
     return f
+
+def create_edge(ray_origin, ray_target):
+  # x0,y0 = world_origin.get_point()
+  
+  x1,y1 = ray_origin
+  x2,y2 = ray_target
+  # placeholder for global origin
+  # y2 + (y0 - y1) - y0 = y2 - y1
+  # x2 + (x0 - x1) - x0 = x2 - x1
+  
+  rad_theta = np.arctan2(y2 - y1, x2 - x1)
+  print(rad_theta)
+  dist = np.sqrt(np.square(x2 - x1) + np.square(y2 - y1))
+  return Line([x1,y1],dist, rad_theta)
+
+def get_original_rad_angle(l):
+  return l.rad_angle
+
+def get_flipped_rad_angle(l):
+  if l.rad_angle > 0:
+    return l.rad_angle - np.pi
+  return l.rad_angle + np.pi

@@ -2,6 +2,7 @@
 
 import pygame
 import time
+
 colors = {
   "black" : (0,0,0),
   "indigo" : (48,79,254),

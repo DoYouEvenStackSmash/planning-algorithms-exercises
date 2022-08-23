@@ -3,7 +3,7 @@ from ctypes import sizeof
 from norms import get_unit_norm
 from polygon import *
 from render_support import *
-from point_file_loader import *
+from file_loader import *
 from primitive_support import *
 from norms import *
 from world import *
