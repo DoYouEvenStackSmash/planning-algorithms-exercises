@@ -78,7 +78,7 @@ class Face:
 class HalfEdge:
   def __init__(self, source_vertex = None, _bounded_face = None, _prev = None,_next = None, _twin = None):
     self.source_vertex = source_vertex
-    self._bounded_face_ = _bounded_face
+    self._bounded_face = _bounded_face
     self._next = _next
     self._prev = _prev
     self._twin = _twin
