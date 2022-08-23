@@ -52,7 +52,7 @@ def construct_star_diagram(A, O, origin):
   # return segments
   # print(len(sl))
 
-def main():
+def build_obstacle_space():
   if len(sys.argv) < 3:
     print("provide two files")
     sys.exit()
@@ -82,6 +82,11 @@ def main():
   pygame.display.update()
   
   pygame_loop(screen)
+
+def main():
+  build_obstacle_space()
+  
+  
 
 main()
 
