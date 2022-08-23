@@ -30,8 +30,12 @@ def frame_draw_line(screen, point_set, color = (0,0,0)):
   s,e = point_set
   pygame.draw.aaline(screen, color, s, e)
 
-def frame_draw_dot(screen, point, color = (0,0,0)):
-  pygame.draw.circle(screen, color, point, 4, 4)
+def frame_draw_bold_line(screen, point_set, color = (0,0,0)):
+  s,e = point_set
+  pygame.draw.line(screen, color, s, e, width=4)
+
+def frame_draw_dot(screen, point, color = (0,0,0), width = 4):
+  pygame.draw.circle(screen, color, point, 4, width)
 
 def clear_frame(screen):
   pygame.Surface.fill(screen, (0,0,0))
