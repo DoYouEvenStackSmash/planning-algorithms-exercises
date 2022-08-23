@@ -4,7 +4,7 @@ from norms import *
 from polygon import *
 from pygame_loop_support import pygame_loop
 from render_support import *
-from point_file_loader import *
+from polygon_loader import *
 from primitive_support import *
 from norms import *
 from world import *
