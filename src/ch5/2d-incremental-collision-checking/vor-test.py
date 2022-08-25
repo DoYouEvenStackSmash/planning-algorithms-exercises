@@ -61,7 +61,7 @@ def find_contact(star_list, screen):
   while i1 < len(star_list):
     V = star_list[i2][1].source_vertex
     E = star_list[i1][1]
-    val = t_in_vor_edge(E, V.get_point_coordinate(), screen)
+    val = t_in_vor_edge(E, V.get_point_coordinate())#, screen)
     if val == T_IN_VOR_EDGE:
       print("EV found")
       EV_found(E, V, screen)
@@ -95,7 +95,7 @@ def find_contact(star_list, screen):
   while i1 < len(star_list):
     V = star_list[i2][1].source_vertex
     E = star_list[i1][1]
-    val = t_in_vor_edge(E, V.get_point_coordinate(), screen)
+    val = t_in_vor_edge(E, V.get_point_coordinate())#, screen)
     if val == T_IN_VOR_EDGE:
       print("EV found")
       EV_found(E, V, screen)
@@ -137,7 +137,7 @@ def afind_contact(star_list, screen):
   while I1 < len(star_list) and I2 < len(star_list):
     # time.sleep(1)
     t = star_list[I2][1].source_vertex
-    val = t_in_vor_edge(star_list[I1][1], t.get_point_coordinate(), screen)
+    val = t_in_vor_edge(star_list[I1][1], t.get_point_coordinate())#, screen)
     if val == T_OOB_HYPOTENUSE: #fails hypotenuse test
       n_edge = star_list[I1][1]._next
       n_val = t_in_vor_edge(n_edge, t.get_point_coordinate())
@@ -564,6 +564,49 @@ def pygame_two_region_loop(screen, A, O):
         #   print(f"{p} is unknown?")
         pygame.display.update()
 
+def get_cc_rotation_matrix(rad_theta):
+  return np.array([[np.cos(rad_theta), -np.sin(rad_theta)], [np.sin(rad_theta), np.cos(rad_theta)]])
+
+def compute_rotation(h, target_point):
+  pt1 = h.source_vertex.get_point_coordinate()
+  pt2 = h._next.source_vertex.get_point_coordinate()
+  base_rad = get_ray_angle(pt1, pt2)
+  target_rad = get_ray_angle(pt1, target_point)
+  # tx,ty = target_point
+  
+  rotation = target_rad - base_rad
+  if rotation > np.pi:
+    rotation = rotation - (2 * np.pi)
+  if rotation < -np.pi:
+    rotation = rotation + (2 * np.pi)
+  return rotation
+  
+def gradually_rotate_polygon(P, target_point, step_size = 1):
+  h = P.get_front_edge()
+  rad_theta = compute_rotation(h, target_point)
+  step_theta = rad_theta / step_size
+  r_mat = get_cc_rotation_matrix(step_theta)
+  rotate_polygon(P, r_mat)
+
+def rotate_point(rotation_matrix, origin, point):
+  ox,oy = origin
+  px,py = point
+  step = np.matmul(rotation_matrix, np.array([[px - ox], [py - oy]]))
+  return [step[0][0] + ox, step[1][0] + oy]
+
+def rotate_polygon(P, rotation_matrix):
+  h = P.get_front_edge()
+  o = h.source_vertex.get_point_coordinate()
+  h = h._next
+  while h != P.get_front_edge():
+    h.source_vertex.point_coordinate = rotate_point(rotation_matrix, o, h.source_vertex.get_point_coordinate())
+    h = h._next
+
+def rotate_voronoi(A, O, p, screen):
+  gradually_rotate_polygon(A, p)
+  sl = build_star(A.get_front_edge(), O.get_front_edge())
+  find_contact(sl, screen)
+
 def pygame_region_loop(screen, P):
   lalt = 256
   lshift = 1
@@ -591,6 +634,70 @@ def pygame_region_loop(screen, P):
         #   print(f"{p} is unknown?")
         pygame.display.update()
 
+def pygame_voronoi_loop(screen, A, O):
+  lalt=256
+  ctrl = 64
+  pl = [A, O]
+  while 1:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        sys.exit()
+      if event.type == pygame.MOUSEBUTTONUP:
+        p = pygame.mouse.get_pos()
+        # print(p)
+        if pygame.key.get_mods() == ctrl:
+          clear_frame(screen)
+          rotate_voronoi(A, O, p, screen)
+          for i in pl:
+            sanity_check_polygon(screen, i)
+        elif pygame.key.get_mods() == lalt:
+          clear_frame(screen)
+          rotate_voronoi(O, A, p, screen)
+          for i in pl:
+            sanity_check_polygon(screen, i)
+        else:
+          print(p)
+        # elif pygame.key.get_mods() == lalt:
+          # clear_frame(screen)  
+        # else:
+          # find_all_region(P, p, screen)
+        print(p)
+
+def pygame_rotation_loop(screen, P):
+  lalt = 256
+  lshift = 1
+  ctrl = 64
+
+  while 1:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        sys.exit()
+      if event.type == pygame.MOUSEBUTTONUP:
+        p = pygame.mouse.get_pos()
+        print(p)
+        if pygame.key.get_mods() == ctrl:
+          gradually_rotate_polygon(P, p)
+        elif pygame.key.get_mods() == lalt:
+          clear_frame(screen)  
+        else:
+          find_all_region(P, p, screen)
+          print(p)
+        sanity_check_polygon(screen, P)
+
+def single_polygon_mod():
+  if len(sys.argv) < 2:
+    print("provide a file")
+    sys.exit()
+  filename = sys.argv[1]
+  A = build_polygon(filename)
+  A.color = colors["white"]
+  A.v_color = colors["cyan"]
+  A.e_color = colors["tangerine"]
+  pygame.init()
+  screen = create_display(1000,1000)
+  sanity_check_polygon(screen, A)
+  pygame_rotation_loop(screen, A)
+
 def single_polygon_locate_edge():
   if len(sys.argv) < 2:
     print("provide a file")
@@ -606,6 +713,27 @@ def single_polygon_locate_edge():
   # pygame_region_loop(screen, A)
   # pygame_edge_region_loop(screen, A)
   pygame_find_all_region_loop(screen, A)
+
+def double_polygon_mod():
+  if len(sys.argv) < 3:
+    print("provide two files")
+    sys.exit()
+  A,O = build_polygon(sys.argv[1]),build_polygon(sys.argv[2])
+  if A == None or O == None:
+    print("one of the regions is none.")
+    sys.exit()
+  A.color = colors["green"]
+  O.color = colors["white"]
+  
+  A.v_color = colors["cyan"]
+  A.e_color = colors["tangerine"]
+  O.v_color = colors["yellow"]
+  O.e_color = colors["red"]
+  pygame.init()
+  screen = create_display(1000,1000)
+  sanity_check_polygon(screen, O)
+  sanity_check_polygon(screen, A)
+  pygame_voronoi_loop(screen, A, O)
 
 def double_polygon_locate_edge():
   if len(sys.argv) < 3:
@@ -683,10 +811,12 @@ def two_polygon_all_edge_voronoi():
   
   
 def main():
+  double_polygon_mod()
+  # single_polygon_mod()
   # single_polygon_locate_edge()
   # double_polygon_locate_edge()
   # single_polygon_single_edge_voronoi()
-  two_polygon_all_edge_voronoi()
+  # two_polygon_all_edge_voronoi()
 
   # pygame_half_planes_loop(screen,W)
   # pygame_loop(screen)

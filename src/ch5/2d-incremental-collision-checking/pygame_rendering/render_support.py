@@ -45,11 +45,11 @@ def draw_lines_between_points(screen, pts, color = colors["white"]):
   color_arr = [colors["red"], colors["yellow"], colors["white"]]
   for i in range(1, len(pts)):
     frame_draw_dot(screen, pts[i - 1], colors["red"])
-    pygame.display.update()
-    time.sleep(.1)
+    # pygame.display.update()
+    # time.sleep(.1)
     frame_draw_line(screen, (pts[i - 1], pts[i]), color)
-    pygame.display.update()
-    time.sleep(.1)
+    # pygame.display.update()
+    # time.sleep(.1)
   frame_draw_dot(screen, pts[-1], colors["red"])
   frame_draw_line(screen, (pts[-1], pts[0]), color)
   pygame.display.update()
