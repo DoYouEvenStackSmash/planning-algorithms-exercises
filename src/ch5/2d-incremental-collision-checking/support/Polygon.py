@@ -7,6 +7,8 @@ class Polygon:
     self.data_structure = DoublyConnectedEdgeList()
     self.init_face(point_list)
     self.color = None
+    self.v_color = None
+    self.e_color = None
 
   def init_face(self, point_list):
     if len(point_list) < 3:

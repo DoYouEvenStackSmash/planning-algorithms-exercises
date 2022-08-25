@@ -10,7 +10,7 @@ from support.star_algorithm import *
 from support.doubly_connected_edge_list import *
 from pygame_rendering.pygame_loop_support import *
 from pygame_rendering.render_support import *
-
+from region_tests import *
 from file_loader import *
 
 import sys
@@ -45,65 +45,88 @@ def voronoi_prep(P):
   print(env[0][0])
   return env
 
-def t_in_vor_edge(edge, t, screen = None):
-  
-
-  a = edge.source_vertex.get_point_coordinate()
-  b = edge._next.source_vertex.get_point_coordinate()
-  
-  r = distance_between_points(a, b)
-  
-  theta_ab = get_ray_angle(a, b)
-  theta_ab_norm = get_unit_norm_angle(a, b)
-  theta_at = get_ray_angle(a, t)
-  
-  print(f"ab:\t{theta_ab}\nnorm:\t{theta_ab_norm}\nt:\t{theta_at}")
-  if (screen != None):
-    frame_draw_line(screen, [a,get_rectangular_coord(a, r, theta_ab)], colors["red"])
-    frame_draw_line(screen,[a, get_rectangular_coord(a, r, theta_ab_norm)], colors["yellow"])
-    pygame.display.update()
-  
-  if theta_ab < -np.pi / 2:
-    print("adjusting ab")
-    theta_ab = 2 * np.pi + theta_ab
-    if theta_at < 0:
-      theta_at = 2 * np.pi + theta_at
-
-  if not (theta_ab_norm <= theta_at):
-    if (screen != None):
-      frame_draw_line(screen, [a, t], colors["tangerine"])
-    print("outside ab_norm!")
-    print(f"norm: {theta_ab_norm} >= {theta_at}")
-    print(f"{t} is out of region by angle test.")
-    return -1
-  if not (theta_at <= theta_ab):
-    if (screen != None):
-      frame_draw_line(screen, [a, t], colors["tangerine"])
-    print("outside ab!")
-    print(f"{theta_ab} <= {theta_at}")
-    print(f"{t} is out of region by angle test.")
-    return -2
-  
-  theta_E = abs(theta_ab - theta_at)
-  rho_at = distance_between_points(a, t)
-  h_max = r / np.cos(theta_E)
-  
-  if (rho_at < h_max):
-    print(f"{t} is in vor(E)")
-    if (screen != None):
-      frame_draw_line(screen, [a, t], colors["green"])
-    return 1
-  if (screen != None):
-    frame_draw_line(screen, [a, t], colors["indigo"])
-  print(f"{t} is out of region due to maximum hypotenuse_test.")
-  return -3
-
 def find_contact(star_list, screen):
+  i1 = 0
+  i2 = 0
+  adj_counter = 0
+
+  while star_list[i1][1]._bounded_face == star_list[i2][1]._bounded_face and i2 < len(star_list):
+    i2+=1
+  adj_counter = i2
+
+  T_OOB_HYPOTENUSE = -3
+  T_OOB_NORM = -1
+  T_OOB_EDGE = -2
+  T_IN_VOR_EDGE = 1
+  while i1 < len(star_list):
+    V = star_list[i2][1].source_vertex
+    E = star_list[i1][1]
+    val = t_in_vor_edge(E, V.get_point_coordinate(), screen)
+    if val == T_IN_VOR_EDGE:
+      print("EV found")
+      EV_found(E, V, screen)
+    if val == T_OOB_NORM:
+      if t_in_V_region(E.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E.source_vertex.get_point_coordinate()):
+        print("VV found")
+        VV_found(E.source_vertex, V, screen)
+    if val == T_OOB_HYPOTENUSE:
+      E2 = E._next
+      if t_in_V_region(E2.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E2.source_vertex.get_point_coordinate()):
+        print("VV found")
+        VV_found(E2.source_vertex, V, screen)
+    e_hold = star_list[i1][1]._next
+    while i1 < len(star_list) and star_list[i1][1] != e_hold:
+      i1+=1
+    if i1 == len(star_list):
+      i1 = 0
+      while star_list[i1][1] != e_hold:
+        i1 += 1
+      print("wrap!")
+      break
+    
+    if i1 > i2:
+      temp = i1
+      i1 = i2
+      i2 = temp
+  temp = i1
+  i1 = i2
+  i2 = temp
+  # i3 = 0
+  while i1 < len(star_list):
+    V = star_list[i2][1].source_vertex
+    E = star_list[i1][1]
+    val = t_in_vor_edge(E, V.get_point_coordinate(), screen)
+    if val == T_IN_VOR_EDGE:
+      print("EV found")
+      EV_found(E, V, screen)
+    if val == T_OOB_NORM:
+      if t_in_V_region(E.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E.source_vertex.get_point_coordinate()):
+        print("VV found")
+        VV_found(E.source_vertex, V, screen)
+    if val == T_OOB_HYPOTENUSE:
+      E2 = E._next
+      if t_in_V_region(E2.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E2.source_vertex.get_point_coordinate()):
+        print("VV found")
+        VV_found(E2.source_vertex, V, screen)
+    e_hold = star_list[i1][1]._next
+    while i1 < len(star_list) and star_list[i1][1] != e_hold:
+      i1+=1
+    if i1 == len(star_list):
+      break
+  
+    
+  
+
+def afind_contact(star_list, screen):
   I1 = 0
   I2 = 0
   NO_MATCH = True
+  adj_counter = 0
+  vertex_visited = [0] * len(star_list)
   while star_list[I2][1]._bounded_face == star_list[I1][1]._bounded_face and I2 < len(star_list):
+    adj_counter+=1
     I2+=1
+  vertex_visited[I2] = 1
   # assume that we have found the first edge in other polygon
   T_OOB_HYPOTENUSE = -3
   T_OOB_NORM = -1
@@ -112,57 +135,57 @@ def find_contact(star_list, screen):
   END = False
   
   while I1 < len(star_list) and I2 < len(star_list):
-    time.sleep(1)
-    val = t_in_vor_edge(star_list[I1][1], star_list[I2][1].source_vertex.get_point_coordinate())
-
-    if val == T_OOB_HYPOTENUSE:
-      neighbor_edge = star_list[I1][1]._next
-      neighbor_val = t_in_vor_edge(neighbor_edge, star_list[I2][1].source_vertex.get_point_coordinate(),screen)
-      if neighbor_val == T_OOB_NORM:
-        print("VV found!")
-        VV_found(neighbor_edge.source_vertex, star_list[I2][1].source_vertex, screen)
-        NO_MATCH = False
-        # break
-      elif neighbor_val == T_IN_VOR_EDGE:
+    # time.sleep(1)
+    t = star_list[I2][1].source_vertex
+    val = t_in_vor_edge(star_list[I1][1], t.get_point_coordinate(), screen)
+    if val == T_OOB_HYPOTENUSE: #fails hypotenuse test
+      n_edge = star_list[I1][1]._next
+      n_val = t_in_vor_edge(n_edge, t.get_point_coordinate())
+      if n_val == T_OOB_NORM: # fails neighbor norm test, VV candidate
+        local_v = n_edge.source_vertex
+        if t._half_edge.source_vertex != t:
+          print("mismatched T\n\n\n\n")
+        # print()
+        # vv_val = t_in_adj_e_vor(t._half_edge, local_v.get_point_coordinate())
+        vv_val = t_in_V_region(t, local_v.get_point_coordinate())
+        if vv_val == True:
+          print(f"Found VV HN! {local_v.get_point_coordinate()} - {t.get_point_coordinate()}")
+          VV_found(local_v, t, screen)
+        else:
+          print("discarding VV candidate...")
+          print(f"discarding hypotenuse norm VV! {local_v.get_point_coordinate()} - {t.get_point_coordinate()}")
+      elif n_val == T_IN_VOR_EDGE:
         print("neigbor happens to have EV!")
-        EV_found(neighbor_edge, star_list[I2][1].source_vertex, screen)
-        NO_MATCH = False
-        break
-        # return
-      elif neighbor_val == T_OOB_EDGE:
-        print("nothing interesting found.")
-      else:
-        print("somehow val isn't what it should be?")
-    elif val == T_IN_VOR_EDGE:
+        EV_found(n_edge, t, screen)
+    # elif n_val == T_IN_VOR_EDGE:
+    if val == T_IN_VOR_EDGE:
       print("EV found!")
-      EV_found(star_list[I1][1], star_list[I2][1].source_vertex, screen)
-      NO_MATCH = False
-      break
-      # return
-    elif val == T_OOB_EDGE: # val = T_OOB_EDGE, which means it could be anywhere and we therefore don't care.
-      print("nothing interesting found")
-    elif val == T_OOB_NORM:
-      neighbor_edge = star_list[I1][1]._prev
-      neighbor_val = t_in_vor_edge(neighbor_edge, star_list[I2][1].source_vertex.get_point_coordinate(),screen)
-      if neighbor_val == T_OOB_HYPOTENUSE:
-        print("VV found!")
-        VV_found(neighbor_edge.source_vertex, star_list[I2][1].source_vertex, screen)
-        NO_MATCH = False
-        # break
-      elif neighbor_val == T_IN_VOR_EDGE:
+      EV_found(star_list[I1][1], t)
+    if val == T_OOB_EDGE:
+      print("target vertex is not in edge")
+    if val == T_OOB_NORM:
+      n_edge = star_list[I1][1]._prev
+      n_val = t_in_vor_edge(n_edge, t.get_point_coordinate())
+      if n_val == T_OOB_HYPOTENUSE: # fails neighbor hypotenuse test, VV candidate
+        local_v = n_edge._next.source_vertex
+        if t._half_edge.source_vertex != t:
+          print("mismatched T\n\n\n\n")
+        # vv_val = t_in_adj_e_vor(t._half_edge, local_v.get_point_coordinate())
+        vv_val = t_in_V_region(t, local_v.get_point_coordinate())
+        print(vv_val)
+        if vv_val == True:
+          print(f"Found VV! {local_v.get_point_coordinate()} - {t.get_point_coordinate()}")
+          VV_found(local_v, t, screen)
+        else:
+          print("discarding candidate...")
+          print(f"discarding norm hypotenuse VV! {local_v.get_point_coordinate()} - {t.get_point_coordinate()}")
+      elif n_val == T_IN_VOR_EDGE:
         print("neigbor happens to have EV!")
-        EV_found(neighbor_edge, star_list[I2][1].source_vertex, screen)
-        NO_MATCH = False
-        # break
-        # return
-      elif neighbor_val == T_OOB_EDGE:
-        print("nothing interesting found.")
-      else:
-
-        print("somehow val isn't what it should be?")
-    else:
-      print("somehow val isn't what it should be?")
-    
+        EV_found(n_edge, t, screen)
+      print("target vertex is out of bounds norm, but should have already been checked by hypotenuse.")
+    # else:
+    #   print("what?")
+    vertex_visited[I2]+=1
     mark_edge_clear(star_list[I1][1], screen)
     # mark_vertex_clear()
     e_hold = star_list[I1][1]._next
@@ -170,8 +193,7 @@ def find_contact(star_list, screen):
       I1+=1
     
     # if I1 is at star list oob, we must wrap to 0 for the last edge
-    if I1 == len(star_list):
-      break
+    
     # make sure I1 is always trailing
     #swap(I1, I2)
     if I1 > I2:
@@ -185,6 +207,94 @@ def find_contact(star_list, screen):
     #goto next 
   if NO_MATCH:
     print("must be wrapped to beginning of unit circle")
+  # while I1 <
+# def find_contact(star_list, screen):
+#   I1 = 0
+#   I2 = 0
+#   NO_MATCH = True
+#   while star_list[I2][1]._bounded_face == star_list[I1][1]._bounded_face and I2 < len(star_list):
+#     I2+=1
+#   # assume that we have found the first edge in other polygon
+#   T_OOB_HYPOTENUSE = -3
+#   T_OOB_NORM = -1
+#   T_OOB_EDGE = -2
+#   T_IN_VOR_EDGE = 1
+#   END = False
+  
+#   while I1 < len(star_list) and I2 < len(star_list):
+#     time.sleep(1)
+#     val = t_in_vor_edge(star_list[I1][1], star_list[I2][1].source_vertex.get_point_coordinate())
+
+#     if val == T_OOB_HYPOTENUSE:
+#       neighbor_edge = star_list[I1][1]._next
+#       neighbor_val = t_in_vor_edge(neighbor_edge, star_list[I2][1].source_vertex.get_point_coordinate(),screen)
+#       if neighbor_val == T_OOB_NORM:
+#         print("VV found! via Hypotenuse Norm test")
+#         VV_found(neighbor_edge.source_vertex, star_list[I2][1].source_vertex, screen)
+#         NO_MATCH = False
+#         break
+#       elif neighbor_val == T_IN_VOR_EDGE:
+#         print("neigbor happens to have EV!")
+#         EV_found(neighbor_edge, star_list[I2][1].source_vertex, screen)
+#         NO_MATCH = False
+#         break
+#         # return
+#       elif neighbor_val == T_OOB_EDGE:
+#         print("nothing interesting found.")
+#       else:
+#         print("somehow val isn't what it should be?")
+#     elif val == T_IN_VOR_EDGE:
+#       print("EV found!")
+#       EV_found(star_list[I1][1], star_list[I2][1].source_vertex, screen)
+#       NO_MATCH = False
+#       break
+#       # return
+#     elif val == T_OOB_EDGE: # val = T_OOB_EDGE, which means it could be anywhere and we therefore don't care.
+#       print("nothing interesting found")
+#     elif val == T_OOB_NORM:
+#       neighbor_edge = star_list[I1][1]._prev
+#       neighbor_val = t_in_vor_edge(neighbor_edge, star_list[I2][1].source_vertex.get_point_coordinate(),screen)
+#       if neighbor_val == T_OOB_HYPOTENUSE:
+#         print("VV found!")
+#         VV_found(neighbor_edge.source_vertex, star_list[I2][1].source_vertex, screen)
+#         NO_MATCH = False
+#         break
+#       elif neighbor_val == T_IN_VOR_EDGE:
+#         print("neigbor happens to have EV!")
+#         EV_found(neighbor_edge, star_list[I2][1].source_vertex, screen)
+#         NO_MATCH = False
+#         break
+#         # return
+#       elif neighbor_val == T_OOB_EDGE:
+#         print("nothing interesting found.")
+#       else:
+
+#         print("somehow val isn't what it should be?")
+#     else:
+#       print("somehow val isn't what it should be?")
+    
+#     mark_edge_clear(star_list[I1][1], screen)
+#     # mark_vertex_clear()
+#     e_hold = star_list[I1][1]._next
+#     while I1 < len(star_list) and star_list[I1][1] != e_hold:
+#       I1+=1
+    
+#     # if I1 is at star list oob, we must wrap to 0 for the last edge
+#     if I1 == len(star_list):
+#       break
+#     # make sure I1 is always trailing
+#     #swap(I1, I2)
+#     if I1 > I2:
+#       temp = I1
+#       I1 = I2
+#       I2 = temp
+#     elif I1 == I2:
+#       print("not sure how this one happened.")
+      
+#     # we can assume the next I1 has been found
+#     #goto next 
+#   if NO_MATCH:
+#     print("must be wrapped to beginning of unit circle")
 
 def mark_vertex_clear(v, screen):
   frame_draw_dot(screen, v.get_point_coordinates(), colors["tangerine"], 1)
@@ -261,6 +371,264 @@ def pygame_single_voronoi_loop(screen, edge):
           print(f"{p} is unknown?")
         pygame.display.update()
 
+def find_vertex_region(P, t, screen):
+  h = P.get_front_edge()
+  
+  e_fov = t_in_V_region(h.source_vertex, t)
+  if e_fov:
+    # l = get_unit_norm(pt1,pt2)
+    # mid = l.get_origin()
+    pt = h.source_vertex.get_point_coordinate()
+    frame_draw_line(screen, [pt,t], P.color)
+    pygame.display.update()
+  else:
+    print(f"{t} not in half plane")
+  h = h._next
+  while h != P.get_front_edge():
+    e_fov = t_in_V_region(h.source_vertex, t)
+    if e_fov:
+      pt = h.source_vertex.get_point_coordinate()
+      frame_draw_line(screen, [pt,t], P.color)
+      pygame.display.update()
+    else:
+      print(f"{t} not in half plane")
+    h = h._next
+
+def find_edge_region(P, t, screen):
+  h = P.get_front_edge()
+  e_reg = t_in_E_region(h, t)
+  if e_reg:
+    pt1 = h.source_vertex.get_point_coordinate()
+    pt2 = h._next.source_vertex.get_point_coordinate()
+    l = get_unit_norm(pt1, pt2)
+    mid = l.get_origin()
+    frame_draw_line(screen, [mid,t], P.color)
+    pygame.display.update()
+  else:
+    print(f"{t} not in edge {h._id} region")
+  h = h._next
+  while h != P.get_front_edge():
+    e_reg = t_in_E_region(h, t)
+    if e_reg:
+      pt1 = h.source_vertex.get_point_coordinate()
+      pt2 = h._next.source_vertex.get_point_coordinate()
+      l = get_unit_norm(pt1, pt2)
+      mid = l.get_origin()
+      frame_draw_line(screen, [mid,t], P.color)
+      pygame.display.update()
+    else:
+      print(f"{t} not in edge {h._id} region")
+    h = h._next
+
+def find_all_region(P, t, screen):
+  h = P.get_front_edge()
+  e_reg = t_in_E_region(h, t)
+  v_reg = t_in_V_region(h.source_vertex, t)
+  if v_reg:
+    # l = get_unit_norm(pt1,pt2)
+    # mid = l.get_origin()
+    pt = h.source_vertex.get_point_coordinate()
+    frame_draw_line(screen, [pt,t], P.v_color)
+    pygame.display.update()
+  else:
+    print(f"{t} not in v_reg")
+  if e_reg:
+    pt1 = h.source_vertex.get_point_coordinate()
+    pt2 = h._next.source_vertex.get_point_coordinate()
+    l = get_unit_norm(pt1, pt2)
+    mid = l.get_origin()
+    frame_draw_line(screen, [mid,t], P.e_color)
+    pygame.display.update()
+  else:
+    print(f"{t} not in edge {h._id} region")
+  if v_reg and e_reg:
+      print("what?")
+  h = h._next
+  while h != P.get_front_edge():
+    e_reg = t_in_E_region(h, t)
+    v_reg = t_in_V_region(h.source_vertex, t)
+    if v_reg:
+      # l = get_unit_norm(pt1,pt2)
+      # mid = l.get_origin()
+      pt = h.source_vertex.get_point_coordinate()
+      frame_draw_line(screen, [pt,t], P.v_color)
+      pygame.display.update()
+    else:
+      print(f"{t} not in v_reg")
+    if e_reg:
+      pt1 = h.source_vertex.get_point_coordinate()
+      pt2 = h._next.source_vertex.get_point_coordinate()
+      l = get_unit_norm(pt1, pt2)
+      mid = l.get_origin()
+      frame_draw_line(screen, [mid,t], P.e_color)
+      pygame.display.update()
+    else:
+      print(f"{t} not in edge {h._id} region")
+    if v_reg and e_reg:
+      print("what?")
+    h = h._next
+
+def find_hp_region(P, t, screen):
+  h = P.get_front_edge()
+  pt1 = h.source_vertex.get_point_coordinate()
+  pt2 = h._next.source_vertex.get_point_coordinate()
+  h1 = check_half_plane(pt1, pt2, t)
+  if h1:
+    l = get_unit_norm(pt1,pt2)
+    mid = l.get_origin()
+    frame_draw_line(screen, [mid,t], P.color)
+    pygame.display.update()
+  else:
+    print(f"{t} not in half plane")
+  h = h._next
+  while h != P.get_front_edge():
+    pt1 = h.source_vertex.get_point_coordinate()
+    pt2 = h._next.source_vertex.get_point_coordinate()
+    h1 = check_half_plane(pt1, pt2, t)
+    if h1:
+      l = get_unit_norm(pt1,pt2)
+      mid = l.get_origin()
+      frame_draw_line(screen, [mid,t], P.color)
+      pygame.display.update()
+    else:
+      print(f"{t} not in half plane")
+    h = h._next
+
+def pygame_edge_region_loop(screen, P):
+  lalt = 256
+  lshift = 1
+  ctrl = 64
+
+  while 1:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        sys.exit()
+      if event.type == pygame.MOUSEBUTTONUP:
+        p = pygame.mouse.get_pos()
+        print(p)
+        if pygame.key.get_mods() == lalt:
+          clear_frame(screen)
+          sanity_check_polygon(screen, P)
+        elif pygame.key.get_mods() == ctrl:
+          find_edge_region(P, p, screen)
+        else:
+          print(p)
+    
+def pygame_find_all_region_loop(screen, P):
+  lalt = 256
+  lshift = 1
+  ctrl = 64
+
+  while 1:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        sys.exit()
+      if event.type == pygame.MOUSEBUTTONUP:
+        p = pygame.mouse.get_pos()
+        print(p)
+        if pygame.key.get_mods() == lalt:
+          clear_frame(screen)
+          sanity_check_polygon(screen, P)
+        elif pygame.key.get_mods() == ctrl:
+          find_all_region(P, p, screen)
+        else:
+          print(p)
+    
+def pygame_two_region_loop(screen, A, O):
+  lalt = 256
+  lshift = 1
+  ctrl = 64
+  PL = [A, O]
+  while 1:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        sys.exit()
+      if event.type == pygame.MOUSEBUTTONUP:
+        p = pygame.mouse.get_pos()
+        print(p)
+        if pygame.key.get_mods() == lalt:
+          clear_frame(screen)
+          for i in PL:
+            sanity_check_polygon(screen, i)
+        elif pygame.key.get_mods() == ctrl:
+          for i in PL:
+            # find_vertex_region(i, p, screen)
+            find_all_region(i, p, screen)
+        else:
+          print(p)
+        # if v_val > 0:
+        #   frame_draw_dot(screen, p, colors["green"])
+        # elif v_val < 0:
+        #   frame_draw_dot(screen, p, colors["tangerine"], 2)
+        # else:
+        #   print(f"{p} is unknown?")
+        pygame.display.update()
+
+def pygame_region_loop(screen, P):
+  lalt = 256
+  lshift = 1
+  ctrl = 64
+
+  while 1:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        sys.exit()
+      if event.type == pygame.MOUSEBUTTONUP:
+        p = pygame.mouse.get_pos()
+        print(p)
+        if pygame.key.get_mods() == lalt:
+          clear_frame(screen)
+          sanity_check_polygon(screen, P)
+        elif pygame.key.get_mods() == ctrl:
+          find_vertex_region(P, p, screen)
+        else:
+          print(p)
+        # if v_val > 0:
+        #   frame_draw_dot(screen, p, colors["green"])
+        # elif v_val < 0:
+        #   frame_draw_dot(screen, p, colors["tangerine"], 2)
+        # else:
+        #   print(f"{p} is unknown?")
+        pygame.display.update()
+
+def single_polygon_locate_edge():
+  if len(sys.argv) < 2:
+    print("provide a file")
+    sys.exit()
+  filename = sys.argv[1]
+  A = build_polygon(filename)
+  A.color = colors["white"]
+  A.v_color = colors["cyan"]
+  A.e_color = colors["tangerine"]
+  pygame.init()
+  screen = create_display(1000,1000)
+  sanity_check_polygon(screen, A)
+  # pygame_region_loop(screen, A)
+  # pygame_edge_region_loop(screen, A)
+  pygame_find_all_region_loop(screen, A)
+
+def double_polygon_locate_edge():
+  if len(sys.argv) < 3:
+    print("provide two files")
+    sys.exit()
+  A,O = build_polygon(sys.argv[1]),build_polygon(sys.argv[2])
+  if A == None or O == None:
+    print("one of the regions is none.")
+    sys.exit()
+  A.color = colors["green"]
+  O.color = colors["white"]
+  
+  A.v_color = colors["cyan"]
+  A.e_color = colors["tangerine"]
+  O.v_color = colors["yellow"]
+  O.e_color = colors["red"]
+  pygame.init()
+  screen = create_display(1000,1000)
+  sanity_check_polygon(screen, O)
+  sanity_check_polygon(screen, A)
+  pygame_two_region_loop(screen, A, O)
+
+
 def single_polygon_single_edge_voronoi():
   if len(sys.argv) < 2:
     print("provide a file")
@@ -298,10 +666,16 @@ def two_polygon_all_edge_voronoi():
   if A == None or O == None:
     print("one of the regions is none.")
     sys.exit()
-
   A.color = colors["green"]
   O.color = colors["white"]
+  
+  A.v_color = colors["cyan"]
+  A.e_color = colors["tangerine"]
+  O.v_color = colors["yellow"]
+  O.e_color = colors["red"]
   sanity_check_polygon(screen, A)
+  # for i in A.dump_segments():
+  #   print(i)
   sanity_check_polygon(screen, O)
   sl = build_star(A.get_front_edge(), O.get_front_edge())
   find_contact(sl, screen)
@@ -309,6 +683,8 @@ def two_polygon_all_edge_voronoi():
   
   
 def main():
+  # single_polygon_locate_edge()
+  # double_polygon_locate_edge()
   # single_polygon_single_edge_voronoi()
   two_polygon_all_edge_voronoi()
 
