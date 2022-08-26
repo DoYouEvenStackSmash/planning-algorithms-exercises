@@ -18,6 +18,12 @@ class Vertex:
       print(f"WARN: vertex does not have point coordinate!")
     return self.point_coordinate
   
+  '''
+    helper for adjusting point coordinate
+  '''
+  def set_point_coordinate(self, point_coordinate):
+    self.point_coordinate = point_coordinate
+  
 '''
   Face:
     A "flat" polygon embedded in R3.  Useful as a boundary representation.
