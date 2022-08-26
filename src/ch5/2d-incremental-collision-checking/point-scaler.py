@@ -76,7 +76,7 @@ def main():
   pl = build_point_list(i)
   # pl = [i for i in reversed(pl)]
   pl = scale(pl, .8)
-  # pl = move_point_list(pl, 0, 100)
+  # pl = move_point_list(pl, 200, 40)
   json_serializer(pl, get_filename(i))
   # pl = scale
   print(pl)
