@@ -143,7 +143,6 @@ def EV_found(edge, v1, screen):
   
 
 
-
 def pygame_half_planes_loop(screen,W):
   lalt = 256
   lshift = 1
