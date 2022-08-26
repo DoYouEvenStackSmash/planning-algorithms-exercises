@@ -28,6 +28,7 @@ def gradually_rotate_polygon(P, target_point, step_size = 1):
   step_theta = rad_theta / step_size
   r_mat = get_cc_rotation_matrix(step_theta)
   rotate_polygon(P, r_mat)
+      
 
 def rotate_point(rotation_matrix, origin, point):
   ox,oy = origin
