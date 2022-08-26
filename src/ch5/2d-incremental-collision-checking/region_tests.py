@@ -43,7 +43,7 @@ def t_in_overlapping_edges(E, t):
   pt1 = E.source_vertex.get_point_coordinate()
   pt2 = E._next.source_vertex.get_point_coordinate()
   pt3 = E._prev.source_vertex.get_point_coordinate()
-  print(f"pt1:{pt1}\npt2:{pt2}\npt3:{pt3}\nt:{t}")
+  # print(f"pt1:{pt1}\npt2:{pt2}\npt3:{pt3}\nt:{t}")
   H_prev_31 = check_half_plane(pt3, pt1, t)
   H_next_12 = check_half_plane(pt1, pt2, t)
   return H_next_12 or H_prev_31
@@ -69,21 +69,21 @@ def t_in_vor_edge(half_edge, t, screen = None):
 
   a = half_edge.source_vertex.get_point_coordinate()
   b = half_edge._next.source_vertex.get_point_coordinate()
-  print(f"edge {a} - {b} checking {t}...")
+  # print(f"edge {a} - {b} checking {t}...")
   r = distance_between_points(a, b)
   
   theta_ab = get_ray_angle(a, b)
   theta_ab_norm = get_unit_norm_angle(a, b)
   theta_at = get_ray_angle(a, t)
   
-  print(f"ab:\t{theta_ab}\nnorm:\t{theta_ab_norm}\nt:\t{theta_at}")
+  # print(f"ab:\t{theta_ab}\nnorm:\t{theta_ab_norm}\nt:\t{theta_at}")
   if (screen != None):
     frame_draw_line(screen, [a,get_rectangular_coord(a, r, theta_ab)], colors["red"])
     frame_draw_line(screen,[a, get_rectangular_coord(a, r, theta_ab_norm)], colors["yellow"])
     pygame.display.update()
   
   if theta_ab < -np.pi / 2:
-    print("adjusting ab")
+    # print("adjusting ab")
     theta_ab = 2 * np.pi + theta_ab
     if theta_at < 0:
       theta_at = 2 * np.pi + theta_at
@@ -91,16 +91,16 @@ def t_in_vor_edge(half_edge, t, screen = None):
   if not (theta_ab_norm <= theta_at):
     if (screen != None):
       frame_draw_line(screen, [a, t], colors["tangerine"])
-    print("outside ab_norm!")
-    print(f"norm: {theta_ab_norm} >= {theta_at}")
-    print(f"{t} is out of region by angle test.")
+    # print("outside ab_norm!")
+    # print(f"norm: {theta_ab_norm} >= {theta_at}")
+    # print(f"{t} is out of region by angle test.")
     return -1
   if not (theta_at <= theta_ab):
     if (screen != None):
       frame_draw_line(screen, [a, t], colors["tangerine"])
-    print("outside ab!")
-    print(f"{theta_ab} <= {theta_at}")
-    print(f"{t} is out of region by angle test.")
+    # print("outside ab!")
+    # print(f"{theta_ab} <= {theta_at}")
+    # print(f"{t} is out of region by angle test.")
     return -2
   
   theta_E = abs(theta_ab - theta_at)
@@ -108,11 +108,11 @@ def t_in_vor_edge(half_edge, t, screen = None):
   h_max = r / np.cos(theta_E)
   
   if (rho_at < h_max):
-    print(f"{t} is in vor(E)")
+    # print(f"{t} is in vor(E)")
     if (screen != None):
       frame_draw_line(screen, [a, t], colors["green"])
     return 1
   if (screen != None):
     frame_draw_line(screen, [a, t], colors["indigo"])
-  print(f"{t} is out of region due to maximum hypotenuse_test.")
+  # print(f"{t} is out of region due to maximum hypotenuse_test.")
   return -3

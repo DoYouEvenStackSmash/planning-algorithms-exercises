@@ -17,7 +17,7 @@ def VV_found(v1,v2, screen):
   p1 = v1.get_point_coordinate()
   p2 = v2.get_point_coordinate()
   frame_draw_bold_line(screen,[p1,p2], colors["magenta"])
-  pygame.display.update()
+  # pygame.display.update()
 
 def EV_found(edge, v1, screen):
   e_p1 = edge.source_vertex.get_point_coordinate()
@@ -26,5 +26,5 @@ def EV_found(edge, v1, screen):
   e_mid = l.get_origin()
   v_p = v1.get_point_coordinate()
   frame_draw_bold_line(screen, [e_mid, v_p], colors["cyan"])
-  pygame.display.update()
+  # pygame.display.update()
   
