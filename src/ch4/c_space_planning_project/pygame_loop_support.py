@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import pygame
-import pygame
 import numpy as np
 import sys
 import time

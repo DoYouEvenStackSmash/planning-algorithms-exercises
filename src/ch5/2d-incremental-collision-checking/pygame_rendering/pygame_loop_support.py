@@ -2,6 +2,7 @@
 import pygame
 import sys
 
+
 def pygame_loop(screen):
   lalt = 256
   lshift = 1

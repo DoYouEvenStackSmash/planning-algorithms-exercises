@@ -1,12 +1,16 @@
 #!/usr/bin/python3
-from ctypes import sizeof
-from norms import get_unit_norm
-from polygon import *
-from render_support import *
+from support.unit_norms import *
+from support.Polygon import *
+from support.Line import *
+from support.Point import *
+from support.World import *
+from support.star_algorithm import *
+from support.doubly_connected_edge_list import *
+from pygame_rendering.pygame_loop_support import *
+from pygame_rendering.render_support import *
+
 from file_loader import *
-from primitive_support import *
-from norms import *
-from world import *
+
 import sys
 import time
 
@@ -30,13 +34,13 @@ def main():
   if not len(p):
     print(f"json file did not load.")
     sys.exit()
-  p = adjust_points(p, 350)
+  # p = adjust_points(p, 350)
   # return
   
   P = Polygon(p)
   
   pygame.init()
-  w, h = 700,700
+  w, h = 1000,1000
   screen = create_display(w, h)
   draw_lines_between_points(screen, P.dump_points(), colors["green"])
   W = World()
@@ -83,6 +87,5 @@ def main():
           print(f"{p} is unknown?")
         pygame.display.update()
           
-
 
 main()

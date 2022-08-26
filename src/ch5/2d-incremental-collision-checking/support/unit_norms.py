@@ -15,7 +15,7 @@ def get_unit_norm(ray_origin, ray_target):
   
   rad_theta = np.arctan2(y2 - y1, x2 - x1)
   rad_prime = rad_theta
-  if rad_prime < -3 * np.pi / 2:
+  if rad_prime < -np.pi / 2:
     rad_prime = 2 * np.pi + rad_prime
   rad_prime = rad_prime - np.pi / 2
   # print(rad_theta)
@@ -35,8 +35,9 @@ def get_unit_norm_angle(ray_origin, ray_target, switch = False):
   x2,y2 = ray_target
   
   rad_theta = np.arctan2(y2 - y1, x2 - x1)
+  print(rad_theta)
   rad_prime = rad_theta
-  if rad_prime < -3 * np.pi / 2:
+  if rad_prime < -np.pi / 2:
     rad_prime = 2 * np.pi + rad_prime
   rad_prime = rad_prime - np.pi / 2
 
@@ -46,6 +47,22 @@ def get_unit_norm_angle(ray_origin, ray_target, switch = False):
     return rad_prime + np.pi
   return rad_prime
 
+def get_ray_angle(ray_origin, ray_target):
+  x1,y1 = ray_origin
+  x2,y2 = ray_target
+  
+  rad_theta = np.arctan2(y2 - y1, x2 - x1)
+  return rad_theta
 
+def get_rectangular_coord(origin, radius, rad_theta):
+  ox, oy = origin
+  x = np.cos(rad_theta) * radius
+  y = np.sin(rad_theta ) * radius
+  return (ox + x, oy + y)
 
-
+def get_polar_coord(origin, target):
+  ox,oy = origin
+  tx,ty = target
+  dist = np.sqrt(np.square(tx - ox) + np.square(ty - oy))
+  theta = np.arctan2(ty - oy, tx - ox)
+  return (dist,theta)
