@@ -33,8 +33,6 @@ def find_vertex_region(P, t, screen):
   
   e_fov = t_in_V_region(h.source_vertex, t)
   if e_fov:
-    # l = get_unit_norm(pt1,pt2)
-    # mid = l.get_origin()
     pt = h.source_vertex.get_point_coordinate()
     frame_draw_line(screen, [pt,t], P.color)
     pygame.display.update()
@@ -82,8 +80,6 @@ def find_all_region(P, t, screen):
   e_reg = t_in_E_region(h, t)
   v_reg = t_in_V_region(h.source_vertex, t)
   if v_reg:
-    # l = get_unit_norm(pt1,pt2)
-    # mid = l.get_origin()
     pt = h.source_vertex.get_point_coordinate()
     frame_draw_line(screen, [pt,t], P.v_color)
     pygame.display.update()
@@ -105,8 +101,6 @@ def find_all_region(P, t, screen):
     e_reg = t_in_E_region(h, t)
     v_reg = t_in_V_region(h.source_vertex, t)
     if v_reg:
-      # l = get_unit_norm(pt1,pt2)
-      # mid = l.get_origin()
       pt = h.source_vertex.get_point_coordinate()
       frame_draw_line(screen, [pt,t], P.v_color)
       pygame.display.update()
