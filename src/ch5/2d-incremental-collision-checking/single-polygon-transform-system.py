@@ -15,8 +15,9 @@ from polygon_debugging import *
 from region_tests import *
 from file_loader import *
 from transform_polygon import *
+from transform_system import *
 
-def pygame_transform_loop(screen, P):
+def pygame_transform_system_loop(screen, P):
   lalt = 256
   lshift = 1
   ctrl = 64
@@ -31,31 +32,15 @@ def pygame_transform_loop(screen, P):
         if pygame.key.get_mods() == ctrl:
           clear_frame(screen)
           gradually_rotate_system(OPList, 0, p, screen)
-          # sanity_check_polygon(screen, P)
         elif pygame.key.get_mods() == lalt:
           clear_frame(screen)
-          gradually_translate_polygon(P, p)
-          sanity_check_polygon(screen, P)
+          gradually_translate_system(OPList, 0, p, screen)
         elif pygame.key.get_mods() == lshift:
           clear_frame(screen)
           sanity_check_polygon(screen, P)
         else:
           print(p)
 
-def get_step_rotation_matrix(P, t):
-  rad_theta = compute_rotation(P.get_front_edge(), t)
-  deg = abs(rad_theta * 180 / np.pi)
-  step_rad = rad_theta / deg
-  r_mat = get_cc_rotation_matrix(step_rad)
-  return deg,r_mat
-
-def gradually_rotate_system(OPList, P_index, t, screen = None):
-  steps, r_mat = get_step_rotation_matrix(OPList[P_index], t)
-  for step in range(int(steps)):
-    rotate_polygon(OPList[P_index], r_mat)
-    clear_frame(screen)
-    for i in range(len(OPList)):
-      sanity_check_polygon(screen, OPList[i])
 
 def single_polygon_mod():
   if len(sys.argv) < 2:
@@ -80,7 +65,7 @@ def single_polygon_mod():
   pygame.init()
   screen = create_display(1000,1000)
   sanity_check_polygon(screen, A)
-  pygame_transform_loop(screen, A)
+  pygame_transform_system_loop(screen, A)
 
 def main():
   single_polygon_mod()
