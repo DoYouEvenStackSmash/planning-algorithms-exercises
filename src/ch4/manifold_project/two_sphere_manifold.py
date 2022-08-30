@@ -2,9 +2,17 @@
 
 from identification_objects import *
 
+'''
+  Identify (x, 1) ~ (0, 1 - x) for all x in [0, 1]
+  "One half of a sphere"
+'''
 def a_identify(o, x, y):
   return (o.get_x_min() + x - x, o.get_y_min() + y - x)
 
+'''
+  Identify (1, y) ~ (1 - y, 0) for all y in [0, 1]
+  "One half of a sphere"
+'''
 def b_identify(o, x, y):
   return (o.get_x_min() + x - y, o.get_y_min() + y - y)
 
@@ -32,13 +40,23 @@ def two_sphere_next_segment(O, x_curr, y_curr, rad_angle):
     x_end = x_curr + x_dist
   return ((x_curr, y_curr), (x_end, y_end))
 
+'''
+  Two Sphere Function
+    (x, 1) ~ (0, 1 - x) for all x in [0, 1]
+    (1, y) ~ (1 - y, 0) for all y in [0, 1]
+  
+  Given some angle, return pairs of points which draw segments on the manifold.
+'''
 def two_sphere(o, angle_degrees):
   o.next_segment = lambda O, x_curr, y_curr, rad_angle: two_sphere_next_segment(O, x_curr, y_curr, rad_angle)
   lines = []
   ox, oy = o.get_x_min(), o.get_y_min()
   r = angle_degrees * np.pi / 180
+  # Two sphere is not unbounded, but number of segments approaches infinity as the radius goes to zero. 
+  # Artificial Limit is set
+  LIMIT = 30
   counter = 0
-  while not o.end_flag and counter < 30:
+  while not o.end_flag and counter < LIMIT:
     lines.append(o.next_segment(o, ox, oy, r))
     ox,oy = lines[-1][1]
     counter+=1

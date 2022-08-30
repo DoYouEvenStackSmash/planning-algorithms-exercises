@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 from identification_objects import *
 
+'''
+  Identify [0, 1 - x]/~ for x
+  "Wrap around, and twist
+'''
 def projective_plane_x_identify(O, x, flip = False):
   if flip:
     return O.get_x_max() - x + O.get_x_min()
@@ -9,6 +13,10 @@ def projective_plane_x_identify(O, x, flip = False):
   else:
     return x
 
+'''
+  Identify [0, 1 - y]/~ for y
+  "Wrap around and twist"
+'''
 def projective_plane_y_identify(O, y, flip = False):
   if flip:
     return O.get_y_max() - y + O.get_y_min()
@@ -17,6 +25,10 @@ def projective_plane_y_identify(O, y, flip = False):
   else:
     return y
 
+'''
+  Calculate Projective Plane segment embedded in R2
+  Given a start point and some angle, determine the end point.
+'''
 def projective_plane_next_segment(O, x_curr, y_curr, rad_angle):
   x_flip, y_flip = False, False
   if O.check_x_max(x_curr):
@@ -46,8 +58,20 @@ def projective_plane_next_segment(O, x_curr, y_curr, rad_angle):
   x_end = x_curr + x_dist
   return ((x_curr, y_curr), (x_end, y_end))
 
+
+'''
+  Projective Plane Function
+    (0, y) ~ (1, 1 - y) for all y in (0, 1)
+    (x, 0) ~ (1 - x, 1) for all x in (0, 1)
+
+  Author's Note:
+    Origin should be identified with 3 other points, corresponding to 
+    the corners of the plane. Adding this functionality is left as an exercise.
+  
+  Given some angle, return pairs of points which draw segments on the manifold.
+'''
 def projective_plane(o, angle_degrees):
-  # o = Obj(10, 100, 10, 100)
+  
   # x_max_rules
   o.end_flag = False
   o.x_identify = lambda O,x, flip: projective_plane_x_identify(O, x, flip)
@@ -58,11 +82,13 @@ def projective_plane(o, angle_degrees):
   lines = []
   ox,oy = o.get_x_min(),o.get_y_min()
   r = angle_degrees * np.pi / 180
+  
+  # Projective plane is unbounded, an artificial limit is set on the number of line segments
   counter = 0
-  while not o.end_flag and counter < 10:
+  LIMIT = 10
+  while not o.end_flag and counter < LIMIT:
     lines.append(o.next_segment(o,ox,oy,r))
     ox,oy = lines[-1][1]
     counter+=1
-  for i in lines:
-    print(i)
+
   return lines

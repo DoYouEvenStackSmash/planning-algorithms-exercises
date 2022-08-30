@@ -2,16 +2,28 @@
 
 from identification_objects import *
 
+
+'''
+  Identify [0,1]/~ for x
+  "Wrap around to x = 0"
+'''
 def mobius_x_identify(O, x):
   if O.check_x_max(x):
     return O.get_x_min()
   return x
 
+'''
+  Identify [0,1-y]/~ for y
+  "Wrap around, and twist"
+'''
 def mobius_y_identify(O, y, flip = False):
   if flip:
     return O.get_y_max() - y + O.get_y_min()
   return y
 
+'''
+  Calculate mobius strip segment embedded in R2
+'''
 def mobius_next_segment(O, x_curr, y_curr, rad_angle):
   
   x_temp = O.x_identify(O, x_curr)
@@ -26,7 +38,6 @@ def mobius_next_segment(O, x_curr, y_curr, rad_angle):
   y_dist = np.multiply(x_dist, np.tan(rad_angle))
   y_end = y_curr + y_dist
   # if y_end is out of bounds...
-  print(y_end)
   if O.check_y_max(y_end):
     y_excess = y_end - O.get_y_max()
     y_dist = y_dist - y_excess
@@ -38,13 +49,16 @@ def mobius_next_segment(O, x_curr, y_curr, rad_angle):
   return ((x_curr, y_curr), (x_end, y_end))
 
 
+'''
+  Mobius strip function
+    (0,y) ~ (1, 1 - y) for all y in [0,1]
+'''
 def mobius_strip(o, angle_degrees):
   # o = Obj(10, 100, 10, 100)
   # x_max_rules
   o.end_flag = False
   o.x_identify = lambda O,x: mobius_x_identify(O, x)
   # y_max_rules
-  # print(o.x_identify(o,.5))
   o.y_identify = lambda O,y,flip : mobius_y_identify(O, y, flip)
   o.next_segment = lambda O, x_curr, y_curr, rad_angle: mobius_next_segment(O, x_curr, y_curr, rad_angle)
   lines = []
@@ -53,6 +67,4 @@ def mobius_strip(o, angle_degrees):
   while not o.end_flag:
     lines.append(o.next_segment(o,ox,oy,r))
     ox,oy = lines[-1][1]
-  for i in lines:
-    print(i)
   return lines
