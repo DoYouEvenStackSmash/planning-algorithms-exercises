@@ -47,7 +47,7 @@ def find_region(O, target_point):
   while rad_theta >= double_torus_region_map[c + 1][0]:
     c+=1
   
-  print(f"tp:\t{target_point}\nid:\t{double_torus_region_map[c][1]}\t{rad_theta}")
+  # print(f"tp:\t{target_point}\nid:\t{double_torus_region_map[c][1]}\t{rad_theta}")
   return double_torus_region_map[c][1]
 
 double_torus_identifications = {
@@ -92,12 +92,12 @@ def double_torus(o, angle_degrees):
   ox,oy = o.get_x_min(), o.get_y_min()
   r = angle_degrees * np.pi / 180
   counter = 0
-  while not o.end_flag and counter < 10:
+  while not o.end_flag and counter < 30:
     lines.append(o.next_segment(o, ox, oy, r))
     ox, oy = lines[-1][1]
     counter+=1
-  for i in lines:
-    print(i)
+  # for i in lines:
+    # print(i)
   return lines
 
 
