@@ -2,14 +2,25 @@
 
 from identification_objects import *
 
+'''
+  Identify [0,1]/~ for x
+  "Wrap around to x = 0"
+'''
 def flat_cylinder_x_identify(O, x):
   if O.check_x_max(x):
     return O.get_x_min()
   return x
 
+'''
+  No identification for y
+  "Wo wrapping for y"
+'''
 def flat_cylinder_y_identify(O, y):
   return y
 
+'''
+  Calculate flat cylinder segment embedded in R2
+'''
 def flat_cylinder_next_segment(O, x_curr, y_curr, rad_angle):
   x_curr = O.x_identify(O, x_curr)
   y_curr = O.y_identify(O, y_curr)
@@ -27,13 +38,16 @@ def flat_cylinder_next_segment(O, x_curr, y_curr, rad_angle):
   
   return ((x_curr, y_curr), (x_end, y_end))
 
+'''
+  Flat Cylinder function
+    (0,y) ~ (1, y) for all y in [0,1]
+'''
 def flat_cylinder(o, angle_degrees):
   # o = Obj(10, 100, 10, 100)
   # x_max_rules
   o.end_flag = False
   o.x_identify = lambda O,x: flat_cylinder_x_identify(O, x)
   # y_max_rules
-  # print(o.x_identify(o,.5))
   o.y_identify = lambda O,y : flat_cylinder_y_identify(O, y)
   o.next_segment = lambda O, x_curr, y_curr, rad_angle: flat_cylinder_next_segment(O, x_curr, y_curr, rad_angle)
   lines = []
@@ -42,7 +56,5 @@ def flat_cylinder(o, angle_degrees):
   while not o.end_flag:
     lines.append(o.next_segment(o,ox,oy,r))
     ox,oy = lines[-1][1]
-  # for i in lines:
-  #   print(i)
   return lines
 

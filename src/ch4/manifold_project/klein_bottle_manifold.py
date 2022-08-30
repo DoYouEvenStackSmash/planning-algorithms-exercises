@@ -1,12 +1,20 @@
 #!/usr/bin/python3
 
 from identification_objects import *
+'''
+  Identify [0,1]/~ for x
+  "Wrap around to x = 0"
+'''
 
 def klein_bottle_x_identify(O, x):
   if O.check_x_max(x):
     return O.get_x_min()
   return x
 
+'''
+  Identify [0,1 - y]/~ for y
+  "Wrap around and twist"
+'''
 def klein_bottle_y_identify(O, y, flip = False):
   if flip:
     return O.get_y_max() - y + O.get_y_min()
@@ -16,6 +24,9 @@ def klein_bottle_y_identify(O, y, flip = False):
   else:
     return y
 
+'''
+  Calculate Klein bottle segment embedded in R2
+'''
 def klein_bottle_next_segment(O, x_curr, y_curr, rad_angle):
   x_temp = O.x_identify(O, x_curr)
   flip = False
@@ -43,6 +54,15 @@ def klein_bottle_next_segment(O, x_curr, y_curr, rad_angle):
   x_end = x_curr + x_dist
   return ((x_curr, y_curr), (x_end, y_end))
 
+'''
+  Klein bottle function
+    (x,0) ~ (x, 1) for all x in (0,1)
+    (0, y) ~ (1, 1 - y) for all y in [0,1]
+
+  Author's Note: 
+    Origin should be identified with 3 other points, corresponding to 
+    the corners of the plane. Adding this functionality is left as an exercise.
+'''
 def klein_bottle(o, angle_degrees):
   # o = Obj(10, 100, 10, 100)
   # x_max_rules
