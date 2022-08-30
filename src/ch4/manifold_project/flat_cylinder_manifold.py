@@ -20,6 +20,7 @@ def flat_cylinder_y_identify(O, y):
 
 '''
   Calculate flat cylinder segment embedded in R2
+  Given a start point and some angle, determine the end point.
 '''
 def flat_cylinder_next_segment(O, x_curr, y_curr, rad_angle):
   x_curr = O.x_identify(O, x_curr)
@@ -41,6 +42,8 @@ def flat_cylinder_next_segment(O, x_curr, y_curr, rad_angle):
 '''
   Flat Cylinder function
     (0,y) ~ (1, y) for all y in [0,1]
+  
+  Given some angle, return pairs of points which draw segments on the manifold.
 '''
 def flat_cylinder(o, angle_degrees):
   # o = Obj(10, 100, 10, 100)
