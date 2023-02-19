@@ -2,3 +2,6 @@
 __pycache__/
 *.py[cod]
 *.png
+*.tfrecords
+*.jpeg
+*.jpg
