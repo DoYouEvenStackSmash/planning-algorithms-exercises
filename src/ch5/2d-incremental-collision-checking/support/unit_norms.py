@@ -2,10 +2,12 @@
 import numpy as np
 from support.Line import *
 
-'''
-  returns a vector normal to the line between two points
-'''
+
 def get_unit_norm(ray_origin, ray_target):
+  '''
+  returns a vector normal to the segment connecting origin and target
+  Returns a Line object
+  '''
   # x0,y0 = world_origin.get_point()
   x1,y1 = ray_origin
   x2,y2 = ray_target
@@ -25,12 +27,13 @@ def get_unit_norm(ray_origin, ray_target):
   norm_y = r * np.sin(rad_theta)
   return Line([x1 + norm_x,y1 + norm_y], r, rad_prime)
 
-'''
+
+def get_unit_norm_angle(ray_origin, ray_target, switch = False):
+  '''
   Returns the angle in radians of the vector normal to the line between two
   points.
   Switch is used by caller functions to flip the angle around the unit circle.
-'''
-def get_unit_norm_angle(ray_origin, ray_target, switch = False):
+  '''
   x1,y1 = ray_origin
   x2,y2 = ray_target
   
@@ -48,6 +51,9 @@ def get_unit_norm_angle(ray_origin, ray_target, switch = False):
   return rad_prime
 
 def get_ray_angle(ray_origin, ray_target):
+  '''
+  Computes the angle of the vector from origin to target
+  '''
   x1,y1 = ray_origin
   x2,y2 = ray_target
   
@@ -55,12 +61,20 @@ def get_ray_angle(ray_origin, ray_target):
   return rad_theta
 
 def get_rectangular_coord(origin, radius, rad_theta):
+  '''
+  Converts from polar coordinates to rectangular coordinates
+  Returns a point (x,y)
+  '''
   ox, oy = origin
   x = np.cos(rad_theta) * radius
   y = np.sin(rad_theta ) * radius
   return (ox + x, oy + y)
 
 def get_polar_coord(origin, target):
+  '''
+  Converts from rectangular coordinates to polar coordinates
+  returns a point (r, theta)
+  '''
   ox,oy = origin
   tx,ty = target
   dist = np.sqrt(np.square(tx - ox) + np.square(ty - oy))

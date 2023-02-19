@@ -45,8 +45,6 @@ def sort_edge_normal_vectors(star_list):
 
 def build_star(ha, ho):
   star_list = []
-  # ha = A.get_front_edge()
-  # ho = O.get_front_edge()
   load_edge_normal_vectors(ha, star_list, True)
   load_edge_normal_vectors(ho, star_list, False)
   star_list = sort_edge_normal_vectors(star_list)
@@ -60,8 +58,6 @@ def distance_between_points(a, b):
 
 def derive_obstacle_space_points(star_list):
   origin_pts = []
-  # ox,oy = star_list[0][1].source_vertex.get_point_coordinate()
-  # origin_pts.append((ox,oy))
   ox,oy = star_list[0][1]._next.source_vertex.get_point_coordinate()
   origin_pts.append((ox,oy))
   for i in range(1,len(star_list)):

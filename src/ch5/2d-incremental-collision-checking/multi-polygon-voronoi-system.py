@@ -16,8 +16,16 @@ from region_tests import *
 from file_loader import *
 from transform_polygon import *
 from transform_system import *
-
+SAMPLE_RATE = 300
+LALT = 256
+LSHIFT = 1
+LCTRL = 64
+SPACE = 32
 def construct_star_diagram(A, O):
+  '''
+  Get the minkowski sum of the two polygons
+  Returns a list of points 
+  '''
   sl = build_star(A.get_front_edge(),O.get_front_edge())
 
   obs_spc = derive_obstacle_space_points(sl)
@@ -26,56 +34,39 @@ def construct_star_diagram(A, O):
 def pygame_transform_voronoi_system_loop(screen, A, O):
   '''
   Driver function interactions between two polygons A and static O
+  Mouse driven path following
   '''
 
-  lalt = 256
-  lshift = 1
-  ctrl = 64
-  space = 32
   
   while 1:
     for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        sys.exit()
-      if event.type == pygame.MOUSEBUTTONUP:
-        p = pygame.mouse.get_pos()
-        print(p)
-        if pygame.key.get_mods() == ctrl:
-          clear_frame(screen)
-          gradually_rotate_voronoi_system(A, O, p, screen)
-        elif pygame.key.get_mods() == lalt:
-          clear_frame(screen)
-          gradually_translate_voronoi_system(A,O,p, screen)
-        elif pygame.key.get_mods() == lshift:
-          clear_frame(screen)
-          gradually_rotate_voronoi_system(A, O, p, screen)
-          gradually_translate_voronoi_system(A,O,p, screen)
-          # sanity_check_polygon(screen, A)
-          # sanity_check_polygon(screen, O)
-        else:
-          draw_lines_between_points(screen, construct_star_diagram(A,O), colors["yellow"])
-          pygame.display.update()
-      elif event.type == pygame.MOUSEBUTTONDOWN:
+      if event.type == pygame.MOUSEBUTTONDOWN:
+        # LCTRL for exit hotkey
+        if pygame.key.get_mods() == LCTRL:
+          sys.exit()
+        
         ptlist = []
         counter = 0
+        # construct the path
         while pygame.MOUSEBUTTONUP not in [event.type for event in pygame.event.get()]:
-          if not counter % 300:
+          if not counter % SAMPLE_RATE:
             ptlist.append(pygame.mouse.get_pos())
             frame_draw_dot(screen, ptlist[-1], colors["yellow"])
             pygame.display.update()
           counter+=1
-        time.sleep(1)
+        
+        # observe the line
+        time.sleep(0.5)
         clear_frame(screen)
+        
+        # execute the path following
         p_last = None
         for p in range(len(ptlist)):
           if p_last != ptlist[p]:
-            # for i in ptlist[p:]:
-            #   frame_draw_dot(screen, i, colors["yellow"])
-            # pygame.display.update()
             gradually_rotate_voronoi_system(A, O, ptlist[p], screen,path_line=ptlist[p:])
             gradually_translate_voronoi_system(A,O,ptlist[p], screen,path_line=ptlist[p:])
           p_last = ptlist[p]
-          # gradually_translate_voronoi_system(A,O,ptlist[p], screen)
+          
 
 
 def double_polygon_mod():
