@@ -4,7 +4,7 @@ from pygame_rendering.render_support import *
 from polygon_debugging import *
 from voronoi_regions import *
 
-SLEEP_CONSTANT = 0.003
+SLEEP_CONSTANT = 0.005
 COLLISION_THRESHOLD = np.divide(1,123456789)
 
 def get_step_rotation_matrix(P, t):
@@ -39,9 +39,9 @@ def get_step_translation_function(P, t, some_constant = 100):
   '''
   h = P.get_front_edge()
   r,theta = get_polar_coord(h.source_vertex.get_point_coordinate(), t)
-  print(f"radius: {r}")
+  # print(f"radius: {r}")
   if r < 100:
-    print("correcting")
+    # print("correcting")
     some_constant = 30
   step_dist = r / some_constant
   x_step = step_dist * np.cos(theta)
@@ -76,7 +76,7 @@ def gradually_rotate_voronoi_system(A, O, t, screen = None, path_line = []):
     sanity_check_polygon(screen, O)
     
     sanity_check_edge(screen,A.get_front_edge())
-    for i in path_line[:2:]:
+    for i in path_line:
       frame_draw_dot(screen, i, colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
@@ -99,7 +99,7 @@ def gradually_translate_voronoi_system(A, O, t, screen = None, some_constant = 1
     find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
     sanity_check_polygon(screen, A)
     sanity_check_polygon(screen, O)
-    for i in path_line[:2:]:
+    for i in path_line:
       frame_draw_dot(screen, i, colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)

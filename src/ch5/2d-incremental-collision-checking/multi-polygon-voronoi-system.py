@@ -56,7 +56,7 @@ def pygame_transform_voronoi_system_loop(screen, A, O):
           counter+=1
         
         # observe the line
-        time.sleep(0.5)
+        # time.sleep(0.5)
         clear_frame(screen)
         
         # execute the path following
