@@ -27,7 +27,8 @@ def get_step_translation_function(P, t, some_constant = 100):
   step_dist = r / some_constant
   x_step = step_dist * np.cos(theta)
   y_step = step_dist * np.sin(theta)
-  return (x_step, y_step, some_constant)
+  val = (x_step, y_step, some_constant)
+  return val
 
 def gradually_translate_system(OPList, P_index, t, screen = None, some_constant = 100):
   rx,ry, const = get_step_translation_function(OPList[P_index], t, some_constant)
@@ -49,7 +50,13 @@ def gradually_rotate_voronoi_system(A, O, t, screen = None):
 
 def gradually_translate_voronoi_system(A, O, t, screen = None, some_constant = 100):
   rx,ry, const = get_step_translation_function(A, t, some_constant)
+  print(f"here: {rx}, {ry}, {const}")
+  thres = np.divide(1,123456789)
+  if abs(rx) < thres or abs(rx) < thres:
+    return
   for step in range(int(const)):
+    # print(f"here: {rx}, {ry}")
+    
     translate_polygon(A, rx, ry)
     clear_frame(screen)
     find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)

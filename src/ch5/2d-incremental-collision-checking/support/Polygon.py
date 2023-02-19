@@ -2,7 +2,14 @@
 from support.doubly_connected_edge_list import *
 
 class Polygon:
+  '''
+  2D Polygon object, made up by an ordered list of points
+  Internally represented as a doubly connected edge list
+  '''
   def __init__(self, point_list = []):
+    '''
+    Initialize polygon object from a set of points
+    '''
     self._id = None
     self.data_structure = DoublyConnectedEdgeList()
     self.init_face(point_list)

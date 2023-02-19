@@ -1,49 +1,57 @@
 #!/usr/bin/python3
 
-'''
+
+class Vertex:
+  '''
   Vertex:
     A point on the boundary of a region. 
-'''
-class Vertex:
+
+  '''
   def __init__(self, point_coordinate = None,_half_edge = None):
     self.point_coordinate = point_coordinate
     self._half_edge = _half_edge
     self._id = None
   
-  '''
-    Accessor for the point coordinate
-  '''
   def get_point_coordinate(self):
+    '''
+    Accessor for the point coordinate
+    Returns an (x,y) point
+    '''
     if not self.point_coordinate:
       print(f"WARN: vertex does not have point coordinate!")
     return self.point_coordinate
   
-  '''
-    helper for adjusting point coordinate
-  '''
   def set_point_coordinate(self, point_coordinate):
+    '''
+    helper for adjusting point coordinate
+    '''
     self.point_coordinate = point_coordinate
   
-'''
+
+class Face:
+  '''
   Face:
     A "flat" polygon embedded in R3.  Useful as a boundary representation.
-'''
-class Face:
+  '''
   def __init__(self, _half_edge = None):
     self._half_edge = _half_edge
     self._id = None
   
-  '''
-    Accessor for boundary half edge list head
-  '''
+  
   def get_half_edge(self):
+    '''
+    Accessor for boundary half edge list head
+    Returns a Half Edge
+    '''
     if self._half_edge == None:
       print(f"no half edge!")
     return self._half_edge
-  '''
-    Walks around the Face, collecting vertex objects
-  '''
+  
   def get_vertices(self):
+    '''
+    Walks around the Face, collecting vertex objects
+    Returns a list of Vertex objects
+    '''
     if self._half_edge == None:
       return []
     vtx = []
@@ -55,10 +63,11 @@ class Face:
       h = h._next
     return vtx
   
-  '''
-    Walks around the face, collecting half edge objects
-  '''
   def get_half_edges(self):
+    '''
+    Walks around the face, collecting half edge objects
+    Returns a list of Half Edge objects
+    '''
     if self._half_edge == None:
       return []
     edge_list = []
@@ -70,7 +79,9 @@ class Face:
       h = h._next
     return edge_list
 
-'''
+ 
+class HalfEdge:
+  '''
   Half Edge
     A "directed" component of a doubly linked list around a face. Can access
     neighboring twin edge(if present), vertex object.
@@ -80,8 +91,7 @@ class Face:
             _prev:  pointer to previous half edge in linked list.
             _next:  pointer to next half edge in linked list.
             _twin:  pointer to sibling half edge which encloses the neighboring face
-'''  
-class HalfEdge:
+  '''
   def __init__(self, source_vertex = None, _bounded_face = None, _prev = None,_next = None, _twin = None):
     self.source_vertex = source_vertex
     self._bounded_face = _bounded_face
@@ -90,16 +100,23 @@ class HalfEdge:
     self._twin = _twin
     self._id = None
 
-'''
-  Data structure for representing polyhedron
-'''
+
 class DoublyConnectedEdgeList:
-  def __init__(self):
-    self.half_edge_records = []
-    self.vertex_records = []
-    self.face_records = []
+  '''
+  Data structure for representing polyhedra
+  Made up of faces, which are surrounded by half edges, 
+  every pair of which share a vertex.
+  '''
+  def __init__(self, half_edge_records = [], vertex_records = [], face_records = []):
+    self.half_edge_records = half_edge_records
+    self.vertex_records = vertex_records
+    self.face_records = face_records
   
   def get_face_half_edge(self, face_id = None):
+    '''
+    Accessor for the lead half edge of a given face_id
+    Returns a single half edge
+    '''
     if face_id == None:
       print(f"WARN: no face id specified")
       return []
@@ -107,10 +124,12 @@ class DoublyConnectedEdgeList:
       print(f"WARN: face id not present in records!")
       return []
     return self.face_records[face_id].get_half_edge()
-  '''
-    get the vector components of the vertices surrounding the face
-  '''
+  
   def get_face_points(self, face_id = None):
+    '''
+    Accessor for points on the perimeter of a face
+    Returns a list of (x,y) points
+    '''
     if face_id == None:
       print(f"WARN: no face id specified")
       return []
@@ -119,10 +138,12 @@ class DoublyConnectedEdgeList:
       return []
     return [pt.get_point_coordinate() for pt in self.face_records[face_id].get_vertices()]
   
-  '''
-    get vertices on the boundary of the face
-  '''
+  
   def get_face_vertices(self, face_id = None):
+    '''
+    Accessor for vertices on the boundary of a face
+    Returns a list of Vertex objects
+    '''
     if face_id == None:
       print(f"WARN: no face id specified")
       return []
@@ -132,10 +153,12 @@ class DoublyConnectedEdgeList:
     
     return self.face_records[face_id].get_vertices()
 
-  '''
-    get half edges enclosing the face
-  '''
+  
   def get_face_edges(self, face_id = None):
+    '''
+    Accessor for half edges which enclose a face
+    Returns a list of Half Edges
+    '''
     if face_id == None:
       print(f"WARN: no face id specified")
       return []
@@ -145,10 +168,12 @@ class DoublyConnectedEdgeList:
     
     return self.face_records[face_id].get_half_edges()
   
-  '''
-    constructs a new face from a point list.  
-  '''
+  
   def create_new_face(self, point_list = []):
+    '''
+    Constructs a new face from a list of (x,y) points.  
+    Returns a face id
+    '''
     if not len(point_list):
       print(f"ERR: cannot create empty face!")
       return -1

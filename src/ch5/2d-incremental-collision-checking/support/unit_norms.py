@@ -35,7 +35,7 @@ def get_unit_norm_angle(ray_origin, ray_target, switch = False):
   x2,y2 = ray_target
   
   rad_theta = np.arctan2(y2 - y1, x2 - x1)
-  print(rad_theta)
+  # print(rad_theta)
   rad_prime = rad_theta
   if rad_prime < -np.pi / 2:
     rad_prime = 2 * np.pi + rad_prime

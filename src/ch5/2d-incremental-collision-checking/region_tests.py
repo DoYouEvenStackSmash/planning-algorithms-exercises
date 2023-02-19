@@ -13,16 +13,21 @@ from file_loader import *
 
 # determines whether a point is within either of the adjacent regions
 def t_in_adj_e_vor(E, t):
+  '''
+  Determines whether point t is in one of two neighboring edge regions
+  Equivalently determines whether t is in voronoi region of their shared vertex
+  '''
   pE = t_in_vor_edge(E._prev, t)
   nE = t_in_vor_edge(E, t)
   if pE < 0 and nE < 0:
     return True
   return False
 
-'''
-  given edge E with vertex V, determines whether t is in 
-'''
+
 def t_in_V_region(V, t):
+  '''
+  Determines whether t is in voronoi region of V
+  '''
   E = V._half_edge
   pt1 = V.get_point_coordinate()
   pt2 = E._next.source_vertex.get_point_coordinate()
@@ -39,7 +44,9 @@ def t_in_V_region(V, t):
   return (lb < tb and tb < ub)
 
 def t_in_overlapping_edges(E, t):
-  
+  '''
+  Determines whether a point is a member of two overlapping half planes
+  '''
   pt1 = E.source_vertex.get_point_coordinate()
   pt2 = E._next.source_vertex.get_point_coordinate()
   pt3 = E._prev.source_vertex.get_point_coordinate()
@@ -49,6 +56,10 @@ def t_in_overlapping_edges(E, t):
   return H_next_12 or H_prev_31
 
 def check_half_plane(a,b ,t):
+  '''
+  Determines whether point t is a member of the half plane, as an angle
+  offset from the vector normal to the segment ab
+  '''
   lead = get_ray_angle(a, b)
   target = get_ray_angle(a, t)
   
@@ -61,12 +72,18 @@ def check_half_plane(a,b ,t):
   return (trail < target and target < lead)
   
 def t_in_E_region(E, t):
+  '''
+  Wrapper function
+  Determines whether t is in voronoi region of E
+  '''
   if t_in_vor_edge(E, t) > 0:
     return True
   return False
 
 def t_in_vor_edge(half_edge, t, screen = None):
-
+  '''
+  Determines whether t is in voronoi region of E
+  '''
   a = half_edge.source_vertex.get_point_coordinate()
   b = half_edge._next.source_vertex.get_point_coordinate()
   # print(f"edge {a} - {b} checking {t}...")

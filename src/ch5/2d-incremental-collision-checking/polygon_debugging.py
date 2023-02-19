@@ -6,7 +6,10 @@ from region_tests import *
 from support.Polygon import *
 
 def build_polygon(filename):
-  # print(f"building polygon from")
+  '''
+  Builds a polygon object from a file
+  Returns a polygon
+  '''
   pts = load_point_set(filename)
   if not len(pts):
     print("no polygon can be built.")
@@ -15,6 +18,9 @@ def build_polygon(filename):
   return P
 
 def sanity_check_polygon(screen, P):
+  '''
+  Draws a single polygon
+  '''
   draw_lines_between_points(screen, P.dump_points(), P.color)
   pygame.display.update()
 
@@ -29,6 +35,10 @@ def sanity_check_edge(screen, edge):
   pygame.display.update()
 
 def find_vertex_region(P, t, screen):
+  '''
+  Draws a line between point t and its corresponding voronoi vertex region in P
+  Returns nothing
+  '''
   h = P.get_front_edge()
   
   e_fov = t_in_V_region(h.source_vertex, t)
@@ -50,6 +60,10 @@ def find_vertex_region(P, t, screen):
     h = h._next
 
 def find_edge_region(P, t, screen):
+  '''
+  Draws a line between point t and its corresponding voronoi edge region in P
+  Returns nothing
+  '''
   h = P.get_front_edge()
   e_reg = t_in_E_region(h, t)
   if e_reg:
@@ -76,6 +90,10 @@ def find_edge_region(P, t, screen):
     h = h._next
 
 def find_all_region(P, t, screen):
+  '''
+  Draws a line between point t and its corresponding voronoi region in P
+  Combination of find_edge_region and find_vertex_region
+  '''
   h = P.get_front_edge()
   e_reg = t_in_E_region(h, t)
   v_reg = t_in_V_region(h.source_vertex, t)
@@ -120,6 +138,9 @@ def find_all_region(P, t, screen):
     h = h._next
 
 def find_hp_region(P, t, screen):
+  '''
+  Draws a line between t and its enclosing half plane in P
+  '''
   h = P.get_front_edge()
   pt1 = h.source_vertex.get_point_coordinate()
   pt2 = h._next.source_vertex.get_point_coordinate()
