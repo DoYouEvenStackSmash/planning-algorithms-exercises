@@ -18,9 +18,15 @@ class Polygon:
     self.e_color = None
 
   def init_face(self, point_list):
+    '''
+    Initialize a polygon using an ordered list of points
+    Returns the id of the created polygon face
+    '''
     if len(point_list) < 3:
       print(f"cannot make a face with fewer than 3 points!")
       return -1
+    
+    # make sure points are in counterclockwise order
     p1_x, p1_y = point_list[0]
     p2_x, p2_y = point_list[1]
     p3_x, p3_y = point_list[2]
@@ -37,16 +43,23 @@ class Polygon:
 
 
   def dump_points(self):
+    '''
+    Accessor for all points in the underlying doubly connected edge list
+    Returns a list of (x,y) points
+    '''
     if self._id == None:
       print(f"WARN: no points to dump!")
       return []
-    # v = self.data_structure.get_face_vertices(self._id)
-    # point_list = [pt.get_point_coordinate() for pt in v]
+
     point_list = self.data_structure.get_face_points(self._id)
     return point_list
 
   
   def dump_segments(self):
+    '''
+    Accessor for pairs of points representing valid segments
+    Returns a list of point pairs [((x1,y1), (x2,y2))]
+    '''
     if self._id == None:
       print(f"WARN: no segments to dump!")
       return []
@@ -61,6 +74,11 @@ class Polygon:
 
 
   def get_front_edge(self):
+    '''
+    Accessor for a representative edge of the polygon from the underlying
+    doubly connected edge list.
+    Returns a Half Edge
+    '''
     if self._id == None:
       print(f"No front edge!")
       return None

@@ -20,6 +20,7 @@ def compute_rotation(h, target_point):
     rotation = rotation - (2 * np.pi)
   if rotation < -np.pi:
     rotation = rotation + (2 * np.pi)
+  print(f"{base_rad}, {target_rad}, {rotation}")
   return rotation
   
 def gradually_rotate_polygon(P, target_point, step_size = 1):

@@ -11,7 +11,8 @@ class Vertex:
     self.point_coordinate = point_coordinate
     self._half_edge = _half_edge
     self._id = None
-  
+
+
   def get_point_coordinate(self):
     '''
     Accessor for the point coordinate
@@ -20,7 +21,8 @@ class Vertex:
     if not self.point_coordinate:
       print(f"WARN: vertex does not have point coordinate!")
     return self.point_coordinate
-  
+
+
   def set_point_coordinate(self, point_coordinate):
     '''
     helper for adjusting point coordinate
@@ -46,7 +48,8 @@ class Face:
     if self._half_edge == None:
       print(f"no half edge!")
     return self._half_edge
-  
+
+
   def get_vertices(self):
     '''
     Walks around the Face, collecting vertex objects
@@ -62,7 +65,8 @@ class Face:
       vtx.append(h.source_vertex)
       h = h._next
     return vtx
-  
+
+
   def get_half_edges(self):
     '''
     Walks around the face, collecting half edge objects
@@ -104,6 +108,7 @@ class HalfEdge:
 class DoublyConnectedEdgeList:
   '''
   Data structure for representing polyhedra
+  
   Made up of faces, which are surrounded by half edges, 
   every pair of which share a vertex.
   '''
@@ -112,6 +117,7 @@ class DoublyConnectedEdgeList:
     self.vertex_records = vertex_records
     self.face_records = face_records
   
+
   def get_face_half_edge(self, face_id = None):
     '''
     Accessor for the lead half edge of a given face_id
@@ -125,6 +131,7 @@ class DoublyConnectedEdgeList:
       return []
     return self.face_records[face_id].get_half_edge()
   
+
   def get_face_points(self, face_id = None):
     '''
     Accessor for points on the perimeter of a face
@@ -171,37 +178,47 @@ class DoublyConnectedEdgeList:
   
   def create_new_face(self, point_list = []):
     '''
-    Constructs a new face from a list of (x,y) points.  
-    Returns a face id
+    Constructs a new face from a list of (x,y) points.
+    Returns integer id of created face
     '''
     if not len(point_list):
       print(f"ERR: cannot create empty face!")
       return -1
     
+    # initialize face    
     f_id = len(self.face_records)
     self.face_records.append(Face())
-    
+
+    # initialize first vertex
     self.vertex_records.append(Vertex(point_list[0]))
     
+    # initialize first half edge, with origin at newest Vertex, belonging to newest Face
     h_id = len(self.half_edge_records)
     self.half_edge_records.append(HalfEdge(self.vertex_records[-1], self.face_records[-1]))
     
+    # Add pointer from newest Vertex to newest Half Edge
     self.vertex_records[-1]._half_edge = self.half_edge_records[-1]
     
+    # Add pointer from newest Face to newest Half Edge
     self.face_records[-1]._half_edge = self.half_edge_records[-1]
     
     for i in range(1, len(point_list)):
+      # create new Vertex
       self.vertex_records.append(Vertex(point_list[i]))
       
+      # create new Half Edge, origin at newest Vertex, belonging to newest Face
       h = HalfEdge(self.vertex_records[-1], self.face_records[-1], self.half_edge_records[-1])
       self.half_edge_records[-1]._next = h
       self.half_edge_records.append(h)
 
+      # Add pointer from newest Vertex to newest Half Edge
       self.vertex_records[-1]._half_edge = self.half_edge_records[-1]
     
+    # add newest half edge to doubly linked list of Face
     self.half_edge_records[-1]._next = self.half_edge_records[h_id]
     self.half_edge_records[h_id]._prev = self.half_edge_records[-1]
-
+    
+    # Add pointer from Face to newest Half Edge
     self.face_records[f_id]._half_edge = self.half_edge_records[h_id]
     
     return f_id

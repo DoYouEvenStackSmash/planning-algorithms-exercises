@@ -66,22 +66,27 @@ def pygame_transform_voronoi_system_loop(screen, A, O):
           counter+=1
         time.sleep(1)
         clear_frame(screen)
-        
+        p_last = None
         for p in range(len(ptlist)):
-          
-          if p % 5:
-          # gradually_translate_voronoi_system(A,O,p, screen)
-            gradually_rotate_voronoi_system(A, O, ptlist[p], screen)
-          gradually_translate_voronoi_system(A,O,ptlist[p], screen)
+          if p_last != ptlist[p]:
+            # for i in ptlist[p:]:
+            #   frame_draw_dot(screen, i, colors["yellow"])
+            # pygame.display.update()
+            gradually_rotate_voronoi_system(A, O, ptlist[p], screen,path_line=ptlist[p:])
+            gradually_translate_voronoi_system(A,O,ptlist[p], screen,path_line=ptlist[p:])
+          p_last = ptlist[p]
+          # gradually_translate_voronoi_system(A,O,ptlist[p], screen)
 
-          
 
 def double_polygon_mod():
+  '''
+  Wrapper for single robot, single obstacle world
+  '''
   if len(sys.argv) < 3:
     print("provide two files")
     sys.exit()
   
-  # polygon construction
+  # initialize and construct polygons
   A,O = build_polygon(sys.argv[1]),build_polygon(sys.argv[2])
   if A == None or O == None:
     print("one of the regions is none.")
@@ -95,13 +100,19 @@ def double_polygon_mod():
   O.v_color = colors["yellow"]
   O.e_color = colors["red"]
 
+  # initialize pygame display
   pygame.init()
   screen = create_display(1000,1000)
+  
+  # draw polygons
   sanity_check_polygon(screen, A)  
   sanity_check_polygon(screen, O)
+
+  # start pygame loop
   pygame_transform_voronoi_system_loop(screen, A, O)
 
 def main():
   double_polygon_mod()
 
-main()
+if __name__ == '__main__':
+  main()
