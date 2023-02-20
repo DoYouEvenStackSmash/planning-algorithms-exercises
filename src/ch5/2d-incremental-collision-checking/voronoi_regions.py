@@ -13,6 +13,8 @@ from feature_markers import *
 from region_tests import *
 from file_loader import *
 
+DEBUG = False
+
 def find_contact(SL, screen = None):
   i1,i2 = 0,0
   end_marker = 0
@@ -38,20 +40,23 @@ def find_contact(SL, screen = None):
     val = t_in_vor_edge(E, V.get_point_coordinate())
     if val == T_IN_VOR_EDGE:
       if t_in_V_region(V, calc_line_point(E, V)):
-        print("EV found!")
+        if DEBUG:
+          print("EV found!")
         ev_records.append((E,V))
         EV_found(E, V, screen)
         return
     if val == T_OOB_NORM: # candidate for VV, seeking symmetry
       if t_in_V_region(E.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E.source_vertex.get_point_coordinate()):
-        print("VV found")
+        if DEBUG:
+          print("VV found")
         vv_records.append((E.source_vertex, V))
         VV_found(E.source_vertex, V, screen)
         return
     if val == T_OOB_HYPOTENUSE:
       E2 = E._next
       if t_in_V_region(E2.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E2.source_vertex.get_point_coordinate()):
-        print("VV found")
+        if DEBUG:
+          print("VV found")
         VV_found(E2.source_vertex, V, screen)
         vv_records.append((E2.source_vertex, V))
         return
@@ -72,20 +77,23 @@ def find_contact(SL, screen = None):
     val = t_in_vor_edge(E, V.get_point_coordinate())
     if val == T_IN_VOR_EDGE:
       if t_in_V_region(V, calc_line_point(E, V)):
-        print("EV found!")
+        if DEBUG:
+          print("EV found!")
         ev_records.append((E,V))
         EV_found(E, V, screen)
         return
     if val == T_OOB_NORM: # candidate for VV, seeking symmetry
       if t_in_V_region(E.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E.source_vertex.get_point_coordinate()):
-        print("VV found")
+        if DEBUG:
+          print("VV found")
         VV_found(E.source_vertex, V, screen)
         vv_records.append((E.source_vertex, V))
         return
     if val == T_OOB_HYPOTENUSE:
       E2 = E._next
       if t_in_V_region(E2.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E2.source_vertex.get_point_coordinate()):
-        print("VV found")
+        if DEBUG:
+          print("VV found")
         vv_records.append((E2.source_vertex, V))
         VV_found(E2.source_vertex, V, screen)
         return

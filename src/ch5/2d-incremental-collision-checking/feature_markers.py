@@ -5,26 +5,34 @@ from support.unit_norms import *
 from support.star_algorithm import *
 
 def mark_vertex_clear(v, screen):
+  '''
+  '''
   frame_draw_dot(screen, v.get_point_coordinates(), colors["tangerine"], 1)
   pygame.display.update()
 
 def mark_edge_clear(edge, screen):
+  '''
+  '''
   e_p1 = edge.source_vertex.get_point_coordinate()
   e_p2 = edge._next.source_vertex.get_point_coordinate()
   frame_draw_line(screen, [e_p1, e_p2], colors["tangerine"])
   pygame.display.update()
 
 def VV_found(v1,v2, screen):
+  '''
+  Draws a bold line between two vertices
+  Does not return
+  '''
   p1 = v1.get_point_coordinate()
   p2 = v2.get_point_coordinate()
   frame_draw_bold_line(screen,[p1,p2], colors["magenta"])
   # pygame.display.update()
 
 def EV_found(edge, v1, screen):
-  # e_p1 = edge.source_vertex.get_point_coordinate()
-  # e_p2 = edge._next.source_vertex.get_point_coordinate()
-  # l = get_unit_norm(e_p1,e_p2)
-  # e_mid = l.get_origin()
+  '''
+  Draws a bold line between an edge and a vertex
+  Does not return
+  '''
   v_p = v1.get_point_coordinate()
   mp = calc_line_point(edge, v1)
   frame_draw_bold_line(screen, [mp, v_p], colors["cyan"])
@@ -32,6 +40,10 @@ def EV_found(edge, v1, screen):
   
 
 def calc_line_point(edge, v1):
+  '''
+  Calculates the nearest point on an edge to vertex v1
+  Returns a (x,y) point
+  '''
   a = edge.source_vertex.get_point_coordinate()
   b = edge._next.source_vertex.get_point_coordinate()
   t = v1.get_point_coordinate()

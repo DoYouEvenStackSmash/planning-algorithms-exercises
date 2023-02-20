@@ -118,7 +118,7 @@ def create_edge(ray_origin, ray_target):
   # x2 + (x0 - x1) - x0 = x2 - x1
   
   rad_theta = np.arctan2(y2 - y1, x2 - x1)
-  print(rad_theta)
+  # print(rad_theta)
   dist = np.sqrt(np.square(x2 - x1) + np.square(y2 - y1))
   return Line([x1,y1],dist, rad_theta)
 

@@ -6,7 +6,10 @@ from region_tests import *
 from support.Polygon import *
 
 def build_polygon(filename):
-  # print(f"building polygon from")
+  '''
+  Builds a polygon object from a file
+  Returns a Polygon object
+  '''
   pts = load_point_set(filename)
   if not len(pts):
     print("no polygon can be built.")
@@ -14,11 +17,21 @@ def build_polygon(filename):
   P = Polygon(pts)
   return P
 
+
 def sanity_check_polygon(screen, P):
+  '''
+  Draws a single polygon
+  Does not return
+  '''
   draw_lines_between_points(screen, P.dump_points(), P.color)
   pygame.display.update()
 
+
 def sanity_check_edge(screen, edge):
+  '''
+  Draws a single Half Edge  
+  Does not return
+  '''
   he_curr = edge
   
   p1 = he_curr.source_vertex.get_point_coordinate()
@@ -28,7 +41,12 @@ def sanity_check_edge(screen, edge):
   frame_draw_dot(screen,p2,colors["indigo"])
   pygame.display.update()
 
+
 def find_vertex_region(P, t, screen):
+  '''
+  Draws a line between point t and its corresponding voronoi vertex region in P
+  Does not return
+  '''
   h = P.get_front_edge()
   
   e_fov = t_in_V_region(h.source_vertex, t)
@@ -49,7 +67,12 @@ def find_vertex_region(P, t, screen):
       print(f"{t} not in half plane")
     h = h._next
 
+
 def find_edge_region(P, t, screen):
+  '''
+  Draws a line between point t and its corresponding voronoi edge region in P
+  Does not return
+  '''
   h = P.get_front_edge()
   e_reg = t_in_E_region(h, t)
   if e_reg:
@@ -75,7 +98,14 @@ def find_edge_region(P, t, screen):
       print(f"{t} not in edge {h._id} region")
     h = h._next
 
+
 def find_all_region(P, t, screen):
+  '''
+  Draws a line between point t and its corresponding voronoi region in P
+  Combination of find_edge_region and find_vertex_region.
+  
+  Does not return
+  '''
   h = P.get_front_edge()
   e_reg = t_in_E_region(h, t)
   v_reg = t_in_V_region(h.source_vertex, t)
@@ -96,6 +126,8 @@ def find_all_region(P, t, screen):
     print(f"{t} not in edge {h._id} region")
   if v_reg and e_reg:
       print("what?")
+  
+  # loop around doubly connected edge list
   h = h._next
   while h != P.get_front_edge():
     e_reg = t_in_E_region(h, t)
@@ -120,6 +152,11 @@ def find_all_region(P, t, screen):
     h = h._next
 
 def find_hp_region(P, t, screen):
+  '''
+  Draws a line between t and its enclosing half plane in P
+  
+  Does not return
+  '''
   h = P.get_front_edge()
   pt1 = h.source_vertex.get_point_coordinate()
   pt2 = h._next.source_vertex.get_point_coordinate()
