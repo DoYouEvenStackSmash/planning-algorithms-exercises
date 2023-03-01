@@ -71,15 +71,20 @@ def gradually_rotate_voronoi_system(A, O, t, screen = None, path_line = []):
   for step in range(int(steps)):
     rotate_polygon(A, r_mat)
     clear_frame(screen)
-    find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
+    val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
+
     sanity_check_polygon(screen, A)
     sanity_check_polygon(screen, O)
     
     sanity_check_edge(screen,A.get_front_edge())
+    if val < 5:
+      pygame.display.update()
+      return val
     for i in path_line:
       frame_draw_dot(screen, i, colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
+  return 0
 
 def gradually_translate_voronoi_system(A, O, t, screen = None, some_constant = 100, path_line = []):
   '''
@@ -90,16 +95,20 @@ def gradually_translate_voronoi_system(A, O, t, screen = None, some_constant = 1
   rx,ry, const = get_step_translation_function(A, t, some_constant)
   
   if abs(rx) < COLLISION_THRESHOLD or abs(ry) < COLLISION_THRESHOLD:
-    return
+    return min(abs(rx), abs(ry))
 
   for step in range(int(const)):
     # print(f"here: {rx}, {ry}")
     translate_polygon(A, rx, ry)
     clear_frame(screen)
-    find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
+    val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
     sanity_check_polygon(screen, A)
     sanity_check_polygon(screen, O)
+    if val < 5:
+      pygame.display.update()
+      return val
     for i in path_line:
       frame_draw_dot(screen, i, colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
+  return 0
