@@ -4,7 +4,7 @@ from pygame_rendering.render_support import *
 from polygon_debugging import *
 from voronoi_regions import *
 
-SLEEP_CONSTANT = 0.005
+SLEEP_CONSTANT = 0.002
 COLLISION_THRESHOLD = np.divide(1,123456789)
 
 def get_step_rotation_matrix(P, t):
@@ -81,8 +81,8 @@ def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = []):
       if val < 5:
         pygame.display.update()
         return val
-    for i in path_line:
-      frame_draw_dot(screen, i, colors["yellow"])
+    for i in range(0,len(path_line), 4):
+      frame_draw_dot(screen, path_line[i], colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
   return 0
@@ -110,8 +110,8 @@ def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant
       if val < 5:
         pygame.display.update()
         return val
-    for i in path_line:
-      frame_draw_dot(screen, i, colors["yellow"])
+    for i in range(0,len(path_line), 4):
+      frame_draw_dot(screen, path_line[i], colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
   return 0

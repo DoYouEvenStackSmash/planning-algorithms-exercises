@@ -16,7 +16,7 @@ from region_tests import *
 from file_loader import *
 from transform_polygon import *
 from transform_system import *
-SAMPLE_RATE = 300
+SAMPLE_RATE = 400
 LALT = 256
 LSHIFT = 1
 LCTRL = 64
@@ -107,7 +107,7 @@ def triple_polygon_mod():
 
   # initialize pygame display
   pygame.init()
-  screen = create_display(1000,1000)
+  screen = create_display(800,800)
   
   # draw polygons
   sanity_check_polygon(screen, A)  
