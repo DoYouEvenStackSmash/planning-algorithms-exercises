@@ -31,7 +31,7 @@ def construct_star_diagram(A, O):
   obs_spc = derive_obstacle_space_points(sl)
   return obs_spc
 
-def pygame_transform_voronoi_system_loop(screen, A, O):
+def pygame_transform_voronoi_system_loop(screen, A, Olist):
   '''
   Driver function interactions between two polygons A and static O
   Mouse driven path following
@@ -63,37 +63,47 @@ def pygame_transform_voronoi_system_loop(screen, A, O):
         p_last = None
         for p in range(len(ptlist)):
           if p_last != ptlist[p]:
-            flag1 = gradually_rotate_voronoi_system(A, O, ptlist[p], screen,path_line=ptlist[p:])
-            if flag1 > 0:
+            flag1 = gradually_rotate_voronoi_system(A, Olist, ptlist[p], screen,path_line=ptlist[p:])
+            if flag1 > 1:
               break
-            flag2 = gradually_translate_voronoi_system(A,O,ptlist[p], screen,path_line=ptlist[p:])
-            if flag2 > 0:
+            flag2 = gradually_translate_voronoi_system(A,Olist,ptlist[p], screen,path_line=ptlist[p:])
+            if flag2 > 1:
               break
           p_last = ptlist[p]
           
 
 
-def double_polygon_mod():
+def triple_polygon_mod():
   '''
   Wrapper for single robot, single obstacle world
   '''
-  if len(sys.argv) < 3:
+  if len(sys.argv) < 4:
     print("provide two files")
     sys.exit()
   
   # initialize and construct polygons
-  A,O = build_polygon(sys.argv[1]),build_polygon(sys.argv[2])
-  if A == None or O == None:
-    print("one of the regions is none.")
+  A = build_polygon(sys.argv[1])
+  Olist = []
+  for i in sys.argv[2:]:
+    Olist.append(build_polygon(i))
+
+  # A,O1,O2 = build_polygon(sys.argv[1]),build_polygon(sys.argv[2]), build_polygon(sys.argv[3])
+  if A == None: 
+    print("robot region is none.")
     sys.exit()
+  for o in Olist:
+    if o == None:
+      print("obstacle region is none")
+      sys.exit()
   
   A.color = colors["green"]
   A.v_color = colors["cyan"]
   A.e_color = colors["tangerine"]
   
-  O.color = colors["white"]
-  O.v_color = colors["yellow"]
-  O.e_color = colors["red"]
+  for O in Olist:
+    O.color = colors["white"]
+    O.v_color = colors["yellow"]
+    O.e_color = colors["red"]
 
   # initialize pygame display
   pygame.init()
@@ -101,13 +111,14 @@ def double_polygon_mod():
   
   # draw polygons
   sanity_check_polygon(screen, A)  
-  sanity_check_polygon(screen, O)
+  for O in Olist:
+    sanity_check_polygon(screen, O)
 
   # start pygame loop
-  pygame_transform_voronoi_system_loop(screen, A, O)
+  pygame_transform_voronoi_system_loop(screen, A, Olist)
 
 def main():
-  double_polygon_mod()
+  triple_polygon_mod()
 
 if __name__ == '__main__':
   main()
