@@ -16,6 +16,10 @@ from file_loader import *
 DEBUG = False
 
 def find_contact(SL, screen = None):
+  '''
+  Algorithm for finding overlapping voronoi regions
+  Returns a scalar distance between the closest pair of points
+  '''
   i1,i2 = 0,0
   end_marker = 0
   while SL[i1][1]._bounded_face == SL[i2][1]._bounded_face and i2 < len(SL):
@@ -43,23 +47,22 @@ def find_contact(SL, screen = None):
         if DEBUG:
           print("EV found!")
         ev_records.append((E,V))
-        EV_found(E, V, screen)
-        return
+        return EV_found(E, V, screen)
+        
     if val == T_OOB_NORM: # candidate for VV, seeking symmetry
       if t_in_V_region(E.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E.source_vertex.get_point_coordinate()):
         if DEBUG:
           print("VV found")
         vv_records.append((E.source_vertex, V))
-        VV_found(E.source_vertex, V, screen)
-        return
+        return VV_found(E.source_vertex, V, screen)
+        
     if val == T_OOB_HYPOTENUSE:
       E2 = E._next
       if t_in_V_region(E2.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E2.source_vertex.get_point_coordinate()):
         if DEBUG:
           print("VV found")
-        VV_found(E2.source_vertex, V, screen)
         vv_records.append((E2.source_vertex, V))
-        return
+        return VV_found(E2.source_vertex, V, screen)
     e_hold = E._next
     while SL[wrap(i1)][1] != e_hold:
       i1+=1
@@ -80,22 +83,21 @@ def find_contact(SL, screen = None):
         if DEBUG:
           print("EV found!")
         ev_records.append((E,V))
-        EV_found(E, V, screen)
-        return
+        return EV_found(E, V, screen)
+        
     if val == T_OOB_NORM: # candidate for VV, seeking symmetry
       if t_in_V_region(E.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E.source_vertex.get_point_coordinate()):
         if DEBUG:
           print("VV found")
-        VV_found(E.source_vertex, V, screen)
         vv_records.append((E.source_vertex, V))
-        return
+        return VV_found(E.source_vertex, V, screen)
+        
     if val == T_OOB_HYPOTENUSE:
       E2 = E._next
       if t_in_V_region(E2.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E2.source_vertex.get_point_coordinate()):
         if DEBUG:
           print("VV found")
         vv_records.append((E2.source_vertex, V))
-        VV_found(E2.source_vertex, V, screen)
-        return
+        return VV_found(E2.source_vertex, V, screen)
     i1+=1
 

@@ -63,8 +63,12 @@ def pygame_transform_voronoi_system_loop(screen, A, O):
         p_last = None
         for p in range(len(ptlist)):
           if p_last != ptlist[p]:
-            gradually_rotate_voronoi_system(A, O, ptlist[p], screen,path_line=ptlist[p:])
-            gradually_translate_voronoi_system(A,O,ptlist[p], screen,path_line=ptlist[p:])
+            flag1 = gradually_rotate_voronoi_system(A, O, ptlist[p], screen,path_line=ptlist[p:])
+            if flag1 > 0:
+              break
+            flag2 = gradually_translate_voronoi_system(A,O,ptlist[p], screen,path_line=ptlist[p:])
+            if flag2 > 0:
+              break
           p_last = ptlist[p]
           
 

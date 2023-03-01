@@ -21,21 +21,25 @@ def mark_edge_clear(edge, screen):
 def VV_found(v1,v2, screen):
   '''
   Draws a bold line between two vertices
-  Does not return
+  Returns the distance between two points
   '''
   p1 = v1.get_point_coordinate()
   p2 = v2.get_point_coordinate()
+  print(f"VV distance {distance_between_points(p1, p2)}")
   frame_draw_bold_line(screen,[p1,p2], colors["magenta"])
+  return distance_between_points(p1, p2)
   # pygame.display.update()
 
 def EV_found(edge, v1, screen):
   '''
   Draws a bold line between an edge and a vertex
-  Does not return
+  Returns the distance between two points
   '''
   v_p = v1.get_point_coordinate()
   mp = calc_line_point(edge, v1)
+  print(f"EV distance {distance_between_points(v_p, mp)}")
   frame_draw_bold_line(screen, [mp, v_p], colors["cyan"])
+  return distance_between_points(v_p, mp)
   # pygame.display.update()
   
 
