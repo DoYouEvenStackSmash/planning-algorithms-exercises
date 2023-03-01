@@ -25,7 +25,7 @@ def VV_found(v1,v2, screen):
   '''
   p1 = v1.get_point_coordinate()
   p2 = v2.get_point_coordinate()
-  print(f"VV distance {distance_between_points(p1, p2)}")
+  # print(f"VV distance {distance_between_points(p1, p2)}")
   frame_draw_bold_line(screen,[p1,p2], colors["magenta"])
   return distance_between_points(p1, p2)
   # pygame.display.update()
@@ -37,7 +37,7 @@ def EV_found(edge, v1, screen):
   '''
   v_p = v1.get_point_coordinate()
   mp = calc_line_point(edge, v1)
-  print(f"EV distance {distance_between_points(v_p, mp)}")
+  # print(f"EV distance {distance_between_points(v_p, mp)}")
   frame_draw_bold_line(screen, [mp, v_p], colors["cyan"])
   return distance_between_points(v_p, mp)
   # pygame.display.update()

@@ -4,7 +4,7 @@ from pygame_rendering.render_support import *
 from polygon_debugging import *
 from voronoi_regions import *
 
-SLEEP_CONSTANT = 0.005
+SLEEP_CONSTANT = 0.002
 COLLISION_THRESHOLD = np.divide(1,123456789)
 
 def get_step_rotation_matrix(P, t):
@@ -61,7 +61,7 @@ def gradually_translate_system(OPList, P_index, t, screen = None, some_constant 
     for i in range(len(OPList)):
       sanity_check_polygon(screen, OPList[i])
 
-def gradually_rotate_voronoi_system(A, O, t, screen = None, path_line = []):
+def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = []):
   '''
   Gradually transforms a polygon A, maintaining a connection between closest pair of points
   (x1,y1),(x2,y2) where x1,y1 is in A and x2,y2 is in O
@@ -71,22 +71,23 @@ def gradually_rotate_voronoi_system(A, O, t, screen = None, path_line = []):
   for step in range(int(steps)):
     rotate_polygon(A, r_mat)
     clear_frame(screen)
-    val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
-
-    sanity_check_polygon(screen, A)
-    sanity_check_polygon(screen, O)
+    for O in Olist:
+      val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
+      sanity_check_polygon(screen, A)
+      for Ox in Olist:
+        sanity_check_polygon(screen, Ox)
     
-    sanity_check_edge(screen,A.get_front_edge())
-    if val < 5:
-      pygame.display.update()
-      return val
-    for i in path_line:
-      frame_draw_dot(screen, i, colors["yellow"])
+      sanity_check_edge(screen,A.get_front_edge())
+      if val < 5:
+        pygame.display.update()
+        return val
+    for i in range(0,len(path_line), 4):
+      frame_draw_dot(screen, path_line[i], colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
   return 0
 
-def gradually_translate_voronoi_system(A, O, t, screen = None, some_constant = 100, path_line = []):
+def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant = 100, path_line = []):
   '''
   Gradually transforms a polygon A, maintaining a connection between closest pair of points
   (x1,y1),(x2,y2) where x1,y1 is in A and x2,y2 is in O
@@ -101,14 +102,16 @@ def gradually_translate_voronoi_system(A, O, t, screen = None, some_constant = 1
     # print(f"here: {rx}, {ry}")
     translate_polygon(A, rx, ry)
     clear_frame(screen)
-    val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
-    sanity_check_polygon(screen, A)
-    sanity_check_polygon(screen, O)
-    if val < 5:
-      pygame.display.update()
-      return val
-    for i in path_line:
-      frame_draw_dot(screen, i, colors["yellow"])
+    for O in Olist:
+      val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
+      sanity_check_polygon(screen, A)
+      for Ox in Olist:
+        sanity_check_polygon(screen, Ox)
+      if val < 5:
+        pygame.display.update()
+        return val
+    for i in range(0,len(path_line), 4):
+      frame_draw_dot(screen, path_line[i], colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
   return 0
