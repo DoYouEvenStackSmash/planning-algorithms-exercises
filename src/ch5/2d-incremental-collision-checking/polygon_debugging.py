@@ -24,7 +24,7 @@ def sanity_check_polygon(screen, P):
   Does not return
   '''
   draw_lines_between_points(screen, P.dump_points(), P.color)
-  pygame.display.update()
+  #pygame.display.update()
 
 
 def sanity_check_edge(screen, edge):
@@ -39,7 +39,7 @@ def sanity_check_edge(screen, edge):
   frame_draw_line(screen,[p1,p2],colors["white"])
   frame_draw_dot(screen,p1,colors["white"])
   frame_draw_dot(screen,p2,colors["indigo"])
-  pygame.display.update()
+  # pygame.display.update()
 
 
 def find_vertex_region(P, t, screen):

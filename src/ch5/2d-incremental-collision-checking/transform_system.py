@@ -78,6 +78,7 @@ def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = []):
         sanity_check_polygon(screen, Ox)
     
       sanity_check_edge(screen,A.get_front_edge())
+      
       if val < 5:
         pygame.display.update()
         return val

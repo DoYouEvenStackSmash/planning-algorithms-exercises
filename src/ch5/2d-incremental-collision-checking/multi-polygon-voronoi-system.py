@@ -107,7 +107,7 @@ def triple_polygon_mod():
 
   # initialize pygame display
   pygame.init()
-  screen = create_display(800,800)
+  screen = create_display(1000,1000)
   
   # draw polygons
   sanity_check_polygon(screen, A)  
