@@ -36,7 +36,6 @@ def pygame_transform_voronoi_system_loop(screen, A, Olist):
   Driver function interactions between two polygons A and static O
   Mouse driven path following
   '''
-
   
   while 1:
     for event in pygame.event.get():
@@ -57,7 +56,7 @@ def pygame_transform_voronoi_system_loop(screen, A, Olist):
         
         # observe the line
         # time.sleep(0.5)
-        clear_frame(screen)
+        #clear_frame(screen)
         
         # execute the path following
         p_last = None
@@ -77,16 +76,17 @@ def triple_polygon_mod():
   '''
   Wrapper for single robot, single obstacle world
   '''
-  if len(sys.argv) < 4:
-    print("provide two files")
-    sys.exit()
-  
-  # initialize and construct polygons
-  A = build_polygon(sys.argv[1])
+  A = None
   Olist = []
-  for i in sys.argv[2:]:
-    Olist.append(build_polygon(i))
-
+  for arg in sys.argv[1:]:
+    try:
+      if not A:
+        A = build_polygon(arg)
+      else:
+        Olist.append(build_polygon(arg))
+    except:
+      pass
+  
   # A,O1,O2 = build_polygon(sys.argv[1]),build_polygon(sys.argv[2]), build_polygon(sys.argv[3])
   if A == None: 
     print("robot region is none.")
@@ -113,7 +113,7 @@ def triple_polygon_mod():
   sanity_check_polygon(screen, A)  
   for O in Olist:
     sanity_check_polygon(screen, O)
-
+  pygame.display.update()
   # start pygame loop
   pygame_transform_voronoi_system_loop(screen, A, Olist)
 
