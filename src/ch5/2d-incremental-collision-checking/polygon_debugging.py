@@ -24,7 +24,7 @@ def sanity_check_polygon(screen, P):
   Does not return
   '''
   draw_lines_between_points(screen, P.dump_points(), P.color)
-  pygame.display.update()
+  #pygame.display.update()
 
 
 def sanity_check_edge(screen, edge):
@@ -39,7 +39,7 @@ def sanity_check_edge(screen, edge):
   frame_draw_line(screen,[p1,p2],colors["white"])
   frame_draw_dot(screen,p1,colors["white"])
   frame_draw_dot(screen,p2,colors["indigo"])
-  pygame.display.update()
+  #pygame.display.update()
 
 
 def find_vertex_region(P, t, screen):
@@ -53,7 +53,7 @@ def find_vertex_region(P, t, screen):
   if e_fov:
     pt = h.source_vertex.get_point_coordinate()
     frame_draw_line(screen, [pt,t], P.color)
-    pygame.display.update()
+    #pygame.display.update()
   else:
     print(f"{t} not in half plane")
   h = h._next
@@ -62,7 +62,7 @@ def find_vertex_region(P, t, screen):
     if e_fov:
       pt = h.source_vertex.get_point_coordinate()
       frame_draw_line(screen, [pt,t], P.color)
-      pygame.display.update()
+      #pygame.display.update()
     else:
       print(f"{t} not in half plane")
     h = h._next
@@ -81,7 +81,7 @@ def find_edge_region(P, t, screen):
     l = get_unit_norm(pt1, pt2)
     mid = l.get_origin()
     frame_draw_line(screen, [mid,t], P.color)
-    pygame.display.update()
+    #pygame.display.update()
   else:
     print(f"{t} not in edge {h._id} region")
   h = h._next
@@ -93,7 +93,7 @@ def find_edge_region(P, t, screen):
       l = get_unit_norm(pt1, pt2)
       mid = l.get_origin()
       frame_draw_line(screen, [mid,t], P.color)
-      pygame.display.update()
+      #pygame.display.update()
     else:
       print(f"{t} not in edge {h._id} region")
     h = h._next
@@ -112,7 +112,7 @@ def find_all_region(P, t, screen):
   if v_reg:
     pt = h.source_vertex.get_point_coordinate()
     frame_draw_line(screen, [pt,t], P.v_color)
-    pygame.display.update()
+    #pygame.display.update()
   else:
     print(f"{t} not in v_reg")
   if e_reg:
@@ -121,7 +121,7 @@ def find_all_region(P, t, screen):
     l = get_unit_norm(pt1, pt2)
     mid = l.get_origin()
     frame_draw_line(screen, [mid,t], P.e_color)
-    pygame.display.update()
+    #pygame.display.update()
   else:
     print(f"{t} not in edge {h._id} region")
   if v_reg and e_reg:
@@ -135,7 +135,7 @@ def find_all_region(P, t, screen):
     if v_reg:
       pt = h.source_vertex.get_point_coordinate()
       frame_draw_line(screen, [pt,t], P.v_color)
-      pygame.display.update()
+      #pygame.display.update()
     else:
       print(f"{t} not in v_reg")
     if e_reg:
@@ -144,7 +144,7 @@ def find_all_region(P, t, screen):
       l = get_unit_norm(pt1, pt2)
       mid = l.get_origin()
       frame_draw_line(screen, [mid,t], P.e_color)
-      pygame.display.update()
+      #pygame.display.update()
     else:
       print(f"{t} not in edge {h._id} region")
     if v_reg and e_reg:
@@ -165,7 +165,7 @@ def find_hp_region(P, t, screen):
     l = get_unit_norm(pt1,pt2)
     mid = l.get_origin()
     frame_draw_line(screen, [mid,t], P.color)
-    pygame.display.update()
+    #pygame.display.update()
   else:
     print(f"{t} not in half plane")
   h = h._next
@@ -177,7 +177,7 @@ def find_hp_region(P, t, screen):
       l = get_unit_norm(pt1,pt2)
       mid = l.get_origin()
       frame_draw_line(screen, [mid,t], P.color)
-      pygame.display.update()
+      #pygame.display.update()
     else:
       print(f"{t} not in half plane")
     h = h._next
