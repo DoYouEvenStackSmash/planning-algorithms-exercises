@@ -27,16 +27,36 @@ class MathFxns:
     return (rad, r)
 
 class GeometryFxns:
-  def get_equilateral_vertex(pt1, pt2):
+  def get_equilateral_vertex(pt1, pt2,sign=1):
     '''
     Calculates the vertex of an equilateral triangle
     Returns a point
     '''
     rad,r = MathFxns.car2pol(pt1,pt2)
-    nx = r * np.cos(rad + np.pi / 3) 
-    ny = r * np.sin(rad + np.pi / 3) 
+    nx = r * np.cos(rad + np.pi * sign / 3) 
+    ny = r * np.sin(rad + np.pi * sign / 3) 
     return (nx + pt1[0],ny + pt1[1])
 
+  def get_midpoint(pt1, pt2):
+    '''
+    Calculates the midpoint of the segment connecting two points
+    Returns a point
+    '''
+    rad,r = MathFxns.car2pol(pt1,pt2)
+    nx = r/2 * np.cos(rad)
+    ny = r/2 * np.sin(rad)
+    return (nx + pt1[0],ny + pt1[1])
+  
+  def lerp(pt1, pt2, t):
+    '''
+    Lerp between two points
+    Returns a point
+    '''
+    rad, r = MathFxns.car2pol(pt1,pt2)
+    nx = r * t * np.cos(rad)
+    ny = r * t * np.sin(rad)
+    return (nx + pt1[0],ny + pt1[1])
+    
 class PygameArtFxns:
   ''' set of colors '''
   colors = {

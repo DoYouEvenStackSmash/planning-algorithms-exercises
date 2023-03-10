@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import pygame
-
+import time
 from render_support import PygameArtFxns as pafn
 from render_support import GeometryFxns as gfn
 from render_support import MathFxns
@@ -13,7 +13,9 @@ SPACE = 32
 
 
 def pygame_lerp_main(screen):
-  origin = (400,400)
+  k = 100
+  segment = 2
+  origin = (k,k)
   while 1:
     for event in pygame.event.get():
       if event.type == pygame.MOUSEBUTTONDOWN:
@@ -26,14 +28,91 @@ def pygame_lerp_main(screen):
         while pygame.MOUSEBUTTONUP not in [event.type for event in pygame.event.get()]:
           continue
         p = pygame.mouse.get_pos()
-        pafn.frame_draw_line(screen,(origin,p),pafn.colors["yellow"])
+        ev = gfn.get_equilateral_vertex(origin, p)
+        mp = gfn.get_midpoint(origin, p)
+        evs = []
+        evs.append(gfn.get_equilateral_vertex(origin, mp))
+        evs.append(gfn.get_equilateral_vertex(mp, p, -1))
+        if segment == 2:
+          n = 100
+          step = 1 / n
+          pts = []
+          l1_pts = []
+          l2_pts = []
+          
+          for i in range(n):
+            l1 = gfn.lerp(origin, evs[0], step * i)
+            l2 = gfn.lerp(evs[0], mp, step * i)
+            m1 = gfn.lerp(l1, l2,step * i)
+            pts.append(m1)
+            l1_pts.append(l1)
+            l2_pts.append(l2)
+          for i in range(n):
+            l1 = gfn.lerp(mp, evs[1], step * i)
+            l2 = gfn.lerp(evs[1], p, step * i)
+            m1 = gfn.lerp(l1, l2,step * i)
+            pts.append(m1)
+            l1_pts.append(l1)
+            l2_pts.append(l2)
+          for i in range(int(len(pts)/2)):
+            pafn.clear_frame(screen)
+            for j in range(i):
+              pafn.frame_draw_dot(screen,pts[j],pafn.colors["cyan"])
+            pafn.frame_draw_line(screen, (l1_pts[i], l2_pts[i]),pafn.colors["green"])
+            # pafn.frame_draw_line(screen, (origin, p),pafn.colors["tangerine"])
+            pafn.frame_draw_line(screen, (origin,evs[0]),pafn.colors["tangerine"])
+            pafn.frame_draw_line(screen, (mp,evs[0]),pafn.colors["tangerine"])
+            pygame.display.update()
+            time.sleep(0.01)
+          for i in range(int(len(pts)/2),len(pts)):
+            pafn.clear_frame(screen)
+            for j in range(i):
+              pafn.frame_draw_dot(screen,pts[j],pafn.colors["cyan"])
+            pafn.frame_draw_line(screen, (l1_pts[i], l2_pts[i]),pafn.colors["green"])
+            # pafn.frame_draw_line(screen, (origin, p),pafn.colors["tangerine"])
+            pafn.frame_draw_line(screen, (mp,evs[1]),pafn.colors["tangerine"])
+            pafn.frame_draw_line(screen, (p,evs[1]),pafn.colors["tangerine"])
+            pygame.display.update()
+            time.sleep(0.01)
+        
+        elif segment == 1:
+          n = 100
+          step = 1 / n
+          pts = []
+          l1_pts = []
+          l2_pts = []
+          
+          for i in range(n):
+
+            l1 = gfn.lerp(origin, ev, step * i)
+            l2 = gfn.lerp(ev, p, step * i)
+            m1 = gfn.lerp(l1, l2,step * i)
+            pts.append(m1)
+            l1_pts.append(l1)
+            l2_pts.append(l2)
+
+          for i in range(n):
+            pafn.clear_frame(screen)
+            for j in range(i):
+              pafn.frame_draw_dot(screen,pts[j],pafn.colors["cyan"])
+            pafn.frame_draw_line(screen, (l1_pts[i], l2_pts[i]),pafn.colors["green"])
+            # pafn.frame_draw_line(screen, (origin, p),pafn.colors["tangerine"])
+            pafn.frame_draw_line(screen, (origin,ev),pafn.colors["tangerine"])
+            pafn.frame_draw_line(screen, (p,ev),pafn.colors["tangerine"])
+            pygame.display.update()
+            time.sleep(0.01)
+        continue
+        l1 = gfn.get_midpoint(p,ev)
+        l2 = gfn.get_midpoint(origin, ev)
+        pafn.frame_draw_line(screen, (l1, l2),pafn.colors["tangerine"])
+        print(ev)
+        pafn.frame_draw_line(screen,(p,ev),pafn.colors["indigo"])
+        pafn.frame_draw_line(screen,(ev,origin),pafn.colors["indigo"])
+        pafn.frame_draw_dot(screen,ev,pafn.colors["cyan"])
+        pafn.frame_draw_line(screen,(origin,p),pafn.colors["indigo"])
         pafn.frame_draw_dot(screen,p,pafn.colors["yellow"])
         pafn.frame_draw_dot(screen,origin,pafn.colors["green"])
-        ev = gfn.get_equilateral_vertex(origin, p)
-        print(ev)
-        pafn.frame_draw_line(screen,(p,ev),pafn.colors["yellow"])
-        pafn.frame_draw_line(screen,(ev,origin),pafn.colors["yellow"])
-        pafn.frame_draw_dot(screen,ev,pafn.colors["cyan"])
+
         pygame.display.update()
 
     
