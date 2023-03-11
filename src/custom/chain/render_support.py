@@ -3,6 +3,51 @@ import numpy as np
 import pygame
 import time
 
+class TransformFxns:
+  '''
+  Transform functions
+  '''
+  def rotation_matrix(rad_theta):
+    '''
+    Creates a rotation matrix
+    Returns a 2x2 numpy array
+    '''
+    return np.array([[np.cos(rad_theta), -np.sin(rad_theta)], [np.sin(rad_theta), np.cos(rad_theta)]])
+  
+  def calculate_rotation_matrix(rad_theta, steps = 30):
+    return TransformFxns.rotation_matrix(rad_theta / steps)
+
+  def calculate_rotation(origin, target, last_target, curr_theta):
+    if last_target == target:
+      return 0,target
+    rad, r = MathFxns.car2pol(origin,target)
+    rad2, r2 = MathFxns.car2pol(origin,last_target)
+    rotation = rad - rad2
+    if rotation > np.pi:
+      rotation = rotation - (2 * np.pi)
+    if rotation < -np.pi:
+      rotation = rotation + 2 * (np.pi)
+    # rotation = rad - rad2
+    print(f'pre {rad} vs {curr_theta} vs {rotation}')
+
+    return rotation,target
+  
+  def rotate_point_set(origin, point_set, rot_mat):
+    nps = []
+    for i in point_set:
+      nps.append(TransformFxns.rotate_point(origin,i,rot_mat))
+    return nps
+
+  def rotate_point(origin, pt, rot_mat):
+    '''
+    Rotates a single point about an origin based on the rotation matrix
+    Returns a point (x, y)
+    '''
+    x_o, y_o = origin
+    lp_x, lp_y = pt
+
+    step = np.matmul(rot_mat,np.array([[lp_x - x_o], [lp_y - y_o]]))
+    return (step[0][0] + x_o, step[1][0]+ y_o)
 
 class MathFxns:
   '''

@@ -34,7 +34,7 @@ def lerp_render(screen, n, spts, ev, l1_pts, l2_pts, pts):
 
 def pygame_lerp_main(screen):
   k = 100
-  segment = 1
+  segment = 8
   origin = (k,k)
   while 1:
     for event in pygame.event.get():
