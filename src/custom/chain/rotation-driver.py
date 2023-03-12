@@ -56,7 +56,7 @@ def pygame_path_main(screen, point_set):
 def main():
   pygame.init()
   screen = pafn.create_display(800,800)
-  pts = [(300, 375),(500,375), (500,425),(300,425)]
+  pts = [(300, 375),(500,400),(300,425)]#(500,375), (500,425),(300,425)]
   reversed(pts)
   pafn.frame_draw_polygon(screen, pts, pafn.colors["red"])
   pygame.display.update()

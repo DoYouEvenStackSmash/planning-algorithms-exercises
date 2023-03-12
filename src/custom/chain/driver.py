@@ -69,7 +69,7 @@ def pygame_lerp_main(screen):
             sign = sign * -1
           
           # calculate lerp points
-          n = 100
+          n = 20
           step = 1 / n
           for sp in range(len(spts) - 1):
             for i in range(n):
