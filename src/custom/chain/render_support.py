@@ -85,12 +85,20 @@ class MathFxns:
     return (rad, r)
   
   def pol2car(pt, r, theta):
+    '''
+    Convert polar coordinate to cartesian
+    Returns a point
+    '''
     ox, oy = pt
     x = r * np.cos(theta)
     y = r * np.sin(theta)
     return [(ox, oy),(x, y)] 
   
   def correct_angle(rad_theta):
+    '''
+    Normalizes a negative angle theta, created by arctan2
+    Returns an angle between -pi/2 and 2pi
+    '''
     if rad_theta < -np.pi/2:
       rad_theta = rad_theta + 2 * np.pi
     return rad_theta

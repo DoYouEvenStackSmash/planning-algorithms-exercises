@@ -14,6 +14,10 @@ LCTRL = 64
 SPACE = 32
 
 def draw_all_normals(screen, chain):
+  '''
+  Render function for all coordinate frames in a chain
+  Does not return
+  '''
   nl = chain.get_chain_normals()
   points = chain.get_chain_point_sets()
   for l in chain.links:
@@ -25,12 +29,20 @@ def draw_all_normals(screen, chain):
 
 
 def draw_all_links(screen, chain):
+  '''
+  Render function for all polygon links in the chain
+  Does not return
+  '''
   points = chain.get_chain_point_sets()
   for p in range(1,len(points)):
     pafn.frame_draw_polygon(screen, points[p], pafn.colors["red"])
-  # pygame.display.update()
 
 def rotate_chain(screen, chain, target_point, steps = 30):
+  '''
+  Rotates links in the chain as influenced by a target point
+  Does not return
+  Calls update
+  '''
   rad1 = chain.links[1].get_relative_rotation(target_point)
   rad2 = chain.links[2].get_relative_rotation(target_point)
   rad2 = rad2 - rad1
@@ -53,14 +65,18 @@ def rotate_chain(screen, chain, target_point, steps = 30):
     time.sleep(0.01)
       
 
-def rotate_link_to_point(screen, chain, target_point, steps = 30):
-  rad = chain.links[2].get_relative_rotation(target_point)
+def rotate_link_to_point(screen, chain, target_point, steps = 30, link_index=2):
+  '''
+  Rotate a single link
+  Does not return
+  '''
+  rad = chain.links[link_index].get_relative_rotation(target_point)
   rot_mat = tfn.calculate_rotation_matrix(rad)
   step = np.divide(rad, steps)
   for i in range(steps):
     pafn.clear_frame(screen)
-    chain.links[2].rotate(chain.links[2].get_origin(), rot_mat)
-    chain.links[2].rel_theta += step
+    chain.links[link_index].rotate(chain.links[link_index].get_origin(), rot_mat)
+    chain.links[link_index].rel_theta += step
     draw_all_normals(screen, chain)
     draw_all_links(screen, chain)
     pygame.display.update()
@@ -102,18 +118,17 @@ def main():
   pygame.init()
   screen = pafn.create_display(1000,1000)
   pts = [(300, 375),(500,400),(300,425)]
-  pts2 = [(600, 375),(500,400),(600,425)]
-  origin = (400,400)
+  pts2 = [(700, 375),(500,400),(700,425)]
+  origin = (300,400)
   a = Link(point_set=[origin])
-  # a.prev = a
-  # a.endpoint = origin
+
   c = Chain(origin = origin, anchor=a)
   l = Link(point_set=pts, endpoint=pts[1])
-  e = Link(point_set=pts2, endpoint=(600,400))
+  e = Link(point_set=pts2, endpoint=(700,400))
   c.add_link(l)
   c.add_link(e)
   points = c.get_chain_point_sets()
-  # print(points)
+
   pafn.frame_draw_dot(screen, origin, pafn.colors["cyan"])
   for p in range(1, len(points)):
     pafn.frame_draw_polygon(screen, points[p], pafn.colors["red"])
