@@ -83,6 +83,12 @@ class MathFxns:
     rad = np.arctan2(y - oy, x - ox)
     r = MathFxns.euclidean_dist(origin, pt)
     return (rad, r)
+  
+  def pol2car(pt, r, theta):
+    ox, oy = pt
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
+    return [(ox, oy),(x, y)] 
 
 class GeometryFxns:
   '''

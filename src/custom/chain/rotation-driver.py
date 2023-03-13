@@ -12,7 +12,7 @@ LSHIFT = 1
 LCTRL = 64
 SPACE = 32
 
-def gradual_rotation(screen, new_point_set, origin, p, lt, step_count = 30):
+def gradual_rotation_pt(screen, new_point_set, origin, p, lt, step_count = 30):
   '''
   Computes and renders an animated rotation of a point set from 
   last target to new target.
@@ -29,6 +29,7 @@ def gradual_rotation(screen, new_point_set, origin, p, lt, step_count = 30):
     pygame.display.update()
     time.sleep(0.001)
   return new_point_set,lt
+
 
 
 
@@ -57,7 +58,7 @@ def pygame_path_main(screen, point_set):
         while pygame.MOUSEBUTTONUP not in [event.type for event in pygame.event.get()]:
           continue
         p = pygame.mouse.get_pos()
-        point_set,lt = gradual_rotation(screen, point_set, origin, p, lt, step_count)
+        point_set,lt = gradual_rotation_pt(screen, point_set, origin, p, lt, step_count)
 
 def main():
   pygame.init()
