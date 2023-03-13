@@ -8,7 +8,10 @@ from support.World import *
 from support.star_algorithm import *
 from support.doubly_connected_edge_list import *
 from pygame_rendering.pygame_loop_support import *
-from pygame_rendering.render_support import *
+from pygame_rendering.render_support import PygameArtFxns as pafn
+from pygame_rendering.render_support import GeometryFxns as gfn
+from pygame_rendering.render_support import MathFxns
+from pygame_rendering.render_support import TransformFxns as tfn
 from voronoi_regions import *
 from feature_markers import *
 from polygon_debugging import *
@@ -50,7 +53,7 @@ def pygame_transform_voronoi_system_loop(screen, A, Olist):
         while pygame.MOUSEBUTTONUP not in [event.type for event in pygame.event.get()]:
           if not counter % SAMPLE_RATE:
             ptlist.append(pygame.mouse.get_pos())
-            frame_draw_dot(screen, ptlist[-1], colors["yellow"])
+            pafn.frame_draw_dot(screen, ptlist[-1], pafn.colors["yellow"])
             pygame.display.update()
           counter+=1
         
@@ -96,18 +99,18 @@ def triple_polygon_mod():
       print("obstacle region is none")
       sys.exit()
   
-  A.color = colors["green"]
-  A.v_color = colors["cyan"]
-  A.e_color = colors["tangerine"]
+  A.color = pafn.colors["green"]
+  A.v_color = pafn.colors["cyan"]
+  A.e_color = pafn.colors["tangerine"]
   
   for O in Olist:
-    O.color = colors["white"]
-    O.v_color = colors["yellow"]
-    O.e_color = colors["red"]
+    O.color = pafn.colors["white"]
+    O.v_color = pafn.colors["yellow"]
+    O.e_color = pafn.colors["red"]
 
   # initialize pygame display
   pygame.init()
-  screen = create_display(800,800)
+  screen = pafn.create_display(800,800)
   
   # draw polygons
   sanity_check_polygon(screen, A)  
