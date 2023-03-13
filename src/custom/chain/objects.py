@@ -1,46 +1,120 @@
+#!/usr/bin/python3
+import numpy as np
+from render_support import PygameArtFxns as pafn
+from render_support import GeometryFxns as gfn
+from render_support import MathFxns
+from render_support import TransformFxns as tfn
 class Link:
-  def __init__(self, point_set, dist = 1, origin = (0,0), _prev = None, _next = None, theta=0):
-    self.origin = origin
+  LINE_LEN = 30
+  def __init__(self, point_set = [], 
+              endpoint = (0,0),
+              _prev = None,
+              _next = None, 
+              theta = 0):
     self.point_set = point_set
     self.rel_theta = theta
-    self.dist = dist
     self.prev = _prev
     self.next = _next
+    self.endpoint = endpoint
   
   def get_point_set(self):
+    '''
+    Accessor for the point set which is constrained to the link
+    Returns a list of points
+    '''
     return self.point_set
   
   def get_relative_angle(self):
+    '''
+    Accessor for the link's angle relative to previous link
+    Returns an angle theta
+    '''
     return self.rel_theta
   
   def get_origin(self):
-    return self.origin
-  
-  def get_endpoint(self):
-    return MathFxns.pol2car(self.origin, self.dist, self.rel_theta)[1]
+    '''
+    Accessor for the link's origin
+    returns a point
+    '''
+    return self.prev.get_endpoint()
 
-  def new_orientation(self, origin, pts, theta):
-    self.origin = origin
+  def get_endpoint(self):
+    '''
+    Accessor for the link endpoint
+    Returns a point
+    '''
+    return self.endpoint
+
+  def rotate(self, origin, rot_mat):
+    self.endpoint = tfn.rotate_point(origin, self.get_endpoint(), rot_mat)
+    self.point_set = tfn.rotate_point_set(origin, self.point_set, rot_mat)
+
+
+  def update_orientation(self, point_set, theta):
     self.point_set = point_set
     self.rel_theta = theta
-
-class Chain:
-  def __init__(self, origin = (0,0)):
-    self.origin = origin
-    self.links = []
   
-  def get_links(self):
+  def update_point_set(self, point_set):
+    self.point_set = point_set
+
+  def get_normals(self):
+    ox,oy = self.get_origin()
+    theta = self.rel_theta
+    xx,xy = Link.LINE_LEN * np.cos(theta), Link.LINE_LEN * np.sin(theta)
+    yx,yy = Link.LINE_LEN * np.cos(theta + np.pi / 2), Link.LINE_LEN * np.sin(theta + np.pi / 2)
+    return ((xx+ox,xy+oy), (yx+ox,yy+oy))
+
+  def get_relative_rotation(self, target_point):
+    rel = self.rel_theta
+    ex,ey = self.get_endpoint()
+    ox,oy = self.get_origin()
+    norm, dist = MathFxns.car2pol(self.get_origin(), self.get_endpoint())
+    rad, r = MathFxns.car2pol(self.get_origin(), target_point)
+    trad, tdist = MathFxns.car2pol(self.get_endpoint(), target_point)
+
+    norm = MathFxns.correct_angle(norm)
+    rad = MathFxns.correct_angle(rad)
+    trad = MathFxns.correct_angle(trad)
+    rotation = np.subtract(rad,norm)
+    if rotation > np.pi:
+      rotation = rotation - 2 * np.pi
+    if rotation < -np.pi:
+      rotation = rotation + 2 * np.pi
+    print(rotation)
+    return rotation
+
+    
+class Chain:
+  def __init__(self, origin = (0,0), anchor = Link()):
+    self.links = [anchor]
+    self.links[-1].prev = self.links[-1]
+    self.links[-1].endpoint = origin
+    self.origin = origin
+
+  def get_chain_point_sets(self):
+    '''
+    Accessor for all points in the chain
+    Returns a list of point sets
+    '''
     ptlist = []
     for link in self.links:
-      ptlist.append(link.get_point_set()):
+      ptlist.append(link.get_point_set())
     return ptlist
-  
+
+  def get_chain_normals(self):
+    ptlist = []
+    for link in self.links:
+      ptlist.append(link.get_normals())
+    return ptlist
+
   def add_link(self, link):
-    if not len(self.links):
-      link.origin = self.origin
-      self.links.append(link)
-    else:
-      link.origin = self.links[-1].get_endpoint()
-      link.prev = self.links[-1]
-      self.links[-1].next = link
-      self.links.append(link)
+    '''
+    Adds a link to the chain
+    Does not return
+    '''
+    link.prev = self.links[-1]
+    self.links[-1].next = link
+    self.links.append(link)
+
+  def get_anchor_origin(self):
+    return self.origin
