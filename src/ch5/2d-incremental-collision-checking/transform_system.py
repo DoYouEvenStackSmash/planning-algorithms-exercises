@@ -1,10 +1,13 @@
 #!/usr/bin/python3
 from transform_polygon import *
-from pygame_rendering.render_support import *
+from pygame_rendering.render_support import PygameArtFxns as pafn
+from pygame_rendering.render_support import GeometryFxns as gfn
+from pygame_rendering.render_support import MathFxns
+from pygame_rendering.render_support import TransformFxns as tfn
 from polygon_debugging import *
 from voronoi_regions import *
 
-SLEEP_CONSTANT = 0.002
+SLEEP_CONSTANT = 0
 COLLISION_THRESHOLD = np.divide(1,123456789)
 
 def get_step_rotation_matrix(P, t):
@@ -26,7 +29,7 @@ def gradually_rotate_system(OPList, P_index, t, screen = None):
   '''
   steps, r_mat = get_step_rotation_matrix(OPList[P_index], t)
   for step in range(int(steps)):
-    clear_frame(screen)
+    pafn.clear_frame(screen)
     rotate_polygon(OPList[P_index], r_mat)
     for i in range(len(OPList)):
       sanity_check_polygon(screen, OPList[i])
@@ -57,7 +60,7 @@ def gradually_translate_system(OPList, P_index, t, screen = None, some_constant 
   '''
   rx,ry, const = get_step_translation_function(OPList[P_index], t, some_constant)
   for step in range(int(const)):
-    clear_frame(screen)
+    pafn.clear_frame(screen)
     translate_polygon(OPList[P_index], rx, ry)
     for i in range(len(OPList)):
       sanity_check_polygon(screen, OPList[i])
@@ -71,7 +74,7 @@ def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = []):
   '''
   steps, r_mat = get_step_rotation_matrix(A, t)
   for step in range(int(steps)):
-    clear_frame(screen)
+    pafn.clear_frame(screen)
     rotate_polygon(A, r_mat)
     for O in Olist:
       val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
@@ -84,7 +87,7 @@ def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = []):
         pygame.display.update()
         return val
     for i in range(0,len(path_line), 4):
-      frame_draw_dot(screen, path_line[i], colors["yellow"])
+      pafn.frame_draw_dot(screen, path_line[i], pafn.colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
   return 0
@@ -102,7 +105,7 @@ def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant
 
   for step in range(int(const)):
     # print(f"here: {rx}, {ry}")
-    clear_frame(screen)
+    pafn.clear_frame(screen)
     translate_polygon(A, rx, ry)
     for O in Olist:
       val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
@@ -113,7 +116,7 @@ def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant
         pygame.display.update()
         return val
     for i in range(0,len(path_line), 4):
-      frame_draw_dot(screen, path_line[i], colors["yellow"])
+      pafn.frame_draw_dot(screen, path_line[i], pafn.colors["yellow"])
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
   return 0

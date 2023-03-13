@@ -19,7 +19,7 @@ class TransformFxns:
     Wrapper for rotation matrix calculation including step count
     Returns a 2x2 numpy array
     '''
-    return TransformFxns.rotation_matrix(rad_theta / step_count)
+    return TransformFxns.rotation_matrix(np.divide(rad_theta,step_count))
 
   def calculate_rotation(origin, target, last_target):
     '''
@@ -35,7 +35,7 @@ class TransformFxns:
     if rotation > np.pi:
       rotation = rotation - (2 * np.pi)
     if rotation < -np.pi:
-      rotation = rotation + 2 * (np.pi)
+      rotation = rotation + (2 * np.pi)
 
     return rotation,target
   
@@ -83,6 +83,25 @@ class MathFxns:
     rad = np.arctan2(y - oy, x - ox)
     r = MathFxns.euclidean_dist(origin, pt)
     return (rad, r)
+  
+  def pol2car(pt, r, theta):
+    '''
+    Convert polar coordinate to cartesian
+    Returns a point
+    '''
+    ox, oy = pt
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
+    return [(ox, oy),(x, y)] 
+  
+  def correct_angle(rad_theta):
+    '''
+    Normalizes a negative angle theta, created by arctan2
+    Returns an angle between -pi/2 and 2pi
+    '''
+    if rad_theta < -np.pi/2:
+      rad_theta = rad_theta + 2 * np.pi
+    return rad_theta
 
 class GeometryFxns:
   '''
