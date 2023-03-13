@@ -14,25 +14,38 @@ class TransformFxns:
     '''
     return np.array([[np.cos(rad_theta), -np.sin(rad_theta)], [np.sin(rad_theta), np.cos(rad_theta)]])
   
-  def calculate_rotation_matrix(rad_theta, steps = 30):
-    return TransformFxns.rotation_matrix(rad_theta / steps)
+  def calculate_rotation_matrix(rad_theta, step_count = 30):
+    '''
+    Wrapper for rotation matrix calculation including step count
+    Returns a 2x2 numpy array
+    '''
+    return TransformFxns.rotation_matrix(rad_theta / step_count)
 
-  def calculate_rotation(origin, target, last_target, curr_theta):
+  def calculate_rotation(origin, target, last_target):
+    '''
+    Calculates rotation as a delta theta between last target and current target
+    returns an angle theta
+    '''
     if last_target == target:
       return 0,target
     rad, r = MathFxns.car2pol(origin,target)
     rad2, r2 = MathFxns.car2pol(origin,last_target)
     rotation = rad - rad2
+    # adjust to make sure rotation is in interval [-pi, pi]
     if rotation > np.pi:
       rotation = rotation - (2 * np.pi)
     if rotation < -np.pi:
       rotation = rotation + 2 * (np.pi)
-    # rotation = rad - rad2
-    print(f'pre {rad} vs {curr_theta} vs {rotation}')
 
     return rotation,target
   
   def rotate_point_set(origin, point_set, rot_mat):
+    '''
+    Rotates a set of points using rotation matrix
+    Wrapper for rotate point
+
+    Returns a list of points
+    '''
     nps = []
     for i in point_set:
       nps.append(TransformFxns.rotate_point(origin,i,rot_mat))
@@ -72,6 +85,9 @@ class MathFxns:
     return (rad, r)
 
 class GeometryFxns:
+  '''
+  Geometry helper functions
+  '''
   def get_equilateral_vertex(pt1, pt2,sign=1):
     '''
     Calculates the vertex of an equilateral triangle
