@@ -7,7 +7,7 @@ from pygame_rendering.render_support import TransformFxns as tfn
 from polygon_debugging import *
 from voronoi_regions import *
 
-SLEEP_CONSTANT = 0
+SLEEP_CONSTANT = 0.0001
 COLLISION_THRESHOLD = np.divide(1,123456789)
 
 def get_step_rotation_matrix(P, t):
