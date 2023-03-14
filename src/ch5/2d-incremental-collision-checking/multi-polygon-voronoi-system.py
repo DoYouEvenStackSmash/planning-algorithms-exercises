@@ -99,6 +99,8 @@ def pygame_transform_voronoi_system_loop(screen, A, Olist):
         p = pygame.mouse.get_pos()
         pts.append(p)
         pafn.frame_draw_dot(screen, p,pafn.colors["green"])
+        for i in range(1,len(pts)):
+          pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
         if len(pts) == 4:
           pafn.clear_frame(screen)
           pafn.frame_draw_polygon(screen, pts, pafn.colors["red"])

@@ -215,5 +215,7 @@ class PygameArtFxns:
     # frame_draw_dot(screen, pts[-1], colors["red"])
     frame_draw_line(screen, (pts[-1], pts[0]), color)
     
-
+  def draw_circle(screen, radius, center, color = (0,0,0)):
+    pygame.draw.circle(screen, color, center, radius, 1)
+    
 
