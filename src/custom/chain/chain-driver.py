@@ -137,18 +137,6 @@ def rotate_chain(screen, chain, target_point, intermediate_point, steps = 30):
       pygame.display.update()
       time.sleep(0.005)
 
-  # for l in chain.links[1:]:
-  #   l.rotate(origin, rot_mat1)
-  #   l.rel_theta += step
-
-  #   chain.links[2].rotate(chain.links[2].get_origin(), rot_mat2)
-  #   chain.links[2].rel_theta += step2
-  #   pafn.clear_frame(screen)
-  #   draw_all_normals(screen, chain)
-  #   draw_all_links(screen, chain)
-  #   pygame.display.update()
-  #   time.sleep(0.01)
-      
 
 def rotate_link_to_point(screen, chain, target_point, steps = 30, link_index=2):
   '''
@@ -218,35 +206,13 @@ def pygame_chain_main(screen, chain):
           pygame.display.update()
           # pafn.frame_draw_polygon(screen, pts, pafn.colors["red"])
           l1,l2,l3,m1,m2,mpts = cubic_lerp_calculate(pts)
-          # for i in range(len(mpts)):
-          #   pafn.clear_frame(screen)
-          #   # render points up to i
-          #   for j in range(i):
-          #     pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
-          #   # render lines
-          #   pafn.frame_draw_line(screen, (pts[0],pts[1]), pafn.colors['red'])
-          #   pafn.frame_draw_line(screen, (pts[1],pts[2]), pafn.colors['red'])
-          #   pafn.frame_draw_line(screen, (pts[2],pts[3]), pafn.colors['red'])
-          #   pafn.frame_draw_line(screen, (l1[i],l2[i]),pafn.colors["tangerine"])
-          #   pafn.frame_draw_line(screen, (l2[i],l3[i]),pafn.colors["tangerine"])
-          #   pafn.frame_draw_bold_line(screen, (m1[i],m2[i]),pafn.colors['green'])
-
-          #   pygame.display.update()
           
           for i in range(len(mpts)):
             pafn.clear_frame(screen)
             p = mpts[i]
             for j in range(i,len(mpts)):
               pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
-            # pafn.frame_draw_line(screen, (pts[0],pts[1]), pafn.colors['red'])
-            # pafn.frame_draw_line(screen, (pts[1],pts[2]), pafn.colors['red'])
-            # pafn.frame_draw_line(screen, (pts[2],pts[3]), pafn.colors['red'])
-            # pafn.frame_draw_line(screen, (l1[i],l2[i]),pafn.colors["tangerine"])
-            # pafn.frame_draw_line(screen, (l2[i],l3[i]),pafn.colors["tangerine"])
-            # pafn.frame_draw_bold_line(screen, (m1[i],m2[i]),pafn.colors['green'])
 
-            # draw_all_normals(screen, chain)
-            # for i in range(2):
             ps = calculate_circles(screen, chain, p)
             r,t = tfn.calculate_rotation(chain.get_anchor_origin(), chain.links[1].get_endpoint(), ps[1])
             rot_mat = tfn.calculate_rotation_matrix(r,step_count=1)
