@@ -15,7 +15,7 @@ from file_loader import *
 
 DEBUG = False
 
-def find_contact(SL, screen = None):
+def find_contact(SL, screen = None, VERBOSE = False):
   '''
   Algorithm for finding overlapping voronoi regions
   Returns a scalar distance between the closest pair of points
@@ -47,14 +47,14 @@ def find_contact(SL, screen = None):
         if DEBUG:
           print("EV found!")
         ev_records.append((E,V))
-        return EV_found(E, V, screen)
+        return EV_found(E, V, screen, VERBOSE)
         
     if val == T_OOB_NORM: # candidate for VV, seeking symmetry
       if t_in_V_region(E.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E.source_vertex.get_point_coordinate()):
         if DEBUG:
           print("VV found")
         vv_records.append((E.source_vertex, V))
-        return VV_found(E.source_vertex, V, screen)
+        return VV_found(E.source_vertex, V, screen, VERBOSE)
         
     if val == T_OOB_HYPOTENUSE:
       E2 = E._next
@@ -62,7 +62,7 @@ def find_contact(SL, screen = None):
         if DEBUG:
           print("VV found")
         vv_records.append((E2.source_vertex, V))
-        return VV_found(E2.source_vertex, V, screen)
+        return VV_found(E2.source_vertex, V, screen, VERBOSE)
     e_hold = E._next
     while SL[wrap(i1)][1] != e_hold:
       i1+=1
@@ -83,14 +83,14 @@ def find_contact(SL, screen = None):
         if DEBUG:
           print("EV found!")
         ev_records.append((E,V))
-        return EV_found(E, V, screen)
+        return EV_found(E, V, screen, VERBOSE)
         
     if val == T_OOB_NORM: # candidate for VV, seeking symmetry
       if t_in_V_region(E.source_vertex, V.get_point_coordinate()) and t_in_V_region(V, E.source_vertex.get_point_coordinate()):
         if DEBUG:
           print("VV found")
         vv_records.append((E.source_vertex, V))
-        return VV_found(E.source_vertex, V, screen)
+        return VV_found(E.source_vertex, V, screen, VERBOSE)
         
     if val == T_OOB_HYPOTENUSE:
       E2 = E._next
@@ -98,6 +98,6 @@ def find_contact(SL, screen = None):
         if DEBUG:
           print("VV found")
         vv_records.append((E2.source_vertex, V))
-        return VV_found(E2.source_vertex, V, screen)
+        return VV_found(E2.source_vertex, V, screen, VERBOSE)
     i1+=1
 

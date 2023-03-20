@@ -136,6 +136,48 @@ class GeometryFxns:
     nx = r * t * np.cos(rad)
     ny = r * t * np.sin(rad)
     return (nx + pt1[0],ny + pt1[1])
+  
+  def lerp_list(p1, p2, n = 100):
+    '''
+    Lerp helper function for two points
+    Returns a list of points
+    '''
+    pts = []
+    step = 1 / n
+    for i in range(n):
+      pts.append(GeometryFxns.lerp(p1, p2, step * i))
+    pts.append(p2)
+    return pts
+
+  def cubic_lerp_calculate(pts, n = 100):
+    '''
+    Cubic lerp function for a list of at least 4 points
+    Returns linear interpolation between pairs of points
+      l1=(A,B)
+      l2=(B,C)
+      l3=(C,D)
+      m1 = (l1,l2)
+      m2 = (l2,l3)
+      p1 = (m1, m2)
+    '''
+    l1 = GeometryFxns.lerp_list(pts[0],pts[1])
+    l2 = GeometryFxns.lerp_list(pts[1],pts[2])
+    l3 = GeometryFxns.lerp_list(pts[2],pts[3])
+    m1 = []
+    m2 = []
+    step = 1 / n
+
+    for i in range(n):
+      m1.append(GeometryFxns.lerp(l1[i],l2[i],i * step))
+      m2.append(GeometryFxns.lerp(l2[i],l3[i],i * step))
+    m1.append(GeometryFxns.lerp(l1[-1],l2[-1],1))
+    m2.append(GeometryFxns.lerp(l2[-1],l3[-1],1))
+
+    p1 = []
+    for i in range(n):
+      p1.append(GeometryFxns.lerp(m1[i],m2[i],i * step))
+    p1.append(GeometryFxns.lerp(m1[-1],m2[-1],1))
+    return l1,l2,l3,m1,m2,p1
     
 class PygameArtFxns:
   ''' set of colors '''

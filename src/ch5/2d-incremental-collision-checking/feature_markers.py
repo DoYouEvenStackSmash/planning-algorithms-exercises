@@ -21,7 +21,7 @@ def mark_edge_clear(edge, screen):
   pafn.frame_draw_line(screen, [e_p1, e_p2], pafn.colors["tangerine"])
   pygame.display.update()
 
-def VV_found(v1,v2, screen):
+def VV_found(v1,v2, screen, VERBOSE = False):
   '''
   Draws a bold line between two vertices
   Returns the distance between two points
@@ -29,11 +29,12 @@ def VV_found(v1,v2, screen):
   p1 = v1.get_point_coordinate()
   p2 = v2.get_point_coordinate()
   # print(f"VV distance {distance_between_points(p1, p2)}")
-  pafn.frame_draw_bold_line(screen,[p1,p2], pafn.colors["magenta"])
+  if VERBOSE:
+    pafn.frame_draw_bold_line(screen,[p1,p2], pafn.colors["magenta"])
   return distance_between_points(p1, p2)
   # pygame.display.update()
 
-def EV_found(edge, v1, screen):
+def EV_found(edge, v1, screen, VERBOSE = False):
   '''
   Draws a bold line between an edge and a vertex
   Returns the distance between two points
@@ -41,7 +42,8 @@ def EV_found(edge, v1, screen):
   v_p = v1.get_point_coordinate()
   mp = calc_line_point(edge, v1)
   # print(f"EV distance {distance_between_points(v_p, mp)}")
-  pafn.frame_draw_bold_line(screen, [mp, v_p], pafn.colors["cyan"])
+  if VERBOSE:
+    pafn.frame_draw_bold_line(screen, [mp, v_p], pafn.colors["cyan"])
   return distance_between_points(v_p, mp)
   # pygame.display.update()
   
