@@ -22,7 +22,7 @@ from transform_polygon import *
 from transform_system import *
 from objects import *
 import sys
-COLLISION_THRESHOLD = np.divide(1,123456789)
+COLLISION_THRESHOLD = 10#np.divide(1,123456789)
 SAMPLE_RATE = 400
 LALT = 256
 LSHIFT = 1
@@ -125,7 +125,7 @@ def calculate_circles(screen, chain,target_point,DRAW=None):
   return ps
   
 
-def rotate_chain(screen, chain, target_point, intermediate_point, steps = 30, plist = []):
+def rotate_chain(screen, chain, target_point, intermediate_point, steps = 30, A=None):
   '''
   Rotates links in the chain as influenced by a target point
   Does not return
@@ -140,38 +140,32 @@ def rotate_chain(screen, chain, target_point, intermediate_point, steps = 30, pl
   step = np.divide(rad1, steps)
   step2 = np.divide(rad2, steps)
   origin = chain.links[0].get_origin()
-  v = 1
+  v = 0
   for i in range(steps):
-    for l in chain.links[1:]:
-      for p in plist:
-        v = check_contact(screen,l,p)
-      #   if v <= COLLISION_THRESHOLD:
-      #     break
-      # if v <= COLLISION_THRESHOLD:
-      #   v = 0
-      #   print("INVALID")
-      #   # return
-      #   continue
-        # if v > 0:
+    for j in range(1,len(chain.links)):
+      l = chain.links[j]
+      v = check_contact(screen, l, A)
+      if v < COLLISION_THRESHOLD:
+        return v
+
       l.rotate_body(origin, rot_mat1)
       l.rel_theta += step
-    # for p in plist:
-    #   v = check_contact(screen,chain.links[2],p)
-    #   if v <= COLLISION_THRESHOLD:
-    #     break
-    # if v <= COLLISION_THRESHOLD:
-    #   v = 0
-    #   continue
+    v = check_contact(screen, l, A)
+    if v < COLLISION_THRESHOLD:
+      return v
+      # continue
     chain.links[2].rotate_body(chain.links[2].get_origin(), rot_mat2)
     chain.links[2].rel_theta += step2
+    
     if steps > 1:
       pafn.clear_frame(screen)
-      for p in plist:
-        sanity_check_polygon(screen, p)
+      
+      sanity_check_polygon(screen, A)
       draw_all_normals(screen, chain)
       draw_all_links(screen, chain)
       pygame.display.update()
       time.sleep(0.005)
+  return 0
 
 
 def rotate_link_to_point(screen, chain, target_point, steps = 30, link_index=2):
@@ -193,12 +187,10 @@ def rotate_link_to_point(screen, chain, target_point, steps = 30, link_index=2):
 
 def check_contact(screen, link, O):
   val = find_contact(build_star(link.get_body().get_front_edge(), O.get_front_edge()), screen, VERBOSE=True)
-  if val <= COLLISION_THRESHOLD:
-    return val
-  return 0
+  return val
 
 def check_all_contact(screen, chain, O):
-  v = 1
+  v = 0
   for l in chain.links[1:]:
     v = check_contact(screen, l, O)
     # if v <= COLLISION_THRESHOLD:
@@ -238,7 +230,7 @@ def pygame_chain_coll(screen, chain, A):
         for i in range(1,len(pts)):
           pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
         pafn.frame_draw_dot(screen, p, pafn.colors['green'])
-
+        global COLLISION_THRESHOLD
         if len(pts) == 4:
           
           pafn.clear_frame(screen)
@@ -250,9 +242,16 @@ def pygame_chain_coll(screen, chain, A):
           tp2 = ps[0]
           tp1 = pts[0]
           # rotate_chain(screen,chain,p,steps=30)
-          rotate_chain(screen, chain, tp1,tp2, steps=40,plist=[A])
+          v = rotate_chain(screen, chain, tp1,tp2, steps=40,A=A)
           draw_all_normals(screen, chain)
           draw_all_links(screen, chain)
+          if v > 1:
+            COLLISION_THRESHOLD = 1
+            pygame.display.update()
+            pts = []
+            continue
+            
+          
           pygame.display.update()
           pafn.frame_draw_polygon(screen, pts, pafn.colors["red"])
           l1,l2,l3,m1,m2,mpts = cubic_lerp_calculate(pts)
@@ -271,10 +270,10 @@ def pygame_chain_coll(screen, chain, A):
             tp2 = ps[0]
             tp1 = p
             # rotate_chain(screen,chain,p,steps=30)
-            v = check_all_contact(screen,chain,A)
-            print(v)
-            if v == 0:
-              rotate_chain(screen, chain, tp1,tp2, steps=1)
+            # v = check_all_contact(screen,chain,A)
+            # print(v)
+            
+            v = rotate_chain(screen, chain, tp1,tp2, steps=1,A=A)
             # else:
               # print("invalid pose")
             
@@ -282,10 +281,18 @@ def pygame_chain_coll(screen, chain, A):
 
             draw_all_normals(screen, chain)
             draw_all_links(screen, chain)
+            if v > 1:
+              COLLISION_THRESHOLD = 1
+              pygame.display.update()
+              pts = []
+              break
+              # continue
             for j in range(i,len(mpts)):
               pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
             pygame.display.update()
             time.sleep(0.01)
+            # COLLISION_THRESHOLD = 5
+          COLLISION_THRESHOLD = 10
           pts = []
         else:
           pygame.display.update()
