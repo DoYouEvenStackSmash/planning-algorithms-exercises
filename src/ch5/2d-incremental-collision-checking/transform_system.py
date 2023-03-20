@@ -6,8 +6,8 @@ from pygame_rendering.render_support import MathFxns
 from pygame_rendering.render_support import TransformFxns as tfn
 from polygon_debugging import *
 from voronoi_regions import *
-
-SLEEP_CONSTANT = 0
+# VERBOSE = False
+SLEEP_CONSTANT = 0.0001
 COLLISION_THRESHOLD = np.divide(1,123456789)
 
 def get_step_rotation_matrix(P, t):
@@ -66,7 +66,7 @@ def gradually_translate_system(OPList, P_index, t, screen = None, some_constant 
       sanity_check_polygon(screen, OPList[i])
     pygame.display.update()
 
-def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = []):
+def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = [], VERBOSE=False):
   '''
   Gradually transforms a polygon A, maintaining a connection between closest pair of points
   (x1,y1),(x2,y2) where x1,y1 is in A and x2,y2 is in O
@@ -77,7 +77,7 @@ def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = []):
     pafn.clear_frame(screen)
     rotate_polygon(A, r_mat)
     for O in Olist:
-      val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
+      val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen, VERBOSE)
       sanity_check_polygon(screen, A)
       for Ox in Olist:
         sanity_check_polygon(screen, Ox)
@@ -92,7 +92,7 @@ def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = []):
     time.sleep(SLEEP_CONSTANT)
   return 0
 
-def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant = 100, path_line = []):
+def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant = 100, path_line = [], VERBOSE=False):
   '''
   Gradually transforms a polygon A, maintaining a connection between closest pair of points
   (x1,y1),(x2,y2) where x1,y1 is in A and x2,y2 is in O
@@ -108,7 +108,7 @@ def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant
     pafn.clear_frame(screen)
     translate_polygon(A, rx, ry)
     for O in Olist:
-      val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen)
+      val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen, VERBOSE)
       sanity_check_polygon(screen, A)
       for Ox in Olist:
         sanity_check_polygon(screen, Ox)
@@ -120,3 +120,52 @@ def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant
     pygame.display.update()
     time.sleep(SLEEP_CONSTANT)
   return 0
+
+def update_world(screen, A, Olist, pts, VERBOSE=False):
+  '''
+  Driver for updating the World space, and all objects therein
+  Does not return
+  '''
+  
+  pafn.clear_frame(screen)
+  
+  l1,l2,l3,m1,m2,mpts = gfn.cubic_lerp_calculate(pts)
+  
+  # lerp rendering
+  for i in range(len(mpts)):
+    pafn.clear_frame(screen)
+    # render interpolated points up to i
+    for j in range(i):
+      pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
+    
+    # render lines if verbose
+    if VERBOSE:
+      pafn.frame_draw_line(screen, (pts[0],pts[1]), pafn.colors['red'])
+      pafn.frame_draw_line(screen, (pts[1],pts[2]), pafn.colors['red'])
+      pafn.frame_draw_line(screen, (pts[2],pts[3]), pafn.colors['red'])
+      pafn.frame_draw_line(screen, (l1[i],l2[i]),pafn.colors["tangerine"])
+      pafn.frame_draw_line(screen, (l2[i],l3[i]),pafn.colors["tangerine"])
+      pafn.frame_draw_bold_line(screen, (m1[i],m2[i]),pafn.colors['green'])
+    
+    # render polygons
+    sanity_check_polygon(screen, A)
+    for O in Olist:
+      sanity_check_polygon(screen, O)
+
+    pygame.display.update()
+    time.sleep(0.005)
+  
+  pts = []
+  ptlist = mpts
+  
+  # execute the path following
+  p_last = None
+  for p in range(len(ptlist)):
+    if p_last != ptlist[p]:
+      flag1 = gradually_rotate_voronoi_system(A, Olist, ptlist[p], screen,path_line=ptlist[p:])
+      if flag1 > 1:
+        break
+      flag2 = gradually_translate_voronoi_system(A,Olist,ptlist[p], screen,path_line=ptlist[p:])
+      if flag2 > 1:
+        break
+    p_last = ptlist[p]

@@ -19,11 +19,14 @@ from region_tests import *
 from file_loader import *
 from transform_polygon import *
 from transform_system import *
+
+VERBOSE = False
 SAMPLE_RATE = 400
 LALT = 256
 LSHIFT = 1
 LCTRL = 64
 SPACE = 32
+
 def construct_star_diagram(A, O):
   '''
   Get the minkowski sum of the two polygons
@@ -39,7 +42,7 @@ def pygame_transform_voronoi_system_loop(screen, A, Olist):
   Driver function interactions between two polygons A and static O
   Mouse driven path following
   '''
-  
+  pts = []
   while 1:
     for event in pygame.event.get():
       if event.type == pygame.MOUSEBUTTONDOWN:
@@ -48,31 +51,27 @@ def pygame_transform_voronoi_system_loop(screen, A, Olist):
           sys.exit()
         
         ptlist = []
+        
         counter = 0
         # construct the path
         while pygame.MOUSEBUTTONUP not in [event.type for event in pygame.event.get()]:
-          if not counter % SAMPLE_RATE:
-            ptlist.append(pygame.mouse.get_pos())
-            pafn.frame_draw_dot(screen, ptlist[-1], pafn.colors["yellow"])
-            pygame.display.update()
-          counter+=1
+          continue
         
-        # observe the line
-        # time.sleep(0.5)
-        #clear_frame(screen)
+        p = pygame.mouse.get_pos()
+        pts.append(p)
         
-        # execute the path following
-        p_last = None
-        for p in range(len(ptlist)):
-          if p_last != ptlist[p]:
-            flag1 = gradually_rotate_voronoi_system(A, Olist, ptlist[p], screen,path_line=ptlist[p:])
-            if flag1 > 1:
-              break
-            flag2 = gradually_translate_voronoi_system(A,Olist,ptlist[p], screen,path_line=ptlist[p:])
-            if flag2 > 1:
-              break
-          p_last = ptlist[p]
-          
+        # render line segments between existing points
+        pafn.frame_draw_dot(screen, p,pafn.colors["green"])
+        for i in range(1,len(pts)):
+          pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
+        
+        # continue until at least 4 points defined
+        if len(pts) < 4:
+          pygame.display.update()
+          continue
+        
+        update_world(screen, A, Olist, pts, VERBOSE)
+        pts = []
 
 
 def triple_polygon_mod():

@@ -12,6 +12,47 @@ LALT = 256
 LSHIFT = 1
 LCTRL = 64
 SPACE = 32
+def lerp_list(p1, p2, n = 200):
+  '''
+  Lerp helper function for two points
+  Returns a list of points
+  '''
+  pts = []
+  step = 1 / n
+  for i in range(n):
+    pts.append(gfn.lerp(p1, p2, step * i))
+  pts.append(p2)
+  return pts
+
+def cubic_lerp_calculate(pts, n = 200):
+  '''
+  Cubic lerp function for a list of at least 4 points
+  Returns linear interpolation between pairs of points
+    l1=(A,B)
+    l2=(B,C)
+    l3=(C,D)
+    m1 = (l1,l2)
+    m2 = (l2,l3)
+    p1 = (m1, m2)
+  '''
+  l1 = lerp_list(pts[0],pts[1])
+  l2 = lerp_list(pts[1],pts[2])
+  l3 = lerp_list(pts[2],pts[3])
+  m1 = []
+  m2 = []
+  step = 1 / n
+
+  for i in range(n):
+    m1.append(gfn.lerp(l1[i],l2[i],i * step))
+    m2.append(gfn.lerp(l2[i],l3[i],i * step))
+  m1.append(gfn.lerp(l1[-1],l2[-1],1))
+  m2.append(gfn.lerp(l2[-1],l3[-1],1))
+
+  p1 = []
+  for i in range(n):
+    p1.append(gfn.lerp(m1[i],m2[i],i * step))
+  p1.append(gfn.lerp(m1[-1],m2[-1],1))
+  return l1,l2,l3,m1,m2,p1
 
 def draw_all_normals(screen, chain):
   '''
@@ -37,17 +78,49 @@ def draw_all_links(screen, chain):
   for p in range(1,len(points)):
     pafn.frame_draw_polygon(screen, points[p], pafn.colors["red"])
 
-def rotate_chain(screen, chain, target_point, steps = 30):
+def calculate_circles(screen, chain,target_point,DRAW=None):
+  t_x,t_y = target_point
+  rad,inner_len = MathFxns.car2pol(chain.links[1].get_origin(), chain.links[1].get_endpoint())
+  rad2,outer_len = MathFxns.car2pol(chain.links[2].get_origin(), chain.links[2].get_endpoint())
+
+  o_x,o_y = chain.get_anchor_origin()
+
+  target_distance = np.sqrt(np.square(t_x - o_x) + np.square(t_y - o_y))
+  x = np.divide((np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (2 * inner_len))
+  
+  y = np.sqrt(np.square(target_distance) - (np.divide(np.square(np.square(inner_len) + np.square(target_distance) - np.square(outer_len)), (4 * np.square(target_distance)))))
+  max_radius = abs(outer_len)
+  curr_radius = abs(outer_len - x)
+  y = min(np.sqrt(abs(np.square(max_radius) - np.square(curr_radius))), y)
+  ps = [(o_x + x, o_y + y), (o_x + x, o_y), (o_x + x, o_y - y)]
+  if DRAW == None:
+    return ps
+
+  # # pps = transform_point_set(link, ps)
+  pafn.clear_frame(screen)
+  for i in ps:
+    pafn.frame_draw_dot(screen, i, pafn.colors["magenta"])
+  # return pps
+  
+  pafn.draw_circle(screen, target_distance, (o_x, o_y), pafn.colors["yellow"])
+  pafn.draw_circle(screen, outer_len, chain.links[2].get_origin(), pafn.colors["cyan"])
+  pafn.draw_circle(screen, x, (o_x, o_y), pafn.colors["green"])
+  pygame.display.update()
+  return ps
+  
+
+def rotate_chain(screen, chain, target_point, intermediate_point, steps = 30):
   '''
   Rotates links in the chain as influenced by a target point
   Does not return
   Calls update
   '''
-  rad1 = chain.links[1].get_relative_rotation(target_point)
-  rad2 = chain.links[2].get_relative_rotation(target_point)
-  rad2 = rad2 - rad1
-  rot_mat1 = tfn.calculate_rotation_matrix(rad1)
-  rot_mat2 = tfn.calculate_rotation_matrix(rad2)
+  # rad1 = chain.links[1].get_relative_rotation(target_point)
+  rad2 = chain.links[2].get_relative_rotation(intermediate_point) # exac
+  rad1,tp = tfn.calculate_rotation(chain.get_anchor_origin(), target_point, intermediate_point)
+  
+  rot_mat1 = tfn.calculate_rotation_matrix(rad1,step_count=steps)
+  rot_mat2 = tfn.calculate_rotation_matrix(rad2,step_count=steps)
   step = np.divide(rad1, steps)
   step2 = np.divide(rad2, steps)
   origin = chain.links[0].get_origin()
@@ -55,15 +128,15 @@ def rotate_chain(screen, chain, target_point, steps = 30):
     for l in chain.links[1:]:
       l.rotate(origin, rot_mat1)
       l.rel_theta += step
-
     chain.links[2].rotate(chain.links[2].get_origin(), rot_mat2)
     chain.links[2].rel_theta += step2
-    pafn.clear_frame(screen)
-    draw_all_normals(screen, chain)
-    draw_all_links(screen, chain)
-    pygame.display.update()
-    time.sleep(0.01)
-      
+    if steps > 1:
+      pafn.clear_frame(screen)
+      draw_all_normals(screen, chain)
+      draw_all_links(screen, chain)
+      pygame.display.update()
+      time.sleep(0.005)
+
 
 def rotate_link_to_point(screen, chain, target_point, steps = 30, link_index=2):
   '''
@@ -74,13 +147,13 @@ def rotate_link_to_point(screen, chain, target_point, steps = 30, link_index=2):
   rot_mat = tfn.calculate_rotation_matrix(rad)
   step = np.divide(rad, steps)
   for i in range(steps):
-    pafn.clear_frame(screen)
+    # pafn.clear_frame(screen)
     chain.links[link_index].rotate(chain.links[link_index].get_origin(), rot_mat)
     chain.links[link_index].rel_theta += step
-    draw_all_normals(screen, chain)
-    draw_all_links(screen, chain)
-    pygame.display.update()
-    time.sleep(0.01)
+    # draw_all_normals(screen, chain)
+    # draw_all_links(screen, chain)
+    # pygame.display.update()
+    # time.sleep(0.01)
 
 def pygame_chain_main(screen, chain):
   '''
@@ -91,6 +164,7 @@ def pygame_chain_main(screen, chain):
   k = 400
   new_theta = 0
   segment = 1
+  pts = []
   origin = (k,k)
   lt = origin
   while 1:
@@ -100,17 +174,63 @@ def pygame_chain_main(screen, chain):
         if pygame.key.get_mods() == LCTRL:
           sys.exit()
         if pygame.key.get_mods() == LALT:
-          pafn.clear_frame(screen)
-          pafn.frame_draw_polygon(screen, point_set, pafn.colors["red"])
+          p = pygame.mouse.get_pos()
+        # draw_all_normals(screen, chain)
+        # for i in range(2):
+          ps = calculate_circles(screen, chain, p,DRAW=1)
           pygame.display.update()
           continue
         while pygame.MOUSEBUTTONUP not in [event.type for event in pygame.event.get()]:
           continue
         p = pygame.mouse.get_pos()
-        # draw_all_normals(screen, chain)
-        # for i in range(2):
-        rotate_chain(screen,chain,p,steps=30)
-        # rotate_link_to_point(screen, chain, p, steps=30)
+        
+        pts.append(p)
+        for i in range(1,len(pts)):
+          pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
+        pafn.frame_draw_dot(screen, p, pafn.colors['green'])
+
+        if len(pts) == 4:
+          
+          pafn.clear_frame(screen)
+          ps = calculate_circles(screen, chain, pts[0])
+          r,t = tfn.calculate_rotation(chain.get_anchor_origin(), chain.links[1].get_endpoint(), ps[1])
+          rot_mat = tfn.calculate_rotation_matrix(r,step_count=1)
+          ps = tfn.rotate_point_set(chain.get_anchor_origin(), ps, rot_mat)
+          
+          tp2 = ps[0]
+          tp1 = pts[0]
+          # rotate_chain(screen,chain,p,steps=30)
+          rotate_chain(screen, chain, tp1,tp2, steps=40)
+          draw_all_normals(screen, chain)
+          draw_all_links(screen, chain)
+          pygame.display.update()
+          # pafn.frame_draw_polygon(screen, pts, pafn.colors["red"])
+          l1,l2,l3,m1,m2,mpts = cubic_lerp_calculate(pts)
+          
+          for i in range(len(mpts)):
+            pafn.clear_frame(screen)
+            p = mpts[i]
+            for j in range(i,len(mpts)):
+              pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
+
+            ps = calculate_circles(screen, chain, p)
+            r,t = tfn.calculate_rotation(chain.get_anchor_origin(), chain.links[1].get_endpoint(), ps[1])
+            rot_mat = tfn.calculate_rotation_matrix(r,step_count=1)
+            ps = tfn.rotate_point_set(chain.get_anchor_origin(), ps, rot_mat)
+            
+            tp2 = ps[0]
+            tp1 = p
+            # rotate_chain(screen,chain,p,steps=30)
+            rotate_chain(screen, chain, tp1,tp2, steps=1)
+            draw_all_normals(screen, chain)
+            draw_all_links(screen, chain)
+            for j in range(i,len(mpts)):
+              pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
+            pygame.display.update()
+            time.sleep(0.01)
+          pts = []
+        else:
+          pygame.display.update()
         # draw_all_normals(screen, chain)
         
 

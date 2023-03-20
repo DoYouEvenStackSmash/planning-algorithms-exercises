@@ -285,6 +285,7 @@ def two_link():
           rotate_chain(link_1, apt.get_coord(), screen, cl)
           draw_origin_dot(screen, p, colors["yellow"])
           draw_origin_dot(screen,pt.get_coord(), colors["cyan"])
+          target_circle(screen, link_2, p)
           # print(f"angle: {a}")
           # print(f"{pt.get_coord()}, vs {link_2.get_end_point()}")
           
