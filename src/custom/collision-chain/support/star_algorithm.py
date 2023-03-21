@@ -119,6 +119,15 @@ def get_star_segments(star_list, origin):
     segments.append(((ox,oy),(r * np.cos(edge_tuple[0]) + ox, r * np.sin(edge_tuple[0]) + oy)))
   return segments
 
+def construct_star_diagram(A, O):
+  '''
+  Get the minkowski sum of the two polygons
+  Returns a list of points 
+  '''
+  sl = build_star(A.get_front_edge(),O.get_front_edge())
+
+  obs_spc = derive_obstacle_space_points(sl)
+  return obs_spc
 
 
   
