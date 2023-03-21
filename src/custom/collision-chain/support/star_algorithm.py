@@ -98,6 +98,8 @@ def derive_obstacle_space_points(star_list):
     theta = star_list[i][0] + np.pi / 2
     if theta > np.pi:
       theta = -2 * np.pi + theta
+    if theta < -np.pi:
+      theta = 2 * np.pi + theta
     x = r * np.cos(theta) + ox
     y = r * np.sin(theta) + oy
     origin_pts.append((x,y))

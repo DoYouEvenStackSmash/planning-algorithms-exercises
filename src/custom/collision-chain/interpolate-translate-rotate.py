@@ -12,21 +12,22 @@ from support.star_algorithm import *
 from support.doubly_connected_edge_list import *
 
 # useful geometry functions
-from pygame_rendering.render_support import PygameArtFxns as pafn
-from pygame_rendering.render_support import GeometryFxns as gfn
-from pygame_rendering.render_support import MathFxns
-from pygame_rendering.render_support import TransformFxns as tfn
+from support.render_support import PygameArtFxns as pafn
+from support.render_support import GeometryFxns as gfn
+from support.render_support import MathFxns
+from support.render_support import TransformFxns as tfn
 
-from voronoi_regions import *
-from feature_markers import *
-from polygon_debugging import *
-from region_tests import *
-from file_loader import *
+from support.voronoi_regions import *
+from support.feature_markers import *
+from support.polygon_debugging import *
+from support.region_tests import *
+from support.file_loader import *
 from transform_polygon import *
-from transform_system import *
-from objects import *
-import sys
 
+from support.Chain import Chain
+from support.Link import Link
+import sys
+COLLISION_THRESHOLD = 10
 VERBOSE = False
 SAMPLE_RATE = 400
 LALT = 256
@@ -70,7 +71,6 @@ def construct_star_diagram(A, O):
 
 def translate_chain(screen, chain, target_point, steps=30):
   
-  # x_disp, y_disp = tfn.get_translation_function(chain.get_anchor_origin(), target_point, steps)
   r,theta = get_polar_coord(chain.get_anchor_origin(), target_point)
   step_r = r / steps
   x_step = step_r * np.cos(theta)
@@ -153,13 +153,15 @@ def calculate_circles(screen, chain,target_point,DRAW=None):
   pygame.display.update()
   return ps
 
-def draw_bundle(screen, chain, A = None):
+def draw_bundle(screen, chain, Olist = [], A = None):
+  for O in Olist:
+    sanity_check_polygon(screen, O)
   if A != None:
     sanity_check_polygon(screen, A)
   draw_all_normals(screen, chain)
   draw_all_links(screen, chain)
 
-def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps = 30, A=None):
+def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps = 30, Olist = [], A=None):
   '''
   Rotates links in the chain as influenced by a target point
   Does not return
@@ -178,22 +180,24 @@ def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps
   for i in range(steps):
     for j in range(1,len(chain.links)):
       l = chain.links[j]
-      # v = check_contact(screen, l, A)
-      # if v < COLLISION_THRESHOLD:
-      #   return v
+      for A in Olist:
+        v = check_contact(screen, l, A)
+        if v < COLLISION_THRESHOLD:
+          return v
 
       l.rotate_body(origin, rot_mat1)
       l.rel_theta += step
-    # v = check_contact(screen, l, A)
-    # if v < COLLISION_THRESHOLD:
-    #   return v
+    for A in Olist:
+      v = check_contact(screen, l, A)
+      if v < COLLISION_THRESHOLD:
+        return v
       # continue
     chain.links[-1].rotate_body(chain.links[-1].get_origin(), rot_mat2)
     chain.links[-1].rel_theta += step2
     
     if steps > 1:
       pafn.clear_frame(screen)
-      draw_bundle(screen, chain, A)
+      draw_bundle(screen, chain,Olist = Olist, A = A)
       # sanity_check_polygon(screen, A)
       # draw_all_normals(screen, chain)
       # draw_all_links(screen, chain)
@@ -203,99 +207,23 @@ def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps
 
 
 def check_contact(screen, link, O):
-  val = find_contact(build_star(link.get_body().get_front_edge(), O.get_front_edge()), screen, VERBOSE=True)
+  val = find_contact(build_star(link.get_body().get_front_edge(), O.get_front_edge()), screen, VERBOSE=False)
+  if val < COLLISION_THRESHOLD:
+    obs_spc = construct_star_diagram(link.get_body(), O)
+    pafn.frame_draw_polygon(screen, obs_spc, pafn.colors['yellow'])
+    pygame.display.update()
   return val
 
-def pygame_chain_rotate(screen, chain):
+def pygame_chain_move(screen, chain, A = None, Olist = []):
   '''
   Driver function interactions between two polygons A and static O
   Mouse driven path following
   '''
-  A = None
-  step_count = 100
-  k = 400
-  new_theta = 0
-  segment = 1
-  pts = []
-  origin = (k,k)
-  lt = origin
-  while 1:
-    for event in pygame.event.get():
-      if event.type == pygame.MOUSEBUTTONDOWN:
-        # LCTRL for exit hotkey
-        if pygame.key.get_mods() == LCTRL:
-          sys.exit()
-        if pygame.key.get_mods() == LALT:
-          p = pygame.mouse.get_pos()
-
-          ps = calculate_circles(screen, chain, p,DRAW=1)
-          pygame.display.update()
-          continue
-        while pygame.MOUSEBUTTONUP not in [event.type for event in pygame.event.get()]:
-          continue
-        p = pygame.mouse.get_pos()
-        
-        pts.append(p)
-        for i in range(1,len(pts)):
-          pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
-        pafn.frame_draw_dot(screen, p, pafn.colors['green'])
-        if len(pts) < 4:
-          pygame.display.update()
-          continue
-        else:
-          pafn.clear_frame(screen)
-          ps = calculate_circles(screen, chain, pts[0])
-          r,t = tfn.calculate_rotation(chain.get_anchor_origin(), chain.links[1].get_endpoint(), ps[1])
-          rot_mat = tfn.calculate_rotation_matrix(r,step_count=1)
-          ps = tfn.rotate_point_set(chain.get_anchor_origin(), ps, rot_mat)
-          
-          tp2 = ps[0]
-          tp1 = pts[0]
-          # rotate_chain(screen,chain,p,steps=30)
-          v = rotate_two_link_chain(screen, chain, tp1,tp2, steps=40,A=A)
-          draw_bundle(screen, chain, A)
-
-          
-  
-          l1,l2,l3,m1,m2,mpts = gfn.cubic_lerp_calculate(pts)
-          for j in range(i,len(mpts)):
-            pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
-          pygame.display.update()
-          for i in range(len(mpts)):
-            pafn.clear_frame(screen)
-            p = mpts[i]
-            for j in range(i,len(mpts)):
-              pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
-
-            ps = calculate_circles(screen, chain, p)
-            r,t = tfn.calculate_rotation(chain.get_anchor_origin(), chain.links[1].get_endpoint(), ps[1])
-            rot_mat = tfn.calculate_rotation_matrix(r,step_count=1)
-            ps = tfn.rotate_point_set(chain.get_anchor_origin(), ps, rot_mat)
-            
-            tp2 = ps[0]
-            tp1 = p
-
-            v = rotate_two_link_chain(screen, chain, tp1,tp2, steps=1,A=A)
-            draw_bundle(screen, chain, A)
-            pygame.display.update()
-
-              # continue
-            for j in range(i,len(mpts)):
-              pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
-            pygame.display.update()
-            time.sleep(0.01)
-            # COLLISION_THRESHOLD = 5
-          pts = []
-        return
-
-def pygame_chain_move(screen, chain, A = None):
-  '''
-  Driver function interactions between two polygons A and static O
-  Mouse driven path following
-  '''
+  global COLLISION_THRESHOLD
   pts = []
   mod = 0
   pts = [chain.links[i].get_origin() for i in range(len(chain.links))]
+  pts.append(chain.links[-1].get_endpoint())
   while 1:
     for event in pygame.event.get():
       if event.type == pygame.MOUSEBUTTONDOWN:
@@ -314,10 +242,32 @@ def pygame_chain_move(screen, chain, A = None):
       
         
         pts.append(p)
-        if len(pts) < 4:
-          continue  
-        l1,l2,l3,m1,m2,mpts = gfn.cubic_lerp_calculate(pts)
-        for i in range(80):
+        for i in range(1,min(len(pts),4)):
+          pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
+        pafn.frame_draw_dot(screen, p, pafn.colors['green'])
+        if len(pts) > 4:
+          for j in range(4, len(pts)):
+            pafn.frame_draw_line(screen, (pts[j-1],pts[j]), pafn.colors['tangerine'])
+          pafn.frame_draw_dot(screen, p, pafn.colors['tangerine'])
+        if len(pts) < 8:
+          pygame.display.update()
+          continue 
+        m = []
+        
+        # for x in range(2):
+        l1,l2,l3,m1,m2,mpts = gfn.cubic_lerp_calculate(pts[0:4])
+        # pts[4] = mpts[79]
+        # pts[5] = mpts[99]
+        l1,l2,l3,m1,m2,mpts2 = gfn.cubic_lerp_calculate(pts[3:7])
+        for i in mpts2:
+          mpts.append(i)
+          # m.append(mpts)
+        # mpts = []
+        # for i in m:
+        #   for j in i:
+        #     mpts.append(j)
+        # print(len(mpts))
+        for i in range(180):
           p = mpts[i + 19]
 
           # pygame.display.update()
@@ -330,28 +280,30 @@ def pygame_chain_move(screen, chain, A = None):
           rot_mat = tfn.calculate_rotation_matrix(r,step_count=1)
           ps = tfn.rotate_point_set(chain.get_anchor_origin(), ps, rot_mat)
           
-          tp2 = ps[2]
+          tp2 = ps[1]
           tp1 = p
-          v = rotate_two_link_chain(screen, chain, tp1,tp2, steps=1,A=A)
+          v = rotate_two_link_chain(screen, chain, tp1,tp2, steps=1,Olist = Olist, A = A)
+          if v > 1:
+            COLLISION_THRESHOLD = 1
+            return
+            
           translate_chain(screen, chain, mpts[i], 1)
-          draw_bundle(screen, chain, A)
+          draw_bundle(screen, chain, Olist = Olist, A = A)
           for j in range(i,len(mpts)):
             pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
           pygame.display.update()
           time.sleep(0.01)
           if MathFxns.euclidean_dist(mpts[i], chain.links[-1].get_endpoint()) < 20:
             break
-        
-        # for p in mpts[50:]:
-        #   translate_chain(screen, chain, p, 1)
-
+        COLLISION_THRESHOLD = 10
         return
 
 
 def triple_polygon_mod():
   pygame.init()
-  screen = pafn.create_display(1000,1000)
+  screen = pafn.create_display(1200,1000)
   pts = [(350, 390),(450,390),(450,410),(350,410)]
+  pts = [(350, 390),(420,400),(350,410)]
   pts2 = [(470, 390),(550,390),(550,410), (470,410)]
   origin = (350,400)
   opts = [origin, (351,401), (352,402)]
@@ -361,27 +313,36 @@ def triple_polygon_mod():
   ap.e_color = pafn.colors["tangerine"]
   a = Link(endpoint = origin, rigid_body = ap)
   A = Polygon(pts)
-  B = Polygon(pts2)
+  # B = Polygon(pts2)
   A.color = pafn.colors["green"]
   A.v_color = pafn.colors["cyan"]
   A.e_color = pafn.colors["tangerine"]
+  Olist = []
   # sanity_check_polygon(screen,A)
   c = Chain(origin = origin, anchor=a)
-  l = Link(endpoint=(455,400), rigid_body = A)
-  B.color = pafn.colors["green"]
-  B.v_color = pafn.colors["cyan"]
-  B.e_color = pafn.colors["tangerine"]
+  l = Link(endpoint=(410,400), rigid_body = A)
+  # B.color = pafn.colors["green"]
+  # B.v_color = pafn.colors["cyan"]
+  # B.e_color = pafn.colors["tangerine"]
+  # B = build_polygon(sys.argv[1])
+  for arg in sys.argv[1:]:
+    o = build_polygon(arg)
+    o.color = pafn.colors["white"]
+    o.v_color = pafn.colors["cyan"]
+    o.e_color = pafn.colors["tangerine"]
+    Olist.append(o)
+  
   # e = Link(endpoint = (600,400), rigid_body = B)
   c.add_link(l)
   # c.add_link(e)
-  # draw_bundle(screen, chain, A)
-  draw_all_normals(screen, c)
-  draw_all_links(screen, c)
+  draw_bundle(screen, c, Olist = Olist)
+  # draw_all_normals(screen, c)
+  # draw_all_links(screen, c)
   
   pygame.display.update()
   # start pygame loop
   while 1:
-    pygame_chain_move(screen, c)
+    pygame_chain_move(screen, c, Olist = Olist)
     # pygame_chain_rotate(screen, c)
 
 def main():

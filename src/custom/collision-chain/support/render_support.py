@@ -255,7 +255,7 @@ class PygameArtFxns:
     Draws a single dot given a point (x, y)
     Returns nothing
     '''
-    pygame.draw.circle(screen, color, point, 2, width)
+    pygame.draw.circle(screen, color, point, 1, width)
 
   def clear_frame(screen, color=(0,0,0)):
     '''

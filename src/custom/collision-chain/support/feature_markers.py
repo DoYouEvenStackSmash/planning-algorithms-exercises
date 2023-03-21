@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 import pygame
-from pygame_rendering.render_support import PygameArtFxns as pafn
-from pygame_rendering.render_support import GeometryFxns as gfn
-from pygame_rendering.render_support import MathFxns
-from pygame_rendering.render_support import TransformFxns as tfn
+from support.render_support import PygameArtFxns as pafn
+from support.render_support import GeometryFxns as gfn
+from support.render_support import MathFxns
+from support.render_support import TransformFxns as tfn
 from support.unit_norms import *
 from support.star_algorithm import *
 

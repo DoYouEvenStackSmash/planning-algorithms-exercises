@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import numpy as np
-from support.Line import *
 
 class World:
   def __init__(self):

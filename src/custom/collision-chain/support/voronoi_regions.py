@@ -7,10 +7,10 @@ from support.World import *
 from support.star_algorithm import *
 from support.doubly_connected_edge_list import *
 
-from pygame_rendering.render_support import *
-from feature_markers import *
-from region_tests import *
-from file_loader import *
+from support.render_support import *
+from support.feature_markers import *
+from support.region_tests import *
+from support.file_loader import *
 
 DEBUG = False
 

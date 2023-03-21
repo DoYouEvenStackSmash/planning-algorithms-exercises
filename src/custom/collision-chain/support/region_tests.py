@@ -6,9 +6,9 @@ from support.World import *
 from support.star_algorithm import *
 from support.doubly_connected_edge_list import *
 
-from pygame_rendering.render_support import *
+from support.render_support import *
 
-from file_loader import *
+from support.file_loader import *
 
 # determines whether a point is within either of the adjacent regions
 def t_in_adj_e_vor(E, t):
