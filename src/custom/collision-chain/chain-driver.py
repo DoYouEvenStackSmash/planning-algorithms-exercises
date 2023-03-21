@@ -92,9 +92,13 @@ def calculate_circles(screen, chain,target_point,DRAW=None):
   pafn.draw_circle(screen, x, (o_x, o_y), pafn.colors["green"])
   pygame.display.update()
   return ps
-  
 
-def rotate_chain(screen, chain, target_point, intermediate_point, steps = 30, A=None):
+def draw_bundle(screen, chain, A):
+  sanity_check_polygon(screen, A)
+  draw_all_normals(screen, chain)
+  draw_all_links(screen, chain)
+
+def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps = 30, A=None):
   '''
   Rotates links in the chain as influenced by a target point
   Does not return
@@ -128,43 +132,18 @@ def rotate_chain(screen, chain, target_point, intermediate_point, steps = 30, A=
     
     if steps > 1:
       pafn.clear_frame(screen)
-      
-      sanity_check_polygon(screen, A)
-      draw_all_normals(screen, chain)
-      draw_all_links(screen, chain)
+      draw_bundle(screen, chain, A)
+      # sanity_check_polygon(screen, A)
+      # draw_all_normals(screen, chain)
+      # draw_all_links(screen, chain)
       pygame.display.update()
       time.sleep(0.005)
   return 0
 
 
-def rotate_link_to_point(screen, chain, target_point, steps = 30, link_index=2):
-  '''
-  Rotate a single link
-  Does not return
-  '''
-  rad = chain.links[link_index].get_relative_rotation(target_point)
-  rot_mat = tfn.calculate_rotation_matrix(rad)
-  step = np.divide(rad, steps)
-  for i in range(steps):
-    # pafn.clear_frame(screen)
-    chain.links[link_index].rotate(chain.links[link_index].get_origin(), rot_mat)
-    chain.links[link_index].rel_theta += step
-    # draw_all_normals(screen, chain)
-    # draw_all_links(screen, chain)
-    # pygame.display.update()
-    # time.sleep(0.01)
-
 def check_contact(screen, link, O):
   val = find_contact(build_star(link.get_body().get_front_edge(), O.get_front_edge()), screen, VERBOSE=True)
   return val
-
-def check_all_contact(screen, chain, O):
-  v = 0
-  for l in chain.links[1:]:
-    v = check_contact(screen, l, O)
-    # if v <= COLLISION_THRESHOLD:
-    #   return v
-  return 0
 
 def pygame_chain_coll(screen, chain, A):
   '''
@@ -186,8 +165,7 @@ def pygame_chain_coll(screen, chain, A):
           sys.exit()
         if pygame.key.get_mods() == LALT:
           p = pygame.mouse.get_pos()
-        # draw_all_normals(screen, chain)
-        # for i in range(2):
+
           ps = calculate_circles(screen, chain, p,DRAW=1)
           pygame.display.update()
           continue
@@ -200,7 +178,20 @@ def pygame_chain_coll(screen, chain, A):
           pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
         pafn.frame_draw_dot(screen, p, pafn.colors['green'])
         global COLLISION_THRESHOLD
-        if len(pts) == 4:
+        if len(pts) < 4:
+          pygame.display.update()
+          continue
+        else:
+          COLL_FLAG = False
+          for l in chain.links[1:]:
+            v = check_contact(screen, l, A)
+            if v < COLLISION_THRESHOLD:
+              print("invalid pose!")
+              COLL_FLAG = True
+              break
+          if COLL_FLAG:
+            pts = []
+            continue
           
           pafn.clear_frame(screen)
           ps = calculate_circles(screen, chain, pts[0])
@@ -211,18 +202,18 @@ def pygame_chain_coll(screen, chain, A):
           tp2 = ps[0]
           tp1 = pts[0]
           # rotate_chain(screen,chain,p,steps=30)
-          v = rotate_chain(screen, chain, tp1,tp2, steps=40,A=A)
-          draw_all_normals(screen, chain)
-          draw_all_links(screen, chain)
+          v = rotate_two_link_chain(screen, chain, tp1,tp2, steps=40,A=A)
+          draw_bundle(screen, chain, A)
+          # draw_all_normals(screen, chain)
+          # draw_all_links(screen, chain)
+          # sanity_check_polygon(screen,A)
+          pygame.display.update()
+
           if v > 1:
             COLLISION_THRESHOLD = 1
-            pygame.display.update()
             pts = []
             continue
-            
-          
-          pygame.display.update()
-          pafn.frame_draw_polygon(screen, pts, pafn.colors["red"])
+  
           l1,l2,l3,m1,m2,mpts = gfn.cubic_lerp_calculate(pts)
           
           for i in range(len(mpts)):
@@ -238,21 +229,13 @@ def pygame_chain_coll(screen, chain, A):
             
             tp2 = ps[0]
             tp1 = p
-            # rotate_chain(screen,chain,p,steps=30)
-            # v = check_all_contact(screen,chain,A)
-            # print(v)
-            
-            v = rotate_chain(screen, chain, tp1,tp2, steps=1,A=A)
-            # else:
-              # print("invalid pose")
-            
-            sanity_check_polygon(screen,A)
 
-            draw_all_normals(screen, chain)
-            draw_all_links(screen, chain)
+            v = rotate_two_link_chain(screen, chain, tp1,tp2, steps=1,A=A)
+            draw_bundle(screen, chain, A)
+            pygame.display.update()
+
             if v > 1:
               COLLISION_THRESHOLD = 1
-              pygame.display.update()
               pts = []
               break
               # continue
@@ -263,9 +246,7 @@ def pygame_chain_coll(screen, chain, A):
             # COLLISION_THRESHOLD = 5
           COLLISION_THRESHOLD = 10
           pts = []
-        else:
-          pygame.display.update()
-        # draw_all_normals(screen, chain)
+
 
 def main():
   pygame.init()
