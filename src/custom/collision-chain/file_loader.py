@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from cgitb import text
+
 import sys
 import json
 

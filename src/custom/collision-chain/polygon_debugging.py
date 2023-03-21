@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import pygame
-# from pygame_rendering.render_support import *
+
 from pygame_rendering.render_support import PygameArtFxns as pafn
 
 from region_tests import *

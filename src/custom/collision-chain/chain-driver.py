@@ -1,18 +1,21 @@
 #!/usr/bin/python3
 import pygame
 import time
+
+# support functions
 from support.unit_norms import *
 from support.Polygon import *
-from support.Line import *
-from support.Point import *
+
 from support.World import *
 from support.star_algorithm import *
 from support.doubly_connected_edge_list import *
-from pygame_rendering.pygame_loop_support import *
+
+# useful geometry functions
 from pygame_rendering.render_support import PygameArtFxns as pafn
 from pygame_rendering.render_support import GeometryFxns as gfn
 from pygame_rendering.render_support import MathFxns
 from pygame_rendering.render_support import TransformFxns as tfn
+
 from voronoi_regions import *
 from feature_markers import *
 from polygon_debugging import *
@@ -22,53 +25,13 @@ from transform_polygon import *
 from transform_system import *
 from objects import *
 import sys
+
 COLLISION_THRESHOLD = 10#np.divide(1,123456789)
 SAMPLE_RATE = 400
 LALT = 256
 LSHIFT = 1
 LCTRL = 64
 SPACE = 32
-def lerp_list(p1, p2, n = 200):
-  '''
-  Lerp helper function for two points
-  Returns a list of points
-  '''
-  pts = []
-  step = 1 / n
-  for i in range(n):
-    pts.append(gfn.lerp(p1, p2, step * i))
-  pts.append(p2)
-  return pts
-
-def cubic_lerp_calculate(pts, n = 200):
-  '''
-  Cubic lerp function for a list of at least 4 points
-  Returns linear interpolation between pairs of points
-    l1=(A,B)
-    l2=(B,C)
-    l3=(C,D)
-    m1 = (l1,l2)
-    m2 = (l2,l3)
-    p1 = (m1, m2)
-  '''
-  l1 = lerp_list(pts[0],pts[1])
-  l2 = lerp_list(pts[1],pts[2])
-  l3 = lerp_list(pts[2],pts[3])
-  m1 = []
-  m2 = []
-  step = 1 / n
-
-  for i in range(n):
-    m1.append(gfn.lerp(l1[i],l2[i],i * step))
-    m2.append(gfn.lerp(l2[i],l3[i],i * step))
-  m1.append(gfn.lerp(l1[-1],l2[-1],1))
-  m2.append(gfn.lerp(l2[-1],l3[-1],1))
-
-  p1 = []
-  for i in range(n):
-    p1.append(gfn.lerp(m1[i],m2[i],i * step))
-  p1.append(gfn.lerp(m1[-1],m2[-1],1))
-  return l1,l2,l3,m1,m2,p1
 
 def draw_all_normals(screen, chain):
   '''
@@ -95,6 +58,12 @@ def draw_all_links(screen, chain):
     pafn.frame_draw_polygon(screen, points[p], pafn.colors["red"])
 
 def calculate_circles(screen, chain,target_point,DRAW=None):
+  '''
+  Calculates intersection point of outermost circle
+  https://mathworld.wolfram.com/Circle-CircleIntersection.html
+  
+  Returns a list of 3 points, which describe the chord going through the lens.
+  '''
   t_x,t_y = target_point
   rad,inner_len = MathFxns.car2pol(chain.links[1].get_origin(), chain.links[1].get_endpoint())
   rad2,outer_len = MathFxns.car2pol(chain.links[2].get_origin(), chain.links[2].get_endpoint())
@@ -254,7 +223,7 @@ def pygame_chain_coll(screen, chain, A):
           
           pygame.display.update()
           pafn.frame_draw_polygon(screen, pts, pafn.colors["red"])
-          l1,l2,l3,m1,m2,mpts = cubic_lerp_calculate(pts)
+          l1,l2,l3,m1,m2,mpts = gfn.cubic_lerp_calculate(pts)
           
           for i in range(len(mpts)):
             pafn.clear_frame(screen)
@@ -297,85 +266,6 @@ def pygame_chain_coll(screen, chain, A):
         else:
           pygame.display.update()
         # draw_all_normals(screen, chain)
-       
-def pygame_chain_main(screen, chain):
-  '''
-  Driver function interactions between two polygons A and static O
-  Mouse driven path following
-  '''
-  step_count = 100
-  k = 400
-  new_theta = 0
-  segment = 1
-  pts = []
-  origin = (k,k)
-  lt = origin
-  while 1:
-    for event in pygame.event.get():
-      if event.type == pygame.MOUSEBUTTONDOWN:
-        # LCTRL for exit hotkey
-        if pygame.key.get_mods() == LCTRL:
-          sys.exit()
-        if pygame.key.get_mods() == LALT:
-          p = pygame.mouse.get_pos()
-        # draw_all_normals(screen, chain)
-        # for i in range(2):
-          ps = calculate_circles(screen, chain, p,DRAW=1)
-          pygame.display.update()
-          continue
-        while pygame.MOUSEBUTTONUP not in [event.type for event in pygame.event.get()]:
-          continue
-        p = pygame.mouse.get_pos()
-        
-        pts.append(p)
-        for i in range(1,len(pts)):
-          pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
-        pafn.frame_draw_dot(screen, p, pafn.colors['green'])
-
-        if len(pts) == 4:
-          
-          pafn.clear_frame(screen)
-          ps = calculate_circles(screen, chain, pts[0])
-          r,t = tfn.calculate_rotation(chain.get_anchor_origin(), chain.links[1].get_endpoint(), ps[1])
-          rot_mat = tfn.calculate_rotation_matrix(r,step_count=1)
-          ps = tfn.rotate_point_set(chain.get_anchor_origin(), ps, rot_mat)
-          
-          tp2 = ps[0]
-          tp1 = pts[0]
-          # rotate_chain(screen,chain,p,steps=30)
-          rotate_chain(screen, chain, tp1,tp2, steps=40)
-          draw_all_normals(screen, chain)
-          draw_all_links(screen, chain)
-          pygame.display.update()
-          pafn.frame_draw_polygon(screen, pts, pafn.colors["red"])
-          l1,l2,l3,m1,m2,mpts = cubic_lerp_calculate(pts)
-          
-          for i in range(len(mpts)):
-            pafn.clear_frame(screen)
-            p = mpts[i]
-            for j in range(i,len(mpts)):
-              pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
-
-            ps = calculate_circles(screen, chain, p)
-            r,t = tfn.calculate_rotation(chain.get_anchor_origin(), chain.links[1].get_endpoint(), ps[1])
-            rot_mat = tfn.calculate_rotation_matrix(r,step_count=1)
-            ps = tfn.rotate_point_set(chain.get_anchor_origin(), ps, rot_mat)
-            
-            tp2 = ps[0]
-            tp1 = p
-            # rotate_chain(screen,chain,p,steps=30)
-            rotate_chain(screen, chain, tp1,tp2, steps=1)
-            draw_all_normals(screen, chain)
-            draw_all_links(screen, chain)
-            for j in range(i,len(mpts)):
-              pafn.frame_draw_dot(screen, mpts[j], pafn.colors["cyan"])
-            pygame.display.update()
-            time.sleep(0.01)
-          pts = []
-        else:
-          pygame.display.update()
-        # draw_all_normals(screen, chain)
-        
 
 def main():
   pygame.init()

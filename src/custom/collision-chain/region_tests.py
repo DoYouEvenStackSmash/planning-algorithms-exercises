@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 from support.unit_norms import *
 from support.Polygon import *
-from support.Line import *
-from support.Point import *
+
 from support.World import *
 from support.star_algorithm import *
 from support.doubly_connected_edge_list import *
-from pygame_rendering.pygame_loop_support import *
+
 from pygame_rendering.render_support import *
 
 from file_loader import *
