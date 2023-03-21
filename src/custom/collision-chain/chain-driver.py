@@ -11,19 +11,20 @@ from support.star_algorithm import *
 from support.doubly_connected_edge_list import *
 
 # useful geometry functions
-from pygame_rendering.render_support import PygameArtFxns as pafn
-from pygame_rendering.render_support import GeometryFxns as gfn
-from pygame_rendering.render_support import MathFxns
-from pygame_rendering.render_support import TransformFxns as tfn
+from support.render_support import PygameArtFxns as pafn
+from support.render_support import GeometryFxns as gfn
+from support.render_support import MathFxns
+from support.render_support import TransformFxns as tfn
 
-from voronoi_regions import *
-from feature_markers import *
-from polygon_debugging import *
-from region_tests import *
-from file_loader import *
-from transform_polygon import *
-from transform_system import *
-from objects import *
+from support.voronoi_regions import *
+from support.feature_markers import *
+from support.polygon_debugging import *
+from support.region_tests import *
+from support.file_loader import *
+from support.transform_polygon import *
+
+from support.Link import Link
+from support.Chain import Chain
 import sys
 
 COLLISION_THRESHOLD = 10#np.divide(1,123456789)

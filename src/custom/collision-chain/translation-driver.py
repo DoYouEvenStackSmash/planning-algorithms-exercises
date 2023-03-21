@@ -117,20 +117,6 @@ def pygame_chain_move(screen, chain):
         
         p = pygame.mouse.get_pos()
         translate_chain(screen, chain, p, 1)
-        # pts.append(p)
-        
-        # render line segments between existing points
-        # pafn.frame_draw_dot(screen, p,pafn.colors["green"])
-        # for i in range(1,len(pts)):
-        #   pafn.frame_draw_line(screen, (pts[i-1],pts[i]), pafn.colors['green'])
-        
-        # # continue until at least 4 points defined
-        # if len(pts) < 4:
-        #   pygame.display.update()
-        #   continue
-        
-        # update_world(screen, A, Olist, pts, VERBOSE)
-        # pts = []
 
 
 def triple_polygon_mod():

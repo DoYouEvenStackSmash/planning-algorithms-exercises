@@ -4,7 +4,7 @@ from support.render_support import PygameArtFxns as pafn
 from support.render_support import GeometryFxns as gfn
 from support.render_support import MathFxns
 from support.render_support import TransformFxns as tfn
-from transform_polygon import *
+from support.transform_polygon import *
 from support.Polygon import *
 
 class Link:
@@ -23,6 +23,10 @@ class Link:
     self.endpoint = endpoint
   
   def get_body(self):
+    '''
+    Accessor for internal polygon
+    Returns a polygon object or None
+    '''
     return self.body
 
   def get_points(self):
@@ -85,6 +89,10 @@ class Link:
     rotate_polygon(self.body, rot_mat, origin)
   
   def translate_body(self, x_disp, y_disp):
+    '''
+    Translates internal polygon
+    Does not return
+    '''
     self.endpoint = (self.endpoint[0] + x_disp, self.endpoint[1] + y_disp)
     translate_polygon(self.body, x_disp, y_disp)
     
@@ -122,22 +130,21 @@ class Link:
 
     Returns a normalized angle theta
     '''
-    rel = self.rel_theta
-    ex,ey = self.get_endpoint()
-    ox,oy = self.get_origin()
+  
     norm, dist = MathFxns.car2pol(self.get_origin(), self.get_endpoint())
     rad, r = MathFxns.car2pol(self.get_origin(), target_point)
-    trad, tdist = MathFxns.car2pol(self.get_endpoint(), target_point)
-
+    
     norm = MathFxns.correct_angle(norm)
     rad = MathFxns.correct_angle(rad)
-    trad = MathFxns.correct_angle(trad)
+    
     rotation = np.subtract(rad,norm)
+    
+    # correction for arctan identification
     if rotation > np.pi:
       rotation = rotation - 2 * np.pi
     if rotation < -np.pi:
       rotation = rotation + 2 * np.pi
-    print(rotation)
+    
     return rotation
 
     

@@ -22,13 +22,13 @@ from support.feature_markers import *
 from support.polygon_debugging import *
 from support.region_tests import *
 from support.file_loader import *
-from transform_polygon import *
+from support.transform_polygon import *
 
 from support.Chain import Chain
 from support.Link import Link
 import sys
 COLLISION_THRESHOLD = 10
-VERBOSE = False
+VERBOSE = True
 SAMPLE_RATE = 400
 LALT = 256
 LSHIFT = 1
@@ -77,14 +77,13 @@ def translate_chain(screen, chain, target_point, steps=30):
   y_step = step_r * np.sin(theta)
   total_x, total_y = 0,0
   for i in range(steps):
-    pafn.clear_frame(screen)
     total_x+=x_step
     total_y+=y_step
     for link in chain.links:
       
-      pafn.clear_frame(screen)
       link.translate_body(x_step, y_step)
       if steps > 1:
+        pafn.clear_frame(screen)
         draw_all_normals(screen, chain)
         draw_all_links(screen, chain)
         pygame.display.update()
@@ -161,7 +160,7 @@ def draw_bundle(screen, chain, Olist = [], A = None):
   draw_all_normals(screen, chain)
   draw_all_links(screen, chain)
 
-def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps = 30, Olist = [], A=None):
+def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps = 30, Olist = [], A=None, VERBOSE = False):
   '''
   Rotates links in the chain as influenced by a target point
   Does not return
@@ -180,15 +179,17 @@ def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps
   for i in range(steps):
     for j in range(1,len(chain.links)):
       l = chain.links[j]
+      
       for A in Olist:
-        v = check_contact(screen, l, A)
+        v = check_contact(screen, l, A, VERBOSE = True)
         if v < COLLISION_THRESHOLD:
           return v
-
       l.rotate_body(origin, rot_mat1)
       l.rel_theta += step
+    # if VERBOSE:
+    #   pygame.display.update()
     for A in Olist:
-      v = check_contact(screen, l, A)
+      v = check_contact(screen, l, A, VERBOSE = True)
       if v < COLLISION_THRESHOLD:
         return v
       # continue
@@ -206,8 +207,8 @@ def rotate_two_link_chain(screen, chain, target_point, intermediate_point, steps
   return 0
 
 
-def check_contact(screen, link, O):
-  val = find_contact(build_star(link.get_body().get_front_edge(), O.get_front_edge()), screen, VERBOSE=False)
+def check_contact(screen, link, O, VERBOSE = False):
+  val = find_contact(build_star(link.get_body().get_front_edge(), O.get_front_edge()), screen, VERBOSE)
   if val < COLLISION_THRESHOLD:
     obs_spc = construct_star_diagram(link.get_body(), O)
     pafn.frame_draw_polygon(screen, obs_spc, pafn.colors['yellow'])
@@ -282,7 +283,8 @@ def pygame_chain_move(screen, chain, A = None, Olist = []):
           
           tp2 = ps[1]
           tp1 = p
-          v = rotate_two_link_chain(screen, chain, tp1,tp2, steps=1,Olist = Olist, A = A)
+          pafn.clear_frame(screen)
+          v = rotate_two_link_chain(screen, chain, tp1,tp2, steps=1,Olist = Olist, A = A, VERBOSE = True)
           if v > 1:
             COLLISION_THRESHOLD = 1
             return

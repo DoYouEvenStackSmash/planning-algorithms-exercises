@@ -42,4 +42,8 @@ class Chain:
     self.links.append(link)
 
   def get_anchor_origin(self):
+    '''
+    Accessor for chain anchor (link 0)
+    Returns anchor origin
+    '''
     return self.origin
