@@ -83,6 +83,11 @@ class Link:
     '''
     self.endpoint = tfn.rotate_point(origin, self.get_endpoint(), rot_mat)
     rotate_polygon(self.body, rot_mat, origin)
+  
+  def translate_body(self, x_disp, y_disp):
+    self.endpoint = (self.endpoint[0] + x_disp, self.endpoint[1] + y_disp)
+    translate_polygon(self.body, x_disp, y_disp)
+    
 
   def update_orientation(self, point_set, theta):
     '''

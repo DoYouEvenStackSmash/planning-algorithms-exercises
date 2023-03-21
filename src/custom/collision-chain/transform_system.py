@@ -76,6 +76,7 @@ def gradually_rotate_voronoi_system(A, Olist, t, screen = None, path_line = [], 
   for step in range(int(steps)):
     pafn.clear_frame(screen)
     rotate_polygon(A, r_mat)
+    sanity_check_polygon(screen, A)
     for O in Olist:
       val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen, VERBOSE)
       sanity_check_polygon(screen, A)
@@ -107,6 +108,7 @@ def gradually_translate_voronoi_system(A, Olist, t, screen = None, some_constant
     # print(f"here: {rx}, {ry}")
     pafn.clear_frame(screen)
     translate_polygon(A, rx, ry)
+    sanity_check_polygon(screen, A)
     for O in Olist:
       val = find_contact(build_star(A.get_front_edge(), O.get_front_edge()), screen, VERBOSE)
       sanity_check_polygon(screen, A)
@@ -165,6 +167,7 @@ def update_world(screen, A, Olist, pts, VERBOSE=False):
       flag1 = gradually_rotate_voronoi_system(A, Olist, ptlist[p], screen,path_line=ptlist[p:])
       if flag1 > 1:
         break
+      
       flag2 = gradually_translate_voronoi_system(A,Olist,ptlist[p], screen,path_line=ptlist[p:])
       if flag2 > 1:
         break

@@ -61,6 +61,27 @@ class TransformFxns:
 
     step = np.matmul(rot_mat,np.array([[lp_x - x_o], [lp_y - y_o]]))
     return (step[0][0] + x_o, step[1][0]+ y_o)
+  
+  def get_translation_function(origin, t, steps = 1):
+    '''
+    Derives incremental displacement for a polygon to reach a target point
+    in some number of steps
+    Returns a tuple containing displacement for x,y, and a constant
+    '''
+    r, theta = MathFxns.car2pol(origin, t)
+    d = MathFxns.euclidean_dist(origin, t)
+    sign = 1
+    if d < 0 and r < 0:
+      sign = -1
+    r = r * d * sign
+    # d = MathFxns.euclidean_dist(origin, t)
+    # print(r)
+    # return MathFxns.pol2car(, r, theta)
+    step_dist = (r / steps)
+    x_step = step_dist * np.cos(theta)
+    y_step = step_dist * np.sin(theta)
+    val = (x_step, y_step)
+    return val
 
 class MathFxns:
   '''

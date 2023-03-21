@@ -68,7 +68,7 @@ def rotate_polygon(P, rotation_matrix, origin = None):
   if origin != None:
     h.source_vertex.point_coordinate = rotate_point(rotation_matrix, o, h.source_vertex.get_point_coordinate())
 
-def gradually_translate_polygon(P, target_point, step_size = 1):
+def gradually_translate_polygon(P, target_point, step_size = 1, endpoint = None):
   '''
   Applies a gradual translation to a polygon by repeatedly applying small translations
   Does not return
@@ -80,6 +80,7 @@ def gradually_translate_polygon(P, target_point, step_size = 1):
   y_step = step_r * np.sin(theta)
   for i in range(step_size):
     translate_polygon(P, x_step, y_step)
+  
 
 def translate_polygon(P, x_disp, y_disp):
   '''
