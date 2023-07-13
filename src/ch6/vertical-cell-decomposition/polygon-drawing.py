@@ -16,9 +16,10 @@ from polygon_debugging import *
 LALT = 256
 LSHIFT = 1
 
-def shape_draw(screen, A):
+def shape_draw(screen, A=None):
   pts = []
-  polygons = [A]
+  polygons = []
+  # polygons = [A]
   colors = [pafn.colors["magenta"], pafn.colors["cyan"], pafn.colors["white"]]
   while 1:
     for event in pygame.event.get():
@@ -129,78 +130,81 @@ def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
-    sortkey = lambda v: v.get_point_coordinate()[0]
-    s = get_polygons()
-    vlist = []
-    for p in s:
-      # sanity_check_polygon(screen, p)
-      vl = p.dump_vertices()
-      for i in range(len(vl)):
-        vlist.append(vl[i])
-      
-      # draw_rays(screen, p)
-    vlist = sorted(vlist, key=sortkey)
-    for p in s:
-      sanity_check_polygon(screen, p)
-    pygame.display.update()
-    for v in vlist:
-      angles = get_ray_angles(get_normals(v))
-      print(v.get_point_coordinate(), end = "\t")
-      print(angles)
-      
-      # reversed_angles = get_ray_angles(get_reversed_normals(v))
-      # get_midpoints()
-      pafn.frame_draw_dot(screen, v.get_point_coordinate(), pafn.colors["indigo"])
-      pafn.frame_draw_line(screen, [v.get_point_coordinate(), v._half_edge._next.source_vertex.get_point_coordinate()], pafn.colors["white"])
-      pafn.frame_draw_ray(screen, v.get_point_coordinate(), v._half_edge._next.source_vertex.get_point_coordinate(), pafn.colors["white"])
-      pts = []
-      for a in angles:
-        # pts.append
-        pts.append((v,a)):
-    edges = []
-    for p in s:
-      edges.append(p.get_front_edge())
-    
-    for p in pts:
-      queue = []
-      for front_edge in edges:
-        hold = front_edge
-        next_edge = hold._next
-        while next_edge != hold:
-          theta_1, r1 = mfn.car2pol(p[0], next_edge.source_vertex.get_point_coordinate())
-          theta_2, r2 = mfn.car2pol(p[0], next_edge._next.source_vertex.get_point_coordinate())
-          if theta_1 < 0:
-            theta_1 = 2 * np.pi + theta_1
-          if theta_2 < 0:
-            theta_2 = 2 * np.pi + theta_2
-          if min(theta_1, theta_2) < p[1] and max(theta_1, theta_2) > p[1]:
-            queue.append(next_edge)
-          next_edge = next_edge._next
-        
-
-          if theta_1 < p[1] and theta_2 > p[1] or -1 * theta_2 < p[1] and theta_1
-          
-          if theta_1 
-
-      for pt in pts:
-        pafn.frame_draw_line(screen, (v.get_point_coordinate(), pt), pafn.colors["silver"])
-        # pt2 = mfn.pol2car(v.get_point_coordinate(), 300, np.pi / 2)
-      # ll = gfn.lerp_list(pt1, pt2, 30)
-      # for pt in ll:
-        # pafn.frame_draw_dot(screen, pt, pafn.colors["red"])
-
-      pygame.display.update()
-      time.sleep(1)
-
-    
-    time.sleep(5)
+    shape_draw(screen)
     sys.exit()
     
+    # sortkey = lambda v: v.get_point_coordinate()[0]
+    # s = get_polygons()
+    # vlist = []
+    # for p in s:
+    #   # sanity_check_polygon(screen, p)
+    #   vl = p.dump_vertices()
+    #   for i in range(len(vl)):
+    #     vlist.append(vl[i])
+      
+    #   # draw_rays(screen, p)
+    # vlist = sorted(vlist, key=sortkey)
+    # for p in s:
+    #   sanity_check_polygon(screen, p)
     # pygame.display.update()
-    # shape_draw(screen, A)
-    # time.sleep(3)
-    # sequence_test(screen, pl)
-    # sequence_with_goal_test(screen, pl)
+    # for v in vlist:
+    #   angles = get_ray_angles(get_normals(v))
+    #   print(v.get_point_coordinate(), end = "\t")
+    #   print(angles)
+      
+    #   # reversed_angles = get_ray_angles(get_reversed_normals(v))
+    #   # get_midpoints()
+    #   pafn.frame_draw_dot(screen, v.get_point_coordinate(), pafn.colors["indigo"])
+    #   pafn.frame_draw_line(screen, [v.get_point_coordinate(), v._half_edge._next.source_vertex.get_point_coordinate()], pafn.colors["white"])
+    #   pafn.frame_draw_ray(screen, v.get_point_coordinate(), v._half_edge._next.source_vertex.get_point_coordinate(), pafn.colors["white"])
+    #   pts = []
+    #   for a in angles:
+    #     # pts.append
+    #     pts.append((v,a)):
+    # edges = []
+    # for p in s:
+    #   edges.append(p.get_front_edge())
+    
+    # for p in pts:
+    #   queue = []
+    #   for front_edge in edges:
+    #     hold = front_edge
+    #     next_edge = hold._next
+    #     while next_edge != hold:
+    #       theta_1, r1 = mfn.car2pol(p[0], next_edge.source_vertex.get_point_coordinate())
+    #       theta_2, r2 = mfn.car2pol(p[0], next_edge._next.source_vertex.get_point_coordinate())
+    #       if theta_1 < 0:
+    #         theta_1 = 2 * np.pi + theta_1
+    #       if theta_2 < 0:
+    #         theta_2 = 2 * np.pi + theta_2
+    #       if min(theta_1, theta_2) < p[1] and max(theta_1, theta_2) > p[1]:
+    #         queue.append(next_edge)
+    #       next_edge = next_edge._next
+        
+
+    #       if theta_1 < p[1] and theta_2 > p[1] or -1 * theta_2 < p[1] and theta_1
+          
+    #       if theta_1 
+
+    #   for pt in pts:
+    #     pafn.frame_draw_line(screen, (v.get_point_coordinate(), pt), pafn.colors["silver"])
+    #     # pt2 = mfn.pol2car(v.get_point_coordinate(), 300, np.pi / 2)
+    #   # ll = gfn.lerp_list(pt1, pt2, 30)
+    #   # for pt in ll:
+    #     # pafn.frame_draw_dot(screen, pt, pafn.colors["red"])
+
+    #   pygame.display.update()
+    #   time.sleep(1)
+
+    
+    # time.sleep(5)
+    # sys.exit()
+    
+    # # pygame.display.update()
+    # # shape_draw(screen, A)
+    # # time.sleep(3)
+    # # sequence_test(screen, pl)
+    # # sequence_with_goal_test(screen, pl)
 
 if __name__ == '__main__':
   main()

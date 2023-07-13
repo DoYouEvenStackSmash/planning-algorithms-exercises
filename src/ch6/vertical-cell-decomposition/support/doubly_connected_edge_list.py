@@ -12,6 +12,7 @@ class Vertex:
         self.point_coordinate = point_coordinate
         self._half_edge = _half_edge
         self._id = None
+        self.rank = -1
 
     def get_point_coordinate(self):
         """
@@ -104,6 +105,21 @@ class HalfEdge:
         self._prev = _prev
         self._twin = _twin
         self._id = None
+    
+    def get_next_vertex_segment(self):
+        """
+        Accessor for pair of vertices, curr->next
+        """
+        return (self.source_vertex, self._next.source_vertex)
+    
+    def get_prev_vertex_segment(self):
+        """
+        Accessor for pair of vertices, prev->curr
+        """
+        return (self._prev.source_vertex, self.source_vertex)
+    
+
+        
 
 
 class DoublyConnectedEdgeList:
@@ -119,11 +135,17 @@ class DoublyConnectedEdgeList:
         self.vertex_records = vertex_records if vertex_records != None else []
         self.face_records = face_records if face_records != None else []
 
-    def get_faces_walk(self):
+    def get_face_vertices_walk(self):
         pts = []
         for f in self.face_records:
             pts.append(f.get_vertices())
         return pts
+    
+    def get_face_edges_walk(self):
+        edges = []
+        for f in self.face_records:
+            edges.append(f.get_half_edges())
+        return edges
     
     def get_other_faces(self, origin_face_id=None):
         """
@@ -269,3 +291,8 @@ class DoublyConnectedEdgeList:
         self.face_records[f_id]._id = f_id
 
         return f_id
+    
+    # def split_face(self, face_id=None):
+    #     if face_id == None:
+    #         print("WARN: No face id specified, cannot split face!")
+

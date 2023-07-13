@@ -125,14 +125,14 @@ class MathFxns:
         r = MathFxns.euclidean_dist(origin, pt)
         return (rad, r)
 
-    def pol2car(pt, r, theta):
+    def pol2car(pt, radius, theta):
         """
         Convert polar coordinate to cartesian
         Returns a point
         """
         ox, oy = pt
-        x = r * np.cos(theta)
-        y = r * np.sin(theta)
+        x = radius * np.cos(theta)
+        y = radius * np.sin(theta)
         return (ox + x, oy + y)
 
     def correct_angle(rad_theta):
@@ -250,6 +250,99 @@ class GeometryFxns:
             p1.append(GeometryFxns.lerp(m1[i], m2[i], i * step))
         p1.append(GeometryFxns.lerp(m1[-1], m2[-1], 1))
         return l1, l2, l3, m1, m2, p1
+    
+    def get_unit_normal(pt1, pt2):
+        """
+        Accessor for normal vector
+        """
+        theta, r = MathFxns.car2pol(pt1, pt2)
+        theta = adjust_angle(theta + np.pi / 2)
+        
+        return theta
+
+    def get_delta_theta(endpoint_1, vertex, endpoint_2):
+        theta1, rad1 = MathFxns.car2pol(vertex, endpoint_1)
+            
+        theta2, rad2 = MathFxns.car2pol(vertex, endpoint_2)
+
+        delta_theta = adjust_angle(theta2 - theta1)
+        return delta_theta
+
+    # def test_delta_theta(ept1, v, ept2):
+    def test_get_delta_theta(A, B, C):
+        """
+        Get the angle ABC
+        """
+        theta1, rad1 = MathFxns.car2pol(B, A)
+        theta2, rad2 = MathFxns.car2pol(B, C)
+        delta_theta = abs(adjust_angle(theta2 - theta1))
+        return delta_theta
+
+
+    def get_cartesian_quadrant(theta):
+        PI_OVER_2 = np.divide(np.pi,2)
+        if theta == -np.pi:
+            theta = np.pi
+        if 0 < theta and theta <= PI_OVER_2:
+            return 1
+        if PI_OVER_2 < theta and theta <= np.pi:
+            return 2
+        if -np.pi < theta and theta <= -PI_OVER_2:
+            return 3
+        if -PI_OVER_2 < theta and theta < 0:
+            return 4
+        return 1
+
+
+    def get_normal_pt(A, B, C):
+        """
+        Get a point on the segment AB 90 degrees from C
+        """
+        h = MathFxns.euclidean_dist(B, C)
+        
+        theta = GeometryFxns.test_get_delta_theta(A, B, C)
+        
+        direction, r = MathFxns.car2pol(B, A)
+        d = h * np.cos(theta)
+        normal_pt = MathFxns.pol2car(B, d, direction)
+        return normal_pt
+
+    def get_intersection_pt(A, B, C, theta):
+        """
+        Calculate an intersection point between a vector originating at C with angle theta
+        and the line segment AB
+        Returns a point
+        """
+        M = GeometryFxns.get_normal_pt(A,B,C)
+        
+        T = MathFxns.pol2car(C, 10, theta)
+        
+        gamma = GeometryFxns.test_get_delta_theta(M,C,T)
+        dist = MathFxns.euclidean_dist(C,M)
+        h = dist / np.cos(gamma)
+
+        I = MathFxns.pol2car(C,h,theta)
+        return I
+    
+    def test_for_intersection(A,B,C,theta):
+        T = MathFxns.pol2car(C,10,theta)
+
+        d1 = MathFxns.euclidean_dist(A, C)
+        d2 = MathFxns.euclidean_dist(B, C)
+        d3 = MathFxns.euclidean_dist(A, T)
+        d4 = MathFxns.euclidean_dist(B, T)
+        
+        if d3 > d1 and d4 > d2:
+            return False
+        
+        I = GeometryFxns.get_intersection_pt(A,B,C,theta)
+        d1 = MathFxns.euclidean_dist(A, I)
+        d2 = MathFxns.euclidean_dist(B, I)
+        base_d = MathFxns.euclidean_dist(A, B)
+        if max(d1,d2) >= base_d:
+            return False
+        return True
+            
 
 
 class PygameArtFxns:
