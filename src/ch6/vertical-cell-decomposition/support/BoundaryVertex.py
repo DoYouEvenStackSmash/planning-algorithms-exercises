@@ -1,5 +1,6 @@
 from doubly_connected_edge_list import *
 from render_support import MathFxns as mfn
+
 class BoundaryVertex:
   def __init__(self, vertex, angles = None):
     self.vertex = vertex

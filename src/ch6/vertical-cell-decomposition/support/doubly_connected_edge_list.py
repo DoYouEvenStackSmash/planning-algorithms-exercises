@@ -119,8 +119,6 @@ class HalfEdge:
         return (self._prev.source_vertex, self.source_vertex)
     
 
-        
-
 
 class DoublyConnectedEdgeList:
     """
@@ -136,16 +134,31 @@ class DoublyConnectedEdgeList:
         self.face_records = face_records if face_records != None else []
 
     def get_face_vertices_walk(self):
+        """
+        Accessor for walking all faces and accumulating vertices
+        """
         pts = []
         for f in self.face_records:
             pts.append(f.get_vertices())
         return pts
     
     def get_face_edges_walk(self):
+        """
+        Accessor for walking all faces and accumulating edges
+        """
         edges = []
         for f in self.face_records:
             edges.append(f.get_half_edges())
         return edges
+    
+    def get_faces(self, face_id=None):
+        """
+        Accessor for a specific face
+        """
+        if face_id == None:
+            print("NO face id specified")
+            return []
+        return [self.face_records[face_id]]
     
     def get_other_faces(self, origin_face_id=None):
         """
