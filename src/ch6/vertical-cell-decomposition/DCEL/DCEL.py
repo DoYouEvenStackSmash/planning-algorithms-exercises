@@ -16,6 +16,21 @@ class DCEL:
         self.vertex_records = vertex_records if vertex_records != None else []
         self.face_records = face_records if face_records != None else []
 
+
+    def construct_global_edge_list(self):
+      """
+      Accessor for all chains, of all faces, stored in data structure
+      """
+      gel = []
+      for face in self.face_records:
+        interior_chains = face.get_interior_component_chains()
+        interior_chains.append(face.get_boundary_chain())
+        for edge_list in interior_chains:
+          for edge in edge_list:
+            gel.append(edge)
+      return gel
+
+
     def create_chain(self, point_list, face_ref = None):
       """
       Initializes a chain of half edges using an ORDERED list of points.

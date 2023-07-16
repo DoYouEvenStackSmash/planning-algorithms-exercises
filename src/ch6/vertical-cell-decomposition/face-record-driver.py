@@ -26,90 +26,6 @@ def adjust_angle(theta):
 
   return theta
 
-def get_vertical_angles(p, n):
-  PI_OVER_2 = np.divide(np.pi, 2)
-  if n == p:
-    if n < 3:
-      return [PI_OVER_2]
-    else:
-      return [-PI_OVER_2]
-
-  if n == 1 and p == 2:
-    return [PI_OVER_2]
-
-  if n == 1 and p == 3:
-    return [PI_OVER_2, -PI_OVER_2]
-
-  if n == 1 and p == 4:
-    return []
-
-  if n == 2 and p == 1:
-    return [PI_OVER_2]
-
-  if n == 2 and p == 2:
-    return [PI_OVER_2]
-
-  if n ==2 and p == 3:
-    return [PI_OVER_2, -PI_OVER_2]
-
-  if n == 2 and p == 4:
-    return [PI_OVER_2, -PI_OVER_2]
-
-  if n == 3 and p == 1:
-    return [PI_OVER_2, -PI_OVER_2]
-
-  if n == 3 and p == 2:
-    return []
-
-  if n == 3 and p == 3:
-    return [-PI_OVER_2]
-
-  if n == 3 and p == 4:
-    return [-PI_OVER_2]
-
-  if n == 4 and p == 1:
-    return [PI_OVER_2, -PI_OVER_2]
-
-  if n == 4 and p == 2:
-    return [PI_OVER_2, -PI_OVER_2]
-
-  if n == 4 and p == 3:
-    return [-PI_OVER_2]
-
-
-def get_norm_quadrant(v1, v2):
-  unit_norm = gfn.get_unit_normal(v1.get_point_coordinate(), v2.get_point_coordinate())
-  quad = gfn.get_cartesian_quadrant(unit_norm)
-  return quad
-
-def gen_bv(v, bv_list = []):
-  # v = he.get_source_vertex()
-  prv = lambda v: v._half_edge._prev.get_source_vertex()
-  nxt = lambda v: v._half_edge._next.get_source_vertex()
-  # pv1, pv2 = he.get_prev_vertex_segment()
-  pv1,pv2 = prv(v), v
-  pq = get_norm_quadrant(pv1,pv2)
-  nv1, nv2 = v,nxt(v)
-  nq = get_norm_quadrant(nv1, nv2)
-  angles = get_vertical_angles(pq, nq)
-  if len(angles):
-    bv_list.append(BoundaryVertex(v, angles))
-
-def get_boundary_vertices(dcel):
-  vl = dcel.vertex_records
-  el = dcel.half_edge_records
-  sortkey = lambda v: v.get_point_coordinate()[0]
-
-  sorted_vl = sorted(vl,key=sortkey)
-  bv = []
-  for i in range(len(sorted_vl)):
-    sorted_vl[i].rank = i
-    gen_bv(sorted_vl[i], bv)
-
-  return bv
-  # for 
-
-
 def draw_component(screen, edge_list, color=pafn.colors["white"]):
     # color = colors[x]
     pl = [e.get_source_vertex().get_point_coordinate() for e in edge_list]
@@ -118,21 +34,17 @@ def draw_component(screen, edge_list, color=pafn.colors["white"]):
     pafn.frame_draw_ray(screen, pl[-1], pl[0], color)
   # pygame.display.update()
 
-def calc_face_split(edge_list, C, angles=[np.pi/4, -3 * np.pi/4]):
-    # edge_list = face.get_half_edges()
-    split_vertices = []
-    for angle in angles:
-        for e in edge_list:
-          A = e.get_source_vertex()
-          B = e._next.get_source_vertex()          
-          if vcd.test_for_intersection(A.get_point_coordinate(), B.get_point_coordinate(), C, angle):
-              split_vertices.append(vcd.get_intersection_pt(A.get_point_coordinate(), B.get_point_coordinate(), C, angle))
-    return split_vertices  
+# def calc_face_split(edge_list, C, angles=[np.pi/4, -3 * np.pi/4]):
+#     # edge_list = face.get_half_edges()
+#     split_vertices = []
+#     for angle in angles:
+#         for e in edge_list:
+#           A = e.get_source_vertex()
+#           B = e._next.get_source_vertex()          
+#           if vcd.test_for_intersection(A.get_point_coordinate(), B.get_point_coordinate(), C, angle):
+#               split_vertices.append(vcd.get_intersection_pt(A.get_point_coordinate(), B.get_point_coordinate(), C, angle))
+#     return split_vertices  
 
-# def calc_intersections(dcel, pt):
-#     f = de.get_faces(0)
-#     sv = calc_face_split(f[0], Vertex(pt))
-#     return sv
 
 def cut_face(screen, dcel):
   f_id = 0
@@ -162,7 +74,7 @@ def cut_face(screen, dcel):
 
 def calculated_face_cut(screen, dcel):
   distkey = lambda x: x[0]
-  bv = get_boundary_vertices(dcel)
+  bv = vcd.get_boundary_vertices(dcel)
   print(len(bv))
   fr = dcel.face_records[0]
   ipl = fr.get_interior_component_chains()
@@ -226,16 +138,11 @@ def calculated_face_cut(screen, dcel):
   time.sleep(3)
   sys.exit()
 
-def get_active_edges(edge_list, curr_rank):
-  valid_edges = []
-  for e in edge_list:
-    if vcd.is_active_edge(e, curr_rank):
-      valid_edges.append(e)
-  return valid_edges
 
 def active_edge_traversal(screen,dcel):
   colors = [pafn.colors["cyan"], pafn.colors["magenta"], pafn.colors["white"]]
-  bv = get_boundary_vertices(dcel)
+  
+  bv = vcd.get_boundary_vertices(dcel)
   fr = dcel.face_records[0]
   ipl = fr.get_interior_component_chains()
   ipl.append(fr.get_boundary_chain())
@@ -280,9 +187,24 @@ def check_for_free_path(edge_list, origin, angle, distance):
       break
   return True
 
+def construct_global_edge_list(dcel):
+  gel = []
+  for face in dcel.face_records:
+    interior_chains = face.get_interior_component_chains()
+    interior_chains.append(face.get_boundary_chain())
+    for edge_list in interior_chains:
+      for edge in edge_list:
+        gel.append(edge)
+  return gel
+
+
 def event_active_edge_traversal(screen, dcel):
-  colors = [pafn.colors["cyan"], pafn.colors["magenta"], pafn.colors["white"]]
-  bvs = get_boundary_vertices(dcel)
+  colors = []
+  for i in pafn.colors:
+    if i == "black":
+      continue
+    colors.append(pafn.colors[i])
+  boundary_events = vcd.get_boundary_vertices(dcel)
   fr = dcel.face_records[0]
   ipl = fr.get_interior_component_chains()
   ipl.append(fr.get_boundary_chain())
@@ -290,31 +212,37 @@ def event_active_edge_traversal(screen, dcel):
   for il in ipl:
     for e in range(len(il)):
       global_edge_list.append(il[e])
+  # global_edge_list = dcel.construct_global_edge_list()
+
   get_seg = lambda edge: (edge.source_vertex.get_point_coordinate(), edge._next.source_vertex.get_point_coordinate())
   sortkey = lambda bv: bv.vertex.rank
-  bvs = sorted(bvs, key=sortkey)
+  
+  boundary_events = sorted(boundary_events, key=sortkey)
   
   last_layer = []
   curr_layer = []
-  rank = sortkey(bvs[0])
-  valid_edges = get_active_edges(global_edge_list, rank)
-  fps = calculate_free_points(valid_edges, bvs[0])
+  rank = sortkey(boundary_events[0])
+  valid_edges = vcd.get_active_edges(global_edge_list, rank)
+  fps = vcd.calculate_free_points(valid_edges, boundary_events[0])
   pairs = []
   for pt in fps:
     last_layer.append(pt)
   last_active_edges = valid_edges
-  for i in range(1, len(bvs)):
-    bv = bvs[i]
+  
+  for i in range(1, len(boundary_events)):
+
+    bv = boundary_events[i]
     pafn.clear_frame(screen)
+    pafn.frame_draw_cross(screen, bv.vertex.get_point_coordinate(), pafn.colors["magenta"])
     for i,el in enumerate(ipl):
       draw_component(screen, el, colors[i])
+    
     rank = sortkey(bv)
-    valid_edges = get_active_edges(global_edge_list, rank)
-    last_active_edges = get_active_edges(global_edge_list, sortkey(bvs[i - 1]))
-    fps = calculate_free_points(valid_edges, bv)
-    for m in range(1, len(fps)):
-      last_layer.append(gfn.get_isosceles_vertex(fps[m-1], fps[m],1,15))
-      last_layer.append(gfn.get_isosceles_vertex(fps[m], fps[m-1],1,15))
+    
+    valid_edges = vcd.get_active_edges(global_edge_list, rank)
+    last_active_edges = vcd.get_past_edges(global_edge_list, rank)
+    
+    fps = vcd.calculate_free_points(valid_edges, bv)
 
     for j in range(len(fps)):
       pt = fps[j]
@@ -330,9 +258,11 @@ def event_active_edge_traversal(screen, dcel):
         pygame.display.update()
         # time.sleep(0.5)
         theta, radius = mfn.car2pol(pt, lpt)
-        if check_for_free_path(global_edge_list, pt, theta, radius):# and check_for_free_path(last_active_edges, pt, theta, radius):
+        if vcd.check_for_free_path(last_active_edges, pt, theta, radius):# and check_for_free_path(last_active_edges, pt, theta, radius):
           pairs.append([last_layer[k], pt])
-
+          last_layer[k] = None
+          # break
+        
     for pt in fps:
       if pt != None:
         curr_layer.append(pt)
@@ -350,7 +280,7 @@ def event_active_edge_traversal(screen, dcel):
     curr_layer = []
 
     pygame.display.update()
-    time.sleep(0.3)
+    time.sleep(0.5)
 
   pygame.display.update()
   # time.sleep(3)
@@ -359,17 +289,18 @@ def event_active_edge_traversal(screen, dcel):
     draw_component(screen, el, colors[i])
   pygame.display.update()
   counter = 0
-  print(len(pairs))
-  while len(pairs) > 10 + len(last_layer) and counter < 5000:
-    pairs = clean_graph(pairs)
-    counter += 1
+  # print(len(pairs))
+  # while len(pairs) > 10 + len(last_layer) and counter < 1:
+  pairs = clean_graph(pairs)
+  #   counter += 1
   print(counter)
   # pl = clean_graph(pl)
   # pl = clean_graph(pl)
   
   return pairs
   # sys.exit()
-  
+
+
 def generically_display_face(screen, dcel):
   f_id = 0
   fr = dcel.face_records[f_id]
@@ -383,7 +314,11 @@ def generically_display_face(screen, dcel):
   iptl = []
   for el in int_comp_list:
     iptl.append([e.get_source_vertex().get_point_coordinate() for e in el])
-  colors = [pafn.colors["cyan"], pafn.colors["magenta"], pafn.colors["green"]]
+  colors = []
+  for i in pafn.colors:
+    if i == "black":
+      continue
+    colors.append(pafn.colors[i])
   for x in range(len(iptl)):
     interior_component = iptl[x]
     color = colors[x]
@@ -439,23 +374,66 @@ def clean_graph(pairlist):
 
 
 
-      
+def gen_dcel():
+  bc = [(159, 629), (332, 196), (427, 260), (581, 82), (765, 148), (628, 329), (534, 269), (460, 391), (608, 638), (427, 832)]
+  dcel = DCEL()
+  a = [(436, 754), (401, 674), (501, 667)]
+  b = [(437, 326), (422, 380), (396, 334), (430, 291), (487, 286)]
+  c = [(590, 242), (556, 163), (680, 198)]
+  x = [(397, 605), (319, 661), (368, 549), (290, 570), (395, 458)]
+  x.reverse()
+  print(a)
+  a.reverse()
+  print(a)
+  # sys.exit()
+  b.reverse()
+  c.reverse()
+  dcel.create_face(bc, [
+  [(308, 609), (257, 591), (323, 424), (199, 619)],
+  x,
+  a,
+  b,
+  c])
+  return dcel
     
 
 def main():
   pygame.init()
   screen = pafn.create_display(1000, 1000)
   pafn.clear_frame(screen)
-  dcel = DCEL()
-  bc = [(226, 280), (778, 284), (670, 711), (136, 706)]
-  obs_1 = [(285, 579), (430, 622), (345, 515), (485, 333),(260, 393)]
-  obs_2 = [(419, 482), (528, 541), (505, 591), (622, 576), (561, 386)]
-  f_id = dcel.create_face(bc, [obs_1, obs_2])
+  # dcel = DCEL()
+  # time.sleep(2)
+  # bc = [(226, 280), (778, 284), (670, 711), (136, 706)]
+  # obs_1 = [(285, 579), (430, 622), (345, 515), (485, 333),(260, 393)]
+  # obs_2 = [(419, 482), (528, 541), (505, 591), (622, 576), (561, 386)]
+  # f_id = dcel.create_face(bc, [obs_1, obs_2])
+  dcel = gen_dcel()
+  # generically_display_face(screen, dcel)
+  # time.sleep(4)
+  # sys.exit()
   # active_edge_traversal(screen, dcel)
-  pl = event_active_edge_traversal(screen, dcel)
-  
+  # pl = event_active_edge_traversal(screen, dcel)
+  pl = vcd.build_roadmap(dcel)
+  pl = clean_graph(pl)
+  fr = dcel.face_records[0]
+  ipl = fr.get_interior_component_chains()
+  ipl.append(fr.get_boundary_chain())
+  # colors = [pafn.colors["cyan"], pafn.colors["magenta"], pafn.colors["white"]]
+  colors = []
+  for i in pafn.colors:
+    if i == "black":
+      continue
+    colors.append(pafn.colors[i])
+  # colors.reverse()
+  # c = []
+  # for i in range(0, len(colors), 2):
+  #   c.append(colors[i])
+  # colors = c
+  for i,el in enumerate(ipl):
+      draw_component(screen, el, colors[i])
   for pair in pl:
-    pafn.frame_draw_line(screen, pair, pafn.colors["tangerine"])
+    pafn.frame_draw_line(screen, pair, pafn.colors["white"])
+    
   pygame.display.update()
   time.sleep(4)
   # cut_face(screen, dcel)

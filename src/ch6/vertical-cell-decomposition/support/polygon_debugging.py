@@ -2,10 +2,7 @@
 
 import pygame
 
-from support.render_support import PygameArtFxns as pafn
-
-from support.region_tests import *
-from support.Polygon import *
+from env_init import *
 
 
 def build_polygon(filename):

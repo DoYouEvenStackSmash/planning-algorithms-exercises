@@ -20,13 +20,16 @@ def shape_draw(screen, A=None):
   pts = []
   polygons = []
   # polygons = [A]
-  colors = [pafn.colors["magenta"], pafn.colors["cyan"], pafn.colors["white"]]
+  colors = []
+  for i in pafn.colors:
+    colors.append(pafn.colors[i])
+  # colors = [pafn.colors["magenta"], pafn.colors["cyan"], pafn.colors["white"]]
   while 1:
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
           if pygame.key.get_mods() == LALT:
             polygons.append(Polygon(pts))
-            polygons[-1].color = colors[len(polygons) - 1]
+            polygons[-1].color = colors[len(polygons)]
             pts = []
             pafn.clear_frame(screen)
             for p in polygons:
