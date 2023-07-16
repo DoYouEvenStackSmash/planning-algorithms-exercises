@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+
 class HalfEdge:
     """
     Half Edge
@@ -22,35 +23,31 @@ class HalfEdge:
         self._prev = _prev
         self._twin = _twin
         self._id = None
-    
+
     def get_next_half_edge(self):
-      """
-      Accessor for next half edge by _next ptr
-      Returns a half edge
-      """
-      return self._next
+        """
+        Accessor for next half edge by _next ptr
+        Returns a half edge
+        """
+        return self._next
 
     def get_prev_half_edge(self):
-      """
-      Accessor for prev half edge by _prev ptr
-      Returns a half edge
-      """
-      return self._prev
-    
+        """
+        Accessor for prev half edge by _prev ptr
+        Returns a half edge
+        """
+        return self._prev
+
     def get_twin_half_edge(self):
-      """
-      Accessor for twin half edge by _twin ptr
-      Returns a half edge
-      """
-      return self._twin
-    
+        """
+        Accessor for twin half edge by _twin ptr
+        Returns a half edge
+        """
+        return self._twin
+
     def get_source_vertex(self):
-      """
-      Accessor for source vertex of half edge
-      Returns a vertex
-      """
-      return self.source_vertex
-
-    
-
-
+        """
+        Accessor for source vertex of half edge
+        Returns a vertex
+        """
+        return self.source_vertex

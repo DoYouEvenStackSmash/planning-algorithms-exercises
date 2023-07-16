@@ -36,7 +36,7 @@ class Face:
       A "flat" polygon embedded in R3.  Useful as a boundary representation.
     """
 
-    def __init__(self, _half_edge=None, obs_space = 1):
+    def __init__(self, _half_edge=None, obs_space=1):
         self._half_edge = _half_edge
         self.norm_direction = obs_space
         self._id = None
@@ -105,19 +105,18 @@ class HalfEdge:
         self._prev = _prev
         self._twin = _twin
         self._id = None
-    
+
     def get_next_vertex_segment(self):
         """
         Accessor for pair of vertices, curr->next
         """
         return (self.source_vertex, self._next.source_vertex)
-    
+
     def get_prev_vertex_segment(self):
         """
         Accessor for pair of vertices, prev->curr
         """
         return (self._prev.source_vertex, self.source_vertex)
-    
 
 
 class DoublyConnectedEdgeList:
@@ -141,7 +140,7 @@ class DoublyConnectedEdgeList:
         for f in self.face_records:
             pts.append(f.get_vertices())
         return pts
-    
+
     def get_face_edges_walk(self):
         """
         Accessor for walking all faces and accumulating edges
@@ -150,7 +149,7 @@ class DoublyConnectedEdgeList:
         for f in self.face_records:
             edges.append(f.get_half_edges())
         return edges
-    
+
     def get_faces(self, face_id=None):
         """
         Accessor for a specific face
@@ -159,7 +158,7 @@ class DoublyConnectedEdgeList:
             print("NO face id specified")
             return []
         return [self.face_records[face_id]]
-    
+
     def get_other_faces(self, origin_face_id=None):
         """
         Retrieves faces other than the one specified
@@ -190,7 +189,6 @@ class DoublyConnectedEdgeList:
             for face in fl:
                 half_edge_list.append(face.get_half_edges())
             return half_edge_list
-
 
     def get_face_half_edge(self, face_id=None):
         """
@@ -249,7 +247,7 @@ class DoublyConnectedEdgeList:
 
         return self.face_records[face_id].get_half_edges()
 
-    def create_new_face(self, point_list=[], obs_space = 1):
+    def create_new_face(self, point_list=[], obs_space=1):
         """
         Constructs a new face from a list of (x,y) points.
         Returns integer id of created face
@@ -299,13 +297,12 @@ class DoublyConnectedEdgeList:
 
         # Add pointer from Face to newest Half Edge
         self.face_records[f_id]._half_edge = self.half_edge_records[h_id]
-        
+
         # add face_id
         self.face_records[f_id]._id = f_id
 
         return f_id
-    
+
     # def split_face(self, face_id=None):
     #     if face_id == None:
     #         print("WARN: No face id specified, cannot split face!")
-

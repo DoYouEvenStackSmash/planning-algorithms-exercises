@@ -17,7 +17,7 @@ class Polygon:
         e_color: edge color of the polygon for rendering
     """
 
-    def __init__(self, point_list=None, obs_space = 1):
+    def __init__(self, point_list=None, obs_space=1):
         """
         Initialize polygon object from a set of points
         """
@@ -29,7 +29,7 @@ class Polygon:
         self.v_color = None
         self.e_color = None
 
-    def init_face(self, point_list, obs_space = 1):
+    def init_face(self, point_list, obs_space=1):
         """
         Initialize a polygon using an ordered list of points
         Returns the id of the created polygon face
@@ -43,7 +43,9 @@ class Polygon:
         p2_x, p2_y = point_list[1]
         p3_x, p3_y = point_list[2]
 
-        if ((p2_x - p1_x) * (p3_y - p1_y)) - ((p2_y - p1_y) * (p3_x - p1_x)) < 0 or obs_space < 0:
+        if ((p2_x - p1_x) * (p3_y - p1_y)) - (
+            (p2_y - p1_y) * (p3_x - p1_x)
+        ) < 0 or obs_space < 0:
             point_list = [i for i in reversed(point_list)]
 
         _id = self.data_structure.create_new_face(point_list, obs_space)
@@ -92,7 +94,7 @@ class Polygon:
             print(f"No front edge!")
             return None
         return self.data_structure.get_face_half_edge(self._id)
-    
+
     def dump_vertices(self):
         """
         Accessor for all vertices in underlying doubly connected edge list
@@ -103,4 +105,3 @@ class Polygon:
             return []
         vertex_list = self.data_structure.get_face_vertices(self._id)
         return vertex_list
-

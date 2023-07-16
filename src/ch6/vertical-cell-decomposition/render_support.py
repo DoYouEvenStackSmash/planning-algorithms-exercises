@@ -4,16 +4,18 @@ import pygame
 import pygame.gfxdraw
 import time
 
-def adjust_angle(theta):
-  """
-  adjusts some theta to arctan2 interval [0,pi] and [-pi, 0]
-  """
-  if theta > np.pi:
-      theta = theta + -2 * np.pi
-  elif theta < -np.pi:
-      theta = theta + 2 * np.pi
 
-  return theta
+def adjust_angle(theta):
+    """
+    adjusts some theta to arctan2 interval [0,pi] and [-pi, 0]
+    """
+    if theta > np.pi:
+        theta = theta + -2 * np.pi
+    elif theta < -np.pi:
+        theta = theta + 2 * np.pi
+
+    return theta
+
 
 class TransformFxns:
     """
@@ -144,6 +146,17 @@ class MathFxns:
             rad_theta = rad_theta + 2 * np.pi
         return rad_theta
 
+    def adjust_angle(theta):
+        """
+        adjusts some theta to arctan2 interval [0,pi] and [-pi, 0]
+        """
+        if theta > np.pi:
+            theta = theta + -2 * np.pi
+        elif theta < -np.pi:
+            theta = theta + 2 * np.pi
+
+        return theta
+
 
 class GeometryFxns:
     """
@@ -250,16 +263,16 @@ class GeometryFxns:
             p1.append(GeometryFxns.lerp(m1[i], m2[i], i * step))
         p1.append(GeometryFxns.lerp(m1[-1], m2[-1], 1))
         return l1, l2, l3, m1, m2, p1
-    
+
     def get_unit_normal(pt1, pt2):
         """
         Accessor for normal vector
         """
         theta, r = MathFxns.car2pol(pt1, pt2)
         theta = adjust_angle(theta + np.pi / 2)
-        
+
         return theta
-    
+
     def get_cartesian_quadrant(theta):
         """
         Check function for determining the quadrant of the unit vector with angle theta
@@ -275,7 +288,7 @@ class GeometryFxns:
 
         """
 
-        PI_OVER_2 = np.divide(np.pi,2)
+        PI_OVER_2 = np.divide(np.pi, 2)
         if theta == -np.pi:
             theta = np.pi
         if 0 < theta and theta <= PI_OVER_2:
@@ -287,6 +300,7 @@ class GeometryFxns:
         if -PI_OVER_2 < theta and theta < 0:
             return 4
         return 1
+
 
 class PygameArtFxns:
     """set of colors"""
@@ -395,7 +409,7 @@ class PygameArtFxns:
         l2 = [(x, y + sz), (x, y - sz)]
         PygameArtFxns.frame_draw_bold_line(screen, l1, color)
         PygameArtFxns.frame_draw_bold_line(screen, l2, color)
-    
+
     def frame_draw_ray(screen, pt1, pt2, color):
         """
         Draws a ray from pt1 to pt2
@@ -410,6 +424,5 @@ class PygameArtFxns:
         lpt = MathFxns.pol2car(ip, 6, theta_left)
         rpt = MathFxns.pol2car(ip, 6, theta_right)
         cpt = pt2
-        PygameArtFxns.frame_draw_line(screen, (pt1, pt2),color)
+        PygameArtFxns.frame_draw_line(screen, (pt1, pt2), color)
         PygameArtFxns.frame_draw_filled_polygon(screen, [lpt, cpt, rpt], color)
-
