@@ -298,7 +298,7 @@ def sequence_with_goal_test(screen, input_points, goal_pt=(900, 100)):
             pafn.frame_draw_dot(screen, o_center, pafn.colors["red"], obs_rad, obs_rad)
 
         pygame.display.update()
-        time.sleep(0.01)
+        time.sleep(0.05)
         if target_pt == goal_pt:
             print("path found!")
             break
@@ -364,6 +364,7 @@ def main():
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
     pygame.display.update()
+    time.sleep(3)
     # sequence_test(screen, pl)
     sequence_with_goal_test(screen, pl)
     # triangle_test(screen)
