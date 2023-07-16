@@ -257,7 +257,166 @@ def gen_dcel_2():
     dcel.create_face(bc, [[(308, 609), (257, 591), (323, 424), (199, 619)], x, a, b, c])
     return dcel
 
+def test_triangle_theta(A,B,C):
+    theta_1 = vcd.test_get_delta_theta(A,B,C)
+    theta_2 = vcd.test_get_delta_theta(B,A,C)
+    return theta_1 > np.pi / 2 or theta_2 > np.pi / 2
 
+def query_roadmap(screen, dcel, pairlist):
+    sortkey = lambda pt: pt[0]
+    adj_dict = {}
+    pt_set = set()
+    vertex_list = []
+    for pair in pairlist:
+        pair = sorted(pair, key=sortkey)
+        pt1, pt2 = pair
+        pt_set.add(pt1)
+        pt_set.add(pt2)
+        if pt1 not in adj_dict:
+            adj_dict[pt1] = len(vertex_list)
+            vertex_list.append(V(pt1))
+        v1 = vertex_list[adj_dict[pt1]]
+
+        if pt2 not in adj_dict:
+            adj_dict[pt2] = len(vertex_list)
+            vertex_list.append(V(pt2))
+        v2 = vertex_list[adj_dict[pt2]]
+        v1.neighbor_dict[adj_dict[pt2]] = False
+        v2.neighbor_dict[adj_dict[pt1]] = False
+    edge_list = dcel.construct_global_edge_list()
+    pt_list = list(pt_set)
+    get_seg = lambda edge: (
+        edge.source_vertex.get_point_coordinate(),
+        edge._next.source_vertex.get_point_coordinate(),
+    )
+    pt_index = []
+    while 1:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pt = pygame.mouse.get_pos()
+                
+                vlist = []
+                seg_dict = {}
+                for pair in pairlist:
+                    seg = pair
+                    if not test_triangle_theta(seg[0],seg[1], pt):
+                        npt = vcd.get_normal_pt(seg[0],seg[1], pt)
+                        theta, radius = mfn.car2pol(pt, npt)
+                        if vcd.check_for_free_path(edge_list, pt, theta, radius):
+                            vlist.append((mfn.euclidean_dist(npt, pt), npt))
+                            seg_dict[npt] = seg
+
+                for v in pt_list:
+                    theta, radius = mfn.car2pol(pt, v)
+                    if vcd.check_for_free_path(edge_list, pt, theta, radius):
+                        vlist.append((mfn.euclidean_dist(v, pt),v))
+                vlist = sorted(vlist, key=sortkey)
+                nearest_neighbor = vlist[0][1]
+                new_pairs = []
+                if nearest_neighbor not in pt_set:
+                    seg = seg_dict[nearest_neighbor]
+
+                    pairlist.append((seg[0], nearest_neighbor))
+                    new_pairs.append(pairlist[-1])
+                    pairlist.append((seg[1], nearest_neighbor))
+                    new_pairs.append(pairlist[-1])
+                    
+                    pt_set.add(nearest_neighbor)
+                    pt_list.append(nearest_neighbor)
+                    if nearest_neighbor not in adj_dict:
+                        adj_dict[nearest_neighbor] = len(vertex_list)
+                        vertex_list.append(V(nearest_neighbor))
+                    vprime = vertex_list[adj_dict[seg[0]]]
+                    vdprime = vertex_list[adj_dict[seg[1]]]
+                    vprime.neighbor_dict[adj_dict[nearest_neighbor]] = False
+                    vdprime.neighbor_dict[adj_dict[nearest_neighbor]] = False
+                    vn = vertex_list[adj_dict[nearest_neighbor]]
+                    vn.neighbor_dict[adj_dict[seg[0]]] = False
+                    vn.neighbor_dict[adj_dict[seg[1]]] = False
+                    # v1 = vertex_list[adj_dict[nearest_neighbor]]
+                pt_set.add(pt)
+                pairlist.append((nearest_neighbor, pt))
+                new_pairs.append(pairlist[-1])
+
+                if pt not in adj_dict:
+                    adj_dict[pt] = len(vertex_list)
+                    vertex_list.append(V(pt))
+                v1 = vertex_list[adj_dict[nearest_neighbor]]
+                v2 = vertex_list[adj_dict[pt]]
+
+                v1.neighbor_dict[adj_dict[pt]] = False
+                v2.neighbor_dict[adj_dict[nearest_neighbor]] = False
+                # # for v in vlist:
+                pc = [pafn.colors["green"],pafn.colors["red"]]
+                pafn.frame_draw_cross(screen, pt, pc[len(pt_index)])
+                # pafn.frame_draw_line(screen, (pt,nearest_neighbor), pafn.colors["green"])
+                pygame.display.update()
+                # for pair in new_pairs:
+                #     pafn.frame_draw_bold_line(screen, (pair[0],pair[1]),pafn.colors["red"])
+                pt_index.append(pt)
+            if len(pt_index) == 2:
+                time.sleep(0.5)
+                start = pt_index[0]
+                end = pt_index[1]
+                stack = find_path(adj_dict, vertex_list, start, end)
+                for v in range(1, len(stack)):
+                    # pafn.frame_draw_cross(screen, stack[v - 1].get_coord(), pafn.colors["yellow"])
+                    pafn.frame_draw_bold_line(
+                        screen,
+                        (stack[v - 1].get_coord(), stack[v].get_coord()),
+                        pafn.colors["green"],
+                    )
+                    pygame.display.update()
+                    time.sleep(0.1)
+                for v in vertex_list:
+                    v.neighbor_counter = 0
+                    v.visited = 0
+                pt_index = []
+                pygame.display.update()
+            
+def find_path(adj_dict, vertex_list, start_pt, target_pt):
+    WHITE = 0
+    GRAY = 1
+    BLACK = 2
+    for v in vertex_list:
+        v.neighbor_dict = list(set(v.neighbor_dict))
+    vertex_dict = vertex_list
+    print(len(vertex_list))
+    curr_vertex = vertex_list[adj_dict[start_pt]]
+    target_vtx = vertex_list[adj_dict[target_pt]]
+    stack = []
+    curr_vertex.visited = GRAY
+    stack.append(curr_vertex)
+    while stack[-1].get_coord() != target_pt:
+        print(stack[-1].neighbor_dict)
+        if stack[-1].visited == BLACK:
+            stack.pop()
+            continue
+        stack[-1].visited = GRAY
+        if stack[-1].neighbor_counter < len(stack[-1].neighbor_dict):
+            stack[-1].neighbor_counter += 1
+            if (
+                vertex_dict[
+                    stack[-1].neighbor_dict[stack[-1].neighbor_counter -1]
+                ].visited
+                == WHITE
+            ):
+                stack.append(
+                    vertex_dict[stack[-1].neighbor_dict[stack[-1].neighbor_counter - 1]]
+                )
+                stack[-1].visited = GRAY
+                # break
+
+        # if stack[-1].neighbor_counter >=len(stack[-1].neighbor_dict):
+        #     stack[-1].visited = BLACK
+        #     stack.pop()
+        #     continue
+        else:
+            stack[-1].visited = BLACK
+            stack.pop()
+    return stack
+    
+                
 def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)
@@ -272,7 +431,7 @@ def main():
     # active_edge_traversal(screen, dcel)
     pl = event_active_edge_traversal(screen, dcel)
     # pl = vcd.build_roadmap(dcel)
-    print(len(pl))
+    # print(len(pl))
     # pl = clean_graph(pl)
     fr = dcel.face_records[0]
     ipl = fr.get_interior_component_chains()
@@ -292,7 +451,8 @@ def main():
         pafn.frame_draw_line(screen, pair, pafn.colors["tangerine"])
     print("Foo")
     pygame.display.update()
-    time.sleep(4)
+    query_roadmap(screen, dcel, pl)
+    # time.sleep(4)
     # cut_face(screen, dcel)
     # calculated_face_cut(screen, dcel)
     sys.exit()

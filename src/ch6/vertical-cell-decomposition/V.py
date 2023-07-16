@@ -1,3 +1,4 @@
+
 class V:
     """
     Abstraction for constructing an undirected graph
@@ -8,6 +9,7 @@ class V:
         self.pt = coordinate
         self.neighbor_dict = neighbor_dict if neighbor_dict != None else {}
         self.neighbor_counter = 0
+        self.visited = 0
 
     def get_coord(self):
         return self.pt
