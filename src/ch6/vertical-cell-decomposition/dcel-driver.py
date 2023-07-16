@@ -97,9 +97,6 @@ def gen_bv(he, bv_list = []):
     bv_list.append(BoundaryVertex(v, angles))
   
 
-
-  
-
 def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)

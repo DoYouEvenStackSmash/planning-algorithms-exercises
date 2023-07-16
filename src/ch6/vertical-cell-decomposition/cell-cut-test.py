@@ -87,8 +87,6 @@ def calc_intersections(dcel, pt):
     sv = calc_face_split(f[0], Vertex(pt))
     return sv
 
-
-
 def triangle_cut(screen):
     de.create_new_face([(208, 497), (763, 136), (645, 666)])
     el = de.get_face_edges(0)
@@ -105,10 +103,26 @@ def triangle_cut(screen):
                     pafn.frame_draw_line(screen, (pt,ipt), pafn.colors["white"])
                 pygame.display.update()
             
-            
     pygame.display.update()
     time.sleep(3)
     sys.exit()
+
+
+def insert_front_edge(curr_edge, new_vertex):
+
+def edge_cut_test(screen):
+    de.create_new_face([(208, 497), (763, 136), (645, 666)])
+    el = de.get_face_edges(0)
+    for e in el:
+        p1, p2 = [v.get_point_coordinate() for v in e.get_next_vertex_segment()]
+        pafn.frame_draw_ray(screen, p1, p2, pafn.colors["green"])
+    pygame.display.update()
+    e = el[0]
+    p1, p2 = [v.get_point_coordinate() for v in e.get_next_vertex_segment()]
+    mpt = gfn.get_midpoint(p1,p2)
+    vmpt = Vertex(mpt)
+
+
 
 def main():
     pygame.init()
