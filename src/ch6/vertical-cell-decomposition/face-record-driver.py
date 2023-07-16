@@ -77,6 +77,15 @@ def event_active_edge_traversal(screen, dcel):
     sortkey = lambda bv: bv.vertex.rank
 
     boundary_events = sorted(boundary_events, key=sortkey)
+    for i, el in enumerate(ipl):
+        draw_component(screen, el, colors[i])
+    # for bv in boundary_events:
+    #     segs = bv.get_vertical_vectors()
+    #     for seg in segs:
+    #         pafn.frame_draw_line(screen, seg, pafn.colors["white"])
+    pygame.display.update()
+    time.sleep(2)
+        # pafn.frame_
 
     last_layer = []
     curr_layer = []
@@ -103,7 +112,32 @@ def event_active_edge_traversal(screen, dcel):
         last_active_edges = vcd.get_past_edges(global_edge_list, rank)
 
         fps = vcd.calculate_free_points(valid_edges, bv)
+        intermediate_pts = []
+        for fp in fps:
+            intermediate_pts.append(
+                mfn.pol2car(fp, 5, np.pi)
+            )
+        # print(intermediate_pts)
 
+        for j in range(len(intermediate_pts)):
+            pt = intermediate_pts[j]
+            pafn.frame_draw_cross(screen, pt, pafn.colors["red"])
+            for k in range(len(last_layer)):
+                lpt = last_layer[k]
+                if lpt == None:
+                    continue
+                theta, radius = mfn.car2pol(pt, lpt)
+                if vcd.check_for_free_path(
+                    last_active_edges, pt, theta, radius
+                ):  # and check_for_free_path(last_active_edges, pt, theta, radius):
+                    pairs.append([last_layer[k], pt])
+                    last_layer[k] = None
+        
+        # pygame.display.update()
+        # time.sleep(0.3)
+        for pt in intermediate_pts:
+            last_layer.append(pt)
+        
         for j in range(len(fps)):
             pt = fps[j]
             if pt == None:
@@ -140,7 +174,7 @@ def event_active_edge_traversal(screen, dcel):
         curr_layer = []
 
         pygame.display.update()
-        time.sleep(0.5)
+        time.sleep(0.4)
 
     pygame.display.update()
 
@@ -229,15 +263,17 @@ def main():
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    dcel = gen_dcel_2()
-    cut_face(screen, dcel)
+    # dcel = gen_dcel_2()
+    dcel = gen_textbook_dcel()
+    # cut_face(screen, dcel)
     # generically_display_face(screen, dcel)
     # time.sleep(4)
     # sys.exit()
     # active_edge_traversal(screen, dcel)
-    # pl = event_active_edge_traversal(screen, dcel)
-    pl = vcd.build_roadmap(dcel)
-    pl = clean_graph(pl)
+    pl = event_active_edge_traversal(screen, dcel)
+    # pl = vcd.build_roadmap(dcel)
+    print(len(pl))
+    # pl = clean_graph(pl)
     fr = dcel.face_records[0]
     ipl = fr.get_interior_component_chains()
     ipl.append(fr.get_boundary_chain())
@@ -247,16 +283,14 @@ def main():
         if i == "black":
             continue
         colors.append(pafn.colors[i])
-    # colors.reverse()
-    # c = []
-    # for i in range(0, len(colors), 2):
-    #   c.append(colors[i])
-    # colors = c
+
     for i, el in enumerate(ipl):
         draw_component(screen, el, colors[i])
+    pygame.display.update()
+    # time.sleep(3)
     for pair in pl:
-        pafn.frame_draw_line(screen, pair, pafn.colors["white"])
-
+        pafn.frame_draw_line(screen, pair, pafn.colors["tangerine"])
+    print("Foo")
     pygame.display.update()
     time.sleep(4)
     # cut_face(screen, dcel)

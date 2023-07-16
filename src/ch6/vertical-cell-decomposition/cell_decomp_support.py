@@ -178,8 +178,8 @@ class VerticalCellDecomposition:
             return [PI_OVER_2, -PI_OVER_2]
 
         if n == 3 and p == 1:
-            return []
-            # return [PI_OVER_2, -PI_OVER_2]
+            # return []
+            return [PI_OVER_2, -PI_OVER_2]
 
         if n == 3 and p == 2:
             return []
@@ -327,16 +327,30 @@ class VerticalCellDecomposition:
             free_points = VerticalCellDecomposition.calculate_free_points(
                 valid_edges, bv
             )
-            if len(free_points) == 2:
-                last_layer.append(
-                    mfn.pol2car(bv.vertex.get_point_coordinate(), 5, np.pi)
+            intermediate_pts = []
+            for fp in free_points:
+                intermediate_pts.append(
+                    mfn.pol2car(fp, 5, np.pi)
                 )
-                free_points.append(
-                    mfn.pol2car(bv.vertex.get_point_coordinate(), 4, np.pi)
-                )
-                last_layer.append(
-                    mfn.pol2car(bv.vertex.get_point_coordinate(), 1, np.pi)
-                )
+            # print(intermediate_pts)
+
+            for j in range(len(intermediate_pts)):
+                pt = intermediate_pts[j]
+                for k in range(len(last_layer)):
+                    lpt = last_layer[k]
+                    if lpt == None:
+                        continue
+                    theta, radius = mfn.car2pol(pt, lpt)
+                    if VerticalCellDecomposition.check_for_free_path(
+                        last_active_edges, pt, theta, radius
+                    ):  # and check_for_free_path(last_active_edges, pt, theta, radius):
+                        pairs.append([last_layer[k], pt])
+                        last_layer[k] = None
+
+            
+            for pt in intermediate_pts:
+                last_layer.append(pt)
+            
             for j in range(len(free_points)):
                 pt = free_points[j]
                 if pt == None:
