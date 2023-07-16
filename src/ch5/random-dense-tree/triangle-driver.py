@@ -11,19 +11,21 @@ import numpy as np
 WHITE = 0
 GRAY = 1
 BLACK = 2
-# def segment_driver(screen):
+
+
 class Vertex:
-  def __init__(self, coordinate):
-    self.pt = coordinate
-    self.neighbor_set = set()
-    self.visited = WHITE
-    self.neighbor_counter = 0
-  
-  def get_coord(self):
-    return self.pt
-  
-  # def add_neighbor(self, target_pt):
-  #   self.neighbor_list.append(target_pt)
+    def __init__(self, coordinate):
+        self.pt = coordinate
+        self.neighbor_set = set()
+        self.visited = WHITE
+        self.neighbor_counter = 0
+
+    def get_coord(self):
+        return self.pt
+
+    # def add_neighbor(self, target_pt):
+    #   self.neighbor_list.append(target_pt)
+
 
 class Edge:
     def __init__(self, pt1, pt2):
@@ -75,6 +77,11 @@ class Edge:
 
 
 def gen_van_der_corput(k_bits=4):
+    """
+    Generates van der corput sequence with k_bits
+    Returns a list of floats between [0,1]
+    """
+
     max_val = np.square(k_bits)
     seq = []
     for i in range(max_val):
@@ -162,15 +169,12 @@ def get_nearest_pt(edge_list, point_set, target_pt):
     nearest_pts = []
     for pt in point_set:
         nearest_pts.append((mfn.euclidean_dist(pt, target_pt), pt))
-    # nearest_pts.append((1e9, (-1, -1)))
+
     nearest_pts = sorted(nearest_pts, key=sortkey)
-    # print(nearest_pts)
+
     nearest_el = sorted(nearest_el, key=sortkey)
     edge_dist = 1e9  # set edge dist to some big constant
     pt_dist = 1e9
-    # if not len(nearest_pts) and not len(nearest_el):
-    #   point_set.add(target_pt)
-    #   return
 
     if len(nearest_el):
         edge_dist = nearest_el[0][0]
@@ -213,6 +217,10 @@ def interactive_triangle_test(screen):
 
 
 def generate_points(origin=(500, 500), dim=500, input_sequence=[]):
+    """
+    Generates a sequence of points
+    returns a list of (x,y)
+    """
     pl = []
     x, y = origin
     for i in input_sequence:
@@ -224,6 +232,10 @@ def generate_points(origin=(500, 500), dim=500, input_sequence=[]):
 
 
 def get_rand_sequence(k=32):
+    """
+    Generates a random sequence of floats between 0,1000
+    returns a sequence of points
+    """
     rng = np.random.default_rng(12345)
     rand_val = lambda: (rng.uniform()) * 1000
     pl = []
@@ -265,13 +277,15 @@ def get_farthest_pt(obstacle_list, point_list, distance_thres=30):
 
 
 def sequence_with_goal_test(screen, input_points, goal_pt=(900, 100)):
-    # obs_list = [(400, 400), (700, 700), (800, 800), (900, 800), (800, 900)]
-    obs_list = get_rand_sequence(40)#generate_points(input_sequence=gen_van_der_corput(5))
-    # obs_list = []
+    """
+    Demonstrates RDT implementation
+    """
+    obs_list = get_rand_sequence(40)
+
     obs_rad = 20
 
     edge_list = []
-    initial_point = (100,900)
+    initial_point = (100, 900)
     point_set = {initial_point}
     step_size = obs_rad / 4
     rng = np.random.default_rng(32345)
@@ -281,9 +295,11 @@ def sequence_with_goal_test(screen, input_points, goal_pt=(900, 100)):
         if rand_val() == 1:
             p = goal_pt
         nearest_pt = get_nearest_pt(edge_list, point_set, p)
-        step_count = 100#max(int(mfn.euclidean_dist(nearest_pt, p) / step_size), 10) * 2
+        step_count = (
+            100  # max(int(mfn.euclidean_dist(nearest_pt, p) / step_size), 10) * 2
+        )
         point_list = gfn.lerp_list(nearest_pt, p, step_count)
-        
+
         # print(point_list)
 
         target_pt = get_farthest_pt(obs_list, point_list, 70)
@@ -302,72 +318,69 @@ def sequence_with_goal_test(screen, input_points, goal_pt=(900, 100)):
         if target_pt == goal_pt:
             print("path found!")
             break
-    
+
     vertex_dict = {}
     for pt in point_set:
-      vertex_dict[pt] = Vertex(pt)
+        vertex_dict[pt] = Vertex(pt)
 
     for edge in edge_list:
-      p1,p2 = edge.get_pts()
-      vertex_dict[p1].neighbor_set.add(p2)
-      vertex_dict[p2].neighbor_set.add(p1)
-    
-    
+        p1, p2 = edge.get_pts()
+        vertex_dict[p1].neighbor_set.add(p2)
+        vertex_dict[p2].neighbor_set.add(p1)
+
     for vertex in vertex_dict:
-      vertex_dict[vertex].neighbor_set = list(vertex_dict[vertex].neighbor_set)
+        vertex_dict[vertex].neighbor_set = list(vertex_dict[vertex].neighbor_set)
     # queue = []
-    stack = [] # stack.append(), stack.pop()
+    stack = []  # stack.append(), stack.pop()
     curr_vertex = vertex_dict[initial_point]
     curr_vertex.visited = GRAY
     stack.append(curr_vertex)
-    # stack.append(curr_vertex)
-    # while len(queue) != 0:
-    # for pt in curr_vertex.neighbor_set:
+
     while stack[-1].get_coord() != target_pt:
-      # stack[-1].
-      
-      if stack[-1].neighbor_counter < len(stack[-1].neighbor_set):
-        stack[-1].neighbor_counter += 1
-        if vertex_dict[stack[-1].neighbor_set[stack[-1].neighbor_counter - 1]].visited == WHITE:
-          stack.append(vertex_dict[stack[-1].neighbor_set[stack[-1].neighbor_counter - 1]])
-          stack[-1].visited = GRAY
-      else:
-        stack[-1].visited = BLACK
-        stack.pop()
-      
-    print(stack)
+        if stack[-1].neighbor_counter < len(stack[-1].neighbor_set):
+            stack[-1].neighbor_counter += 1
+            if (
+                vertex_dict[
+                    stack[-1].neighbor_set[stack[-1].neighbor_counter - 1]
+                ].visited
+                == WHITE
+            ):
+                stack.append(
+                    vertex_dict[stack[-1].neighbor_set[stack[-1].neighbor_counter - 1]]
+                )
+                stack[-1].visited = GRAY
+        else:
+            stack[-1].visited = BLACK
+            stack.pop()
+
     for v in range(1, len(stack)):
-      pafn.frame_draw_cross(screen, stack[v - 1].get_coord(), pafn.colors["yellow"])
-      pafn.frame_draw_bold_line(screen, (stack[v - 1].get_coord(), stack[v].get_coord()), pafn.colors["green"])
-      pygame.display.update()
-      time.sleep(0.1)
-    
-    
+        pafn.frame_draw_cross(screen, stack[v - 1].get_coord(), pafn.colors["yellow"])
+        pafn.frame_draw_bold_line(
+            screen,
+            (stack[v - 1].get_coord(), stack[v].get_coord()),
+            pafn.colors["green"],
+        )
+        pygame.display.update()
+        time.sleep(0.1)
+
     pafn.frame_draw_cross(screen, initial_point, pafn.colors["yellow"])
     pafn.frame_draw_cross(screen, goal_pt, pafn.colors["yellow"])
     pygame.display.update()
-      
-
-
 
     time.sleep(5)
     sys.exit()
 
 
 def main():
-    # pl = generate_points(input_sequence=gen_van_der_corput())
     pl = get_rand_sequence(600)
-    # print(pl)
 
-    # sys.exit()
     pygame.init()
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
     pygame.display.update()
     time.sleep(3)
-    # sequence_test(screen, pl)
+
     sequence_with_goal_test(screen, pl)
-    # triangle_test(screen)
 
 
 if __name__ == "__main__":
