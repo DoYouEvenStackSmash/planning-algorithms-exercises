@@ -13,7 +13,7 @@ from render_support import GeometryFxns as gfn
 from render_support import MathFxns as mfn
 from render_support import TransformFxns as tfn
 from render_support import PygameArtFxns as pafn
-
+from graph_processing import *
 # from cell_decomp_support import VerticalCellDecomposition as vcd
 import numpy as np
 import time
@@ -149,14 +149,14 @@ def event_active_edge_traversal(screen, dcel):
                 if lpt == None:
                     continue
                 pafn.frame_draw_dot(screen, lpt, pafn.colors["red"])
-                pygame.display.update()
+                # pygame.display.update()
 
                 theta, radius = mfn.car2pol(pt, lpt)
                 if vcd.check_for_free_path(
                     last_active_edges, pt, theta, radius
                 ):  # and check_for_free_path(last_active_edges, pt, theta, radius):
                     pairs.append([last_layer[k], pt])
-                    last_layer[k] = None
+                    # last_layer[k] = None
 
         for pt in fps:
             if pt != None:
@@ -174,7 +174,7 @@ def event_active_edge_traversal(screen, dcel):
         curr_layer = []
 
         pygame.display.update()
-        time.sleep(0.4)
+        time.sleep(0.2)
 
     pygame.display.update()
 
@@ -182,7 +182,8 @@ def event_active_edge_traversal(screen, dcel):
     for i, el in enumerate(ipl):
         draw_component(screen, el, colors[i])
     pygame.display.update()
-
+    pairs = clean_graph(pairs)
+    pairs = clean_graph(pairs)
     return pairs
     # sys.exit()
 
@@ -226,6 +227,14 @@ def gen_textbook_dcel():
     obs_1 = [(285, 579), (430, 622), (345, 515), (485, 333), (260, 393)]
     obs_2 = [(419, 482), (528, 541), (505, 591), (622, 576), (561, 386)]
     dcel.create_face(bc, [obs_1, obs_2])
+    return dcel
+
+def gen_spiral_dcel():
+    dcel = DCEL()
+    bc = [(137, 86), (965, 56), (920, 944), (75, 930)]
+    obs_1 = [(879, 116), (782, 160), (668, 154), (535, 174), (424, 221), (301, 361), (245, 515), (286, 648), (403, 727), (560, 757), (694, 734), (788, 616), (814, 491), (783, 361), (712, 278), (599, 267), (474, 349), (411, 474), (434, 546), (549, 560), (589, 528), (579, 462), (541, 392), (580, 314), (658, 319), (718, 361), (750, 474), (729, 576), (686, 633), (599, 668), (500, 671), (360, 604), (341, 495), (358, 406), (444, 317), (568, 237), (686, 195), (833, 236), (913, 440), (879, 656), (733, 838), (504, 873), (224, 772), (142, 565), (198, 308), (422, 151), (759, 106)]
+    obs_1.reverse()
+    dcel.create_face(bc, [obs_1])
     return dcel
 
 
@@ -423,7 +432,8 @@ def main():
     pafn.clear_frame(screen)
 
     # dcel = gen_dcel_2()
-    dcel = gen_textbook_dcel()
+    dcel = gen_spiral_dcel()
+    # dcel = gen_textbook_dcel()
     # cut_face(screen, dcel)
     # generically_display_face(screen, dcel)
     # time.sleep(4)

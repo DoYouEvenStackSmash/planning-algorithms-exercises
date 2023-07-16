@@ -178,8 +178,8 @@ class VerticalCellDecomposition:
             return [PI_OVER_2, -PI_OVER_2]
 
         if n == 3 and p == 1:
-            # return []
-            return [PI_OVER_2, -PI_OVER_2]
+            return []
+            # return [PI_OVER_2, -PI_OVER_2]
 
         if n == 3 and p == 2:
             return []
