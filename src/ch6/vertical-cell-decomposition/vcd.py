@@ -174,24 +174,9 @@ def vertical_edge_loop(screen, dcel):
         
     return vpl
 
-
-def main():
-    pygame.init()
-    screen = pafn.create_display(1000, 1000)
-    pafn.clear_frame(screen)
-
-    ID, dcel = textbook_obj()
-    draw_face(screen, dcel, ID)
-    pygame.display.update()
-    vpl = vertical_edge_loop(screen, dcel)
+def refine_roadmap(screen, dcel,vpl):
     el = dcel.construct_global_edge_list()
     pair_list = []
-    for vl in vpl:
-      for p in vl:
-        # print(p)
-        pafn.frame_draw_dot(screen, gfn.get_midpoint(p[0],p[1]), pafn.colors["red"])
-    pygame.display.update()
-    
     for idx in range(len(vpl)-1):
       orig_point_set = [gfn.get_midpoint(a,b) for a,b in vpl[idx]]
       
@@ -204,17 +189,25 @@ def main():
               pair_list.append([m1, m2])
 
     pair_list = [Edge(a,b,mfn.euclidean_dist(a,b)) for (a,b) in pair_list]
-    
     pair_list = [(e.u,e.v) for e in kruskal(pair_list)]
     
     for p in pair_list:
-      if p[1] == None or p[0] == None:
-        print(p)
-        continue
-    
       pafn.frame_draw_bold_line(screen, p, pafn.colors["silver"])
-    pygame.display.update()
+      pygame.display.update()
+      time.sleep(0.05)
 
+def main():
+    pygame.init()
+    screen = pafn.create_display(1000, 1000)
+    pafn.clear_frame(screen)
+
+    ID, dcel = test_obj_2()
+    draw_face(screen, dcel, ID)
+    pygame.display.update()
+    time.sleep(2)
+    vpl = vertical_edge_loop(screen, dcel)
+    refine_roadmap(screen, dcel,vpl)
+    pygame.display.update()
     time.sleep(5)
 
 
