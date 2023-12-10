@@ -81,7 +81,6 @@ class VerticalCellDecomposition:
             return False
         return True
 
-
     def calc_face_split(edge_list, C_pt, angles=[np.pi / 2, -np.pi / 2]):
         """
         Calculates intersection points between vectors with origin C_pt and angles theta

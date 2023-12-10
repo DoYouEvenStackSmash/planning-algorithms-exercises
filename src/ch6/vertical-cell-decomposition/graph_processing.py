@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from env_init import *
 
+
 class Edge:
     def __init__(self, u, v, weight):
         self.u = u
@@ -13,14 +14,14 @@ class Edge:
 
 def kruskal(edges):
     cost = 0
-    
+
     tree_id = {}
     for e in edges:
         if e.u not in tree_id:
             tree_id[e.u] = len(tree_id)
         if e.v not in tree_id:
             tree_id[e.v] = len(tree_id)
-    
+
     result = []
 
     edges.sort()
@@ -35,4 +36,3 @@ def kruskal(edges):
                 if tree_id[i] == old_id:
                     tree_id[i] = new_id
     return result
-

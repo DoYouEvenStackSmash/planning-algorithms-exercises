@@ -17,11 +17,13 @@ from graph_processing import *
 from cell_decomp_support import VerticalCellDecomposition as vcd
 import numpy as np
 import time
+
 # from V import V
 from aux_functions import *
 from test_objects import *
 from collections import deque
 from graph_processing import *
+
 THRES = 1e-8
 xval = lambda m, p: 0 if abs(m) < THRES else m * np.cos(p)
 yval = lambda m, p: 0 if abs(m) < THRES else m * np.sin(p)
@@ -75,17 +77,10 @@ def complex2cart(complex_pt, center=(0, 0)):
 
 def vertical_edge_loop(screen, dcel):
     # #
-    vpl = []
-    pts = chain2vertex(dcel.construct_global_edge_list())
-    sortkey = lambda x: x.get_point_coordinate()[0]
-    pts = sorted(pts, key=sortkey)
-    for p in range(len(pts)):
-        pts[p].rank = p + 1
 
     get_adj_succ = lambda p: p.get_half_edge().get_next_half_edge().get_source_vertex()
     get_adj_pred = lambda p: p.get_half_edge().get_prev_half_edge().get_source_vertex()
     v2pt = lambda p: p.get_point_coordinate()
-
     get_rank = lambda v: v.rank
     is_active = (
         lambda rank, e: min(get_rank(edge_vtx(e)), get_rank(get_adj_succ(edge_vtx(e))))
@@ -96,15 +91,25 @@ def vertical_edge_loop(screen, dcel):
     norm = lambda cv: cv / abs(cv)
     tang = lambda ang: ang * np.exp(1j * np.pi / 2)
     atang = lambda ang: ang * np.exp(1j * -np.pi / 2)
+    # initialize things
+    vpl = []
+    pts = chain2vertex(dcel.construct_global_edge_list())
+
+    # sort the points by x coordinate
+    sortkey = lambda x: x.get_point_coordinate()[0]
+    pts = sorted(pts, key=sortkey)
+    for p in range(len(pts)):
+        pts[p].rank = p + 1
+
+    # initializers
     added_ranks = [0]
     angles = [np.pi / 2, -np.pi / 2]
-
     ranks = set()
-
     edge_list = []
+
+    # visit all points
     for vtx in pts:
         vpl.append([])
-        print(len(edge_list))
         rank = get_rank(vtx)
 
         added_ranks.append(get_rank(vtx))
@@ -113,33 +118,35 @@ def vertical_edge_loop(screen, dcel):
         prev = get_adj_pred(vtx)
 
         pt = vtx
-
         p1 = cart2complex(v2pt(prev), v2pt(pt))
         p2 = cart2complex(v2pt(nxt), v2pt(pt))
 
+        # compute bisecting vector
         bounds = [norm(atang(p1)), norm(tang(p2))]
         delta = np.mean(bounds)
 
+        # check for valid edges at angles of incidence
         alist = []
         for i in range(len(angles)):
             a = np.exp(1j * angles[i])
 
             if np.angle(delta / a) < 0 and np.angle(p1 / a) > 0:
-
                 alist.append(a)
 
             if np.angle(delta / a) > 0 and np.angle(p2 / a) < 0:
-
                 alist.append(a)
-        el = []
 
+        # find closest edge intersection for valid angles
+        el = []
         for a in alist:
             curr_ep = None
             curr_dist = float("inf")
+
+            # shortcut for searching active edges only
             for e in reversed(edge_list):
                 if not is_active(rank, e):
                     continue
-
+                # test for intersection with an active edge
                 if vcd.test_for_intersection(
                     v2pt(edge_vtx(e)),
                     v2pt(get_adj_succ(edge_vtx(e))),
@@ -156,10 +163,12 @@ def vertical_edge_loop(screen, dcel):
                         curr_dist = mfn.euclidean_dist(I, v2pt(pt))
                         curr_ep = I
 
+            # store the intersection point
             if curr_ep != None:
                 vpl[-1].append((v2pt(pt), curr_ep))
                 pafn.frame_draw_cross(screen, curr_ep, pafn.colors["magenta"])
 
+        # add new active edges
         if is_active(rank, vtx.get_half_edge()) and vtx.rank not in ranks:
             ranks.add(get_rank(vtx))
             edge_list.append(vtx.get_half_edge())
@@ -171,30 +180,40 @@ def vertical_edge_loop(screen, dcel):
             edge_list.append(get_adj_pred(vtx).get_half_edge())
 
         pygame.display.update()
-        
+
     return vpl
 
-def refine_roadmap(screen, dcel,vpl):
+
+def refine_roadmap(screen, dcel, vpl):
+    """Given a pointset which covers the input space, constructs
+        a roadmap graph and computes the minimum spanning tree over that
+
+    Args:
+        screen (_type_): _description_
+        dcel (_type_): _description_
+        vpl (_type_): _description_
+    """
     el = dcel.construct_global_edge_list()
     pair_list = []
-    for idx in range(len(vpl)-1):
-      orig_point_set = [gfn.get_midpoint(a,b) for a,b in vpl[idx]]
-      
-      for vl in vpl[idx+1:]:
-        target_point_set = [gfn.get_midpoint(a,b) for a,b in vl]
-        for m1 in orig_point_set:
-          for m2 in target_point_set:
-            theta, d = mfn.car2pol(m1, m2)
-            if vcd.check_for_free_path(el, m1, theta, d):
-              pair_list.append([m1, m2])
+    for idx in range(len(vpl) - 1):
+        orig_point_set = [gfn.get_midpoint(a, b) for a, b in vpl[idx]]
 
-    pair_list = [Edge(a,b,mfn.euclidean_dist(a,b)) for (a,b) in pair_list]
-    pair_list = [(e.u,e.v) for e in kruskal(pair_list)]
-    
+        for vl in vpl[idx + 1 :]:
+            target_point_set = [gfn.get_midpoint(a, b) for a, b in vl]
+            for m1 in orig_point_set:
+                for m2 in target_point_set:
+                    theta, d = mfn.car2pol(m1, m2)
+                    if vcd.check_for_free_path(el, m1, theta, d):
+                        pair_list.append([m1, m2])
+
+    pair_list = [Edge(a, b, mfn.euclidean_dist(a, b)) for (a, b) in pair_list]
+    pair_list = [(e.u, e.v) for e in kruskal(pair_list)]
+
     for p in pair_list:
-      pafn.frame_draw_bold_line(screen, p, pafn.colors["silver"])
-      pygame.display.update()
-      time.sleep(0.05)
+        pafn.frame_draw_bold_line(screen, p, pafn.colors["silver"])
+        pygame.display.update()
+        time.sleep(0.05)
+
 
 def main():
     pygame.init()
@@ -206,7 +225,7 @@ def main():
     pygame.display.update()
     time.sleep(2)
     vpl = vertical_edge_loop(screen, dcel)
-    refine_roadmap(screen, dcel,vpl)
+    refine_roadmap(screen, dcel, vpl)
     pygame.display.update()
     time.sleep(5)
 

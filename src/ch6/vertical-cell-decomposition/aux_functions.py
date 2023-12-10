@@ -17,10 +17,11 @@ from graph_processing import *
 from cell_decomp_support import VerticalCellDecomposition as vcd
 import numpy as np
 import time
+
 # from V import V
 
 
-def draw_shape(screen, bc, maxs=(1000, 1000),val=8):
+def draw_shape(screen, bc, maxs=(1000, 1000), val=8):
     """Renders the elements of a body chain onto a screen
     Calls updates
 
@@ -29,10 +30,10 @@ def draw_shape(screen, bc, maxs=(1000, 1000),val=8):
         bc (_type_): _description_
         maxs (tuple, optional): _description_. Defaults to (1000,1000).
     """
-    
+
     pafn.frame_draw_filled_polygon(screen, bc, pafn.colors[list(pafn.colors)[val]])
     pygame.display.update()
-    
+
 
 def draw_last_point(screen, point_list):
     pafn.frame_draw_ray(screen, point_list[-1], point_list[0], pafn.colors["cyan"])
@@ -85,9 +86,9 @@ def draw_face(screen, dcel, f_id=0):
     draw_last_point(screen, point_list)
     pygame.display.update()
 
-    for idx,ic in enumerate(face.get_interior_component_chains()):
+    for idx, ic in enumerate(face.get_interior_component_chains()):
         ic_point_list = chain2points(ic)
-        draw_shape(screen, ic_point_list,None,idx+1*2)
+        draw_shape(screen, ic_point_list, None, idx + 1 * 2)
         # for p in range(1, len(ic_point_list)):
         #     pafn.frame_draw_ray(
         #         screen, ic_point_list[p - 1], ic_point_list[p], pafn.colors["magenta"]
