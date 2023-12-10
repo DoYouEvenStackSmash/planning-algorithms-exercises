@@ -2,8 +2,6 @@
 import pygame
 import sys
 
-sys.path.append("./support")
-sys.path.append("./DCEL")
 from env_init import *
 
 # from BoundaryVertex import BoundaryVertex
@@ -17,7 +15,7 @@ from graph_processing import *
 from cell_decomp_support import VerticalCellDecomposition as vcd
 import numpy as np
 import time
-from V import V
+# from V import V
 from aux_functions import *
 
 

@@ -17,10 +17,10 @@ from graph_processing import *
 from cell_decomp_support import VerticalCellDecomposition as vcd
 import numpy as np
 import time
-from V import V
+# from V import V
 
 
-def draw_shape(screen, bc, maxs=(1000, 1000)):
+def draw_shape(screen, bc, maxs=(1000, 1000),val=8):
     """Renders the elements of a body chain onto a screen
     Calls updates
 
@@ -29,28 +29,10 @@ def draw_shape(screen, bc, maxs=(1000, 1000)):
         bc (_type_): _description_
         maxs (tuple, optional): _description_. Defaults to (1000,1000).
     """
-
-    for p in range(1, len(bc)):
-        pafn.frame_draw_dot(screen, bc[p - 1])
-        ptx = cart2complex(bc[p], bc[p - 1]) * np.exp(1j * np.pi / 2) * 0.5
-        new_pt = complex2cart(ptx, bc[p - 1])
-        pafn.frame_draw_ray(screen, bc[p - 1], bc[p], pafn.colors["magenta"])
-        pygame.display.update()
-        time.sleep(0.5)
-        pafn.frame_draw_ray(screen, bc[p - 1], new_pt, pafn.colors["green"])
-        pygame.display.update()
-        time.sleep(0.5)
-
-    # handle last edge
-    pafn.frame_draw_dot(screen, bc[-1])
-    ptx = cart2complex(bc[0], bc[-1]) * np.exp(1j * np.pi / 2) * 0.5
-    new_pt = complex2cart(ptx, bc[-1])
-    pafn.frame_draw_ray(screen, bc[-1], bc[0], pafn.colors["cyan"])
+    
+    pafn.frame_draw_filled_polygon(screen, bc, pafn.colors[list(pafn.colors)[val]])
     pygame.display.update()
-    time.sleep(0.5)
-    pafn.frame_draw_ray(screen, bc[-1], new_pt, pafn.colors["green"])
-    pygame.display.update()
-
+    
 
 def draw_last_point(screen, point_list):
     pafn.frame_draw_ray(screen, point_list[-1], point_list[0], pafn.colors["cyan"])
@@ -103,12 +85,13 @@ def draw_face(screen, dcel, f_id=0):
     draw_last_point(screen, point_list)
     pygame.display.update()
 
-    for ic in face.get_interior_component_chains():
+    for idx,ic in enumerate(face.get_interior_component_chains()):
         ic_point_list = chain2points(ic)
-        for p in range(1, len(ic_point_list)):
-            pafn.frame_draw_ray(
-                screen, ic_point_list[p - 1], ic_point_list[p], pafn.colors["magenta"]
-            )
+        draw_shape(screen, ic_point_list,None,idx+1*2)
+        # for p in range(1, len(ic_point_list)):
+        #     pafn.frame_draw_ray(
+        #         screen, ic_point_list[p - 1], ic_point_list[p], pafn.colors["magenta"]
+        #     )
 
-        draw_last_point(screen, ic_point_list)
-        pygame.display.update()
+        # draw_last_point(screen, ic_point_list)
+        # pygame.display.update()

@@ -17,11 +17,11 @@ from graph_processing import *
 from cell_decomp_support import VerticalCellDecomposition as vcd
 import numpy as np
 import time
-from V import V
+# from V import V
 from aux_functions import *
 from test_objects import *
 from collections import deque
-
+from graph_processing import *
 THRES = 1e-8
 xval = lambda m, p: 0 if abs(m) < THRES else m * np.cos(p)
 yval = lambda m, p: 0 if abs(m) < THRES else m * np.sin(p)
@@ -75,6 +75,7 @@ def complex2cart(complex_pt, center=(0, 0)):
 
 def vertical_edge_loop(screen, dcel):
     # #
+    vpl = []
     pts = chain2vertex(dcel.construct_global_edge_list())
     sortkey = lambda x: x.get_point_coordinate()[0]
     pts = sorted(pts, key=sortkey)
@@ -102,6 +103,7 @@ def vertical_edge_loop(screen, dcel):
 
     edge_list = []
     for vtx in pts:
+        vpl.append([])
         print(len(edge_list))
         rank = get_rank(vtx)
 
@@ -123,19 +125,11 @@ def vertical_edge_loop(screen, dcel):
             a = np.exp(1j * angles[i])
 
             if np.angle(delta / a) < 0 and np.angle(p1 / a) > 0:
-                pafn.frame_draw_line(
-                    screen,
-                    (v2pt(pt), mfn.pol2car(v2pt(pt), 100, angles[i])),
-                    pafn.colors["tangerine"],
-                )
+
                 alist.append(a)
 
             if np.angle(delta / a) > 0 and np.angle(p2 / a) < 0:
-                pafn.frame_draw_line(
-                    screen,
-                    (v2pt(pt), mfn.pol2car(v2pt(pt), 100, angles[i])),
-                    pafn.colors["green"],
-                )
+
                 alist.append(a)
         el = []
 
@@ -163,6 +157,7 @@ def vertical_edge_loop(screen, dcel):
                         curr_ep = I
 
             if curr_ep != None:
+                vpl[-1].append((v2pt(pt), curr_ep))
                 pafn.frame_draw_cross(screen, curr_ep, pafn.colors["magenta"])
 
         if is_active(rank, vtx.get_half_edge()) and vtx.rank not in ranks:
@@ -176,7 +171,8 @@ def vertical_edge_loop(screen, dcel):
             edge_list.append(get_adj_pred(vtx).get_half_edge())
 
         pygame.display.update()
-        # time.sleep(0.5)
+        
+    return vpl
 
 
 def main():
@@ -184,10 +180,40 @@ def main():
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    ID, dcel = test_obj_1()
+    ID, dcel = textbook_obj()
     draw_face(screen, dcel, ID)
     pygame.display.update()
-    vertical_edge_loop(screen, dcel)
+    vpl = vertical_edge_loop(screen, dcel)
+    el = dcel.construct_global_edge_list()
+    pair_list = []
+    for vl in vpl:
+      for p in vl:
+        # print(p)
+        pafn.frame_draw_dot(screen, gfn.get_midpoint(p[0],p[1]), pafn.colors["red"])
+    pygame.display.update()
+    
+    for idx in range(len(vpl)-1):
+      orig_point_set = [gfn.get_midpoint(a,b) for a,b in vpl[idx]]
+      
+      for vl in vpl[idx+1:]:
+        target_point_set = [gfn.get_midpoint(a,b) for a,b in vl]
+        for m1 in orig_point_set:
+          for m2 in target_point_set:
+            theta, d = mfn.car2pol(m1, m2)
+            if vcd.check_for_free_path(el, m1, theta, d):
+              pair_list.append([m1, m2])
+
+    pair_list = [Edge(a,b,mfn.euclidean_dist(a,b)) for (a,b) in pair_list]
+    
+    pair_list = [(e.u,e.v) for e in kruskal(pair_list)]
+    
+    for p in pair_list:
+      if p[1] == None or p[0] == None:
+        print(p)
+        continue
+    
+      pafn.frame_draw_bold_line(screen, p, pafn.colors["silver"])
+    pygame.display.update()
 
     time.sleep(5)
 
