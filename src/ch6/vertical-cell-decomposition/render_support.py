@@ -415,7 +415,7 @@ class PygameArtFxns:
         Draws a ray from pt1 to pt2
         Does not return
         """
-        print(pt1, pt2)
+        # print(pt1, pt2)
         theta, r = MathFxns.car2pol(pt1, pt2)
         ip = MathFxns.pol2car(pt1, r - 20, theta)
 
