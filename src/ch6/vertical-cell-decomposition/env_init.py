@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 import sys
 
-sys.path.append("./support")
 sys.path.append("./DCEL")
 import numpy as np
 from DCEL import *
-from BoundaryVertex import BoundaryVertex
+
+# from BoundaryVertex import BoundaryVertex
 from render_support import GeometryFxns as gfn
 from render_support import MathFxns as mfn
 from render_support import TransformFxns as tfn
 from render_support import PygameArtFxns as pafn
-from V import V
+
+# from V import V
 from cell_decomp_support import VerticalCellDecomposition as vcd
 
 import collections
@@ -21,7 +22,6 @@ def draw_component(screen, edge_list, color=pafn.colors["white"]):
     for i in range(1, len(pl)):
         pafn.frame_draw_ray(screen, pl[i - 1], pl[i], color)
     pafn.frame_draw_ray(screen, pl[-1], pl[0], color)
-
 
 
 def gen_textbook_dcel():

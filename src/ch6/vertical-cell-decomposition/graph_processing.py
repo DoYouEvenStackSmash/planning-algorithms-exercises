@@ -2,43 +2,37 @@
 from env_init import *
 
 
-def clean_graph(pairlist):
-    """
-    Somewhat thrown together graph minimization
-    Returns a list of pairs of (x,y) points
-    """
-    sortkey = lambda pt: pt[0]
-    adj_dict = {}
-    vertex_list = []
-    for pair in pairlist:
-        pair = sorted(pair, key=sortkey)
-        pt1, pt2 = pair
-        if pt1 not in adj_dict:
-            adj_dict[pt1] = len(vertex_list)
-            vertex_list.append(V(pt1))
-        v1 = vertex_list[adj_dict[pt1]]
+class Edge:
+    def __init__(self, u, v, weight):
+        self.u = u
+        self.v = v
+        self.weight = weight
 
-        if pt2 not in adj_dict:
-            adj_dict[pt2] = len(vertex_list)
-            vertex_list.append(V(pt2))
-        v2 = vertex_list[adj_dict[pt2]]
-        v1.neighbor_dict[adj_dict[pt2]] = False
-        v2.neighbor_dict[adj_dict[pt1]] = False
+    def __lt__(self, other):
+        return self.weight < other.weight
 
-    edge_list = []
 
-    for k, v_idx in adj_dict.items():
-        v = vertex_list[v_idx]
-        vlist = []
-        for i in v.neighbor_dict:
-            if not v.neighbor_dict[i]:
-                vlist.append((mfn.euclidean_dist(vertex_list[i].pt, v.pt), i))
-            vlist = sorted(vlist, key=sortkey)
-            if len(vlist):
-                neighbor_idx = vlist[0][1]
-                neighbor = vertex_list[neighbor_idx]
-                neighbor.neighbor_dict[v_idx] = True
-                v.neighbor_dict[neighbor_idx] = True
-                edge_list.append((v.pt, neighbor.pt))
+def kruskal(edges):
+    cost = 0
 
-    return edge_list
+    tree_id = {}
+    for e in edges:
+        if e.u not in tree_id:
+            tree_id[e.u] = len(tree_id)
+        if e.v not in tree_id:
+            tree_id[e.v] = len(tree_id)
+
+    result = []
+
+    edges.sort()
+
+    for e in edges:
+        if tree_id[e.u] != tree_id[e.v]:
+            cost += e.weight
+            result.append(e)
+
+            old_id, new_id = tree_id[e.u], tree_id[e.v]
+            for i in list(tree_id):
+                if tree_id[i] == old_id:
+                    tree_id[i] = new_id
+    return result

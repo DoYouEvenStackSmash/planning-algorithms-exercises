@@ -359,7 +359,7 @@ class PygameArtFxns:
         s, e = point_set
         pygame.draw.line(screen, color, s, e, width=4)
 
-    def frame_draw_dot(screen, point, color=(0, 0, 0), width=0, thickness=4):
+    def frame_draw_dot(screen, point, color=(255, 0, 0), width=0, thickness=4):
         """
         Draws a single dot given a point (x, y)
         Returns nothing
@@ -410,12 +410,12 @@ class PygameArtFxns:
         PygameArtFxns.frame_draw_bold_line(screen, l1, color)
         PygameArtFxns.frame_draw_bold_line(screen, l2, color)
 
-    def frame_draw_ray(screen, pt1, pt2, color):
+    def frame_draw_ray(screen, pt1, pt2, color, BOLD=False):
         """
         Draws a ray from pt1 to pt2
         Does not return
         """
-        print(pt1, pt2)
+        # print(pt1, pt2)
         theta, r = MathFxns.car2pol(pt1, pt2)
         ip = MathFxns.pol2car(pt1, r - 20, theta)
 
@@ -424,5 +424,8 @@ class PygameArtFxns:
         lpt = MathFxns.pol2car(ip, 6, theta_left)
         rpt = MathFxns.pol2car(ip, 6, theta_right)
         cpt = pt2
-        PygameArtFxns.frame_draw_line(screen, (pt1, pt2), color)
+        if BOLD:
+            PygameArtFxns.frame_draw_bold_line(screen, (pt1, pt2), color)
+        else:
+            PygameArtFxns.frame_draw_line(screen, (pt1, pt2), color)
         PygameArtFxns.frame_draw_filled_polygon(screen, [lpt, cpt, rpt], color)
