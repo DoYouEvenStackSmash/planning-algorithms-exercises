@@ -23,7 +23,6 @@ def draw_component(screen, edge_list, color=pafn.colors["white"]):
     pafn.frame_draw_ray(screen, pl[-1], pl[0], color)
 
 
-
 def gen_textbook_dcel():
     dcel = DCEL()
     bc = [(226, 280), (778, 284), (670, 711), (136, 706)]

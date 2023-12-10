@@ -329,9 +329,7 @@ class VerticalCellDecomposition:
             )
             intermediate_pts = []
             for fp in free_points:
-                intermediate_pts.append(
-                    mfn.pol2car(fp, 5, np.pi)
-                )
+                intermediate_pts.append(mfn.pol2car(fp, 5, np.pi))
             # print(intermediate_pts)
 
             for j in range(len(intermediate_pts)):
@@ -347,10 +345,9 @@ class VerticalCellDecomposition:
                         pairs.append([last_layer[k], pt])
                         last_layer[k] = None
 
-            
             for pt in intermediate_pts:
                 last_layer.append(pt)
-            
+
             for j in range(len(free_points)):
                 pt = free_points[j]
                 if pt == None:

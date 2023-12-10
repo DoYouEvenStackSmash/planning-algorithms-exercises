@@ -410,7 +410,7 @@ class PygameArtFxns:
         PygameArtFxns.frame_draw_bold_line(screen, l1, color)
         PygameArtFxns.frame_draw_bold_line(screen, l2, color)
 
-    def frame_draw_ray(screen, pt1, pt2, color,BOLD=False):
+    def frame_draw_ray(screen, pt1, pt2, color, BOLD=False):
         """
         Draws a ray from pt1 to pt2
         Does not return

@@ -1,4 +1,3 @@
-
 class V:
     """
     Abstraction for constructing an undirected graph

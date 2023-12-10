@@ -14,6 +14,7 @@ from render_support import MathFxns as mfn
 from render_support import TransformFxns as tfn
 from render_support import PygameArtFxns as pafn
 from graph_processing import *
+
 # from cell_decomp_support import VerticalCellDecomposition as vcd
 import numpy as np
 import time
@@ -85,7 +86,7 @@ def event_active_edge_traversal(screen, dcel):
     #         pafn.frame_draw_line(screen, seg, pafn.colors["white"])
     pygame.display.update()
     time.sleep(2)
-        # pafn.frame_
+    # pafn.frame_
 
     last_layer = []
     curr_layer = []
@@ -114,9 +115,7 @@ def event_active_edge_traversal(screen, dcel):
         fps = vcd.calculate_free_points(valid_edges, bv)
         intermediate_pts = []
         for fp in fps:
-            intermediate_pts.append(
-                mfn.pol2car(fp, 5, np.pi)
-            )
+            intermediate_pts.append(mfn.pol2car(fp, 5, np.pi))
         # print(intermediate_pts)
 
         for j in range(len(intermediate_pts)):
@@ -132,12 +131,12 @@ def event_active_edge_traversal(screen, dcel):
                 ):  # and check_for_free_path(last_active_edges, pt, theta, radius):
                     pairs.append([last_layer[k], pt])
                     last_layer[k] = None
-        
+
         # pygame.display.update()
         # time.sleep(0.3)
         for pt in intermediate_pts:
             last_layer.append(pt)
-        
+
         for j in range(len(fps)):
             pt = fps[j]
             if pt == None:
@@ -229,10 +228,59 @@ def gen_textbook_dcel():
     dcel.create_face(bc, [obs_1, obs_2])
     return dcel
 
+
 def gen_spiral_dcel():
     dcel = DCEL()
     bc = [(137, 86), (965, 56), (920, 944), (75, 930)]
-    obs_1 = [(879, 116), (782, 160), (668, 154), (535, 174), (424, 221), (301, 361), (245, 515), (286, 648), (403, 727), (560, 757), (694, 734), (788, 616), (814, 491), (783, 361), (712, 278), (599, 267), (474, 349), (411, 474), (434, 546), (549, 560), (589, 528), (579, 462), (541, 392), (580, 314), (658, 319), (718, 361), (750, 474), (729, 576), (686, 633), (599, 668), (500, 671), (360, 604), (341, 495), (358, 406), (444, 317), (568, 237), (686, 195), (833, 236), (913, 440), (879, 656), (733, 838), (504, 873), (224, 772), (142, 565), (198, 308), (422, 151), (759, 106)]
+    obs_1 = [
+        (879, 116),
+        (782, 160),
+        (668, 154),
+        (535, 174),
+        (424, 221),
+        (301, 361),
+        (245, 515),
+        (286, 648),
+        (403, 727),
+        (560, 757),
+        (694, 734),
+        (788, 616),
+        (814, 491),
+        (783, 361),
+        (712, 278),
+        (599, 267),
+        (474, 349),
+        (411, 474),
+        (434, 546),
+        (549, 560),
+        (589, 528),
+        (579, 462),
+        (541, 392),
+        (580, 314),
+        (658, 319),
+        (718, 361),
+        (750, 474),
+        (729, 576),
+        (686, 633),
+        (599, 668),
+        (500, 671),
+        (360, 604),
+        (341, 495),
+        (358, 406),
+        (444, 317),
+        (568, 237),
+        (686, 195),
+        (833, 236),
+        (913, 440),
+        (879, 656),
+        (733, 838),
+        (504, 873),
+        (224, 772),
+        (142, 565),
+        (198, 308),
+        (422, 151),
+        (759, 106),
+    ]
     obs_1.reverse()
     dcel.create_face(bc, [obs_1])
     return dcel
@@ -266,10 +314,12 @@ def gen_dcel_2():
     dcel.create_face(bc, [[(308, 609), (257, 591), (323, 424), (199, 619)], x, a, b, c])
     return dcel
 
-def test_triangle_theta(A,B,C):
-    theta_1 = vcd.test_get_delta_theta(A,B,C)
-    theta_2 = vcd.test_get_delta_theta(B,A,C)
+
+def test_triangle_theta(A, B, C):
+    theta_1 = vcd.test_get_delta_theta(A, B, C)
+    theta_2 = vcd.test_get_delta_theta(B, A, C)
     return theta_1 > np.pi / 2 or theta_2 > np.pi / 2
+
 
 def query_roadmap(screen, dcel, pairlist):
     sortkey = lambda pt: pt[0]
@@ -303,13 +353,13 @@ def query_roadmap(screen, dcel, pairlist):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pt = pygame.mouse.get_pos()
-                
+
                 vlist = []
                 seg_dict = {}
                 for pair in pairlist:
                     seg = pair
-                    if not test_triangle_theta(seg[0],seg[1], pt):
-                        npt = vcd.get_normal_pt(seg[0],seg[1], pt)
+                    if not test_triangle_theta(seg[0], seg[1], pt):
+                        npt = vcd.get_normal_pt(seg[0], seg[1], pt)
                         theta, radius = mfn.car2pol(pt, npt)
                         if vcd.check_for_free_path(edge_list, pt, theta, radius):
                             vlist.append((mfn.euclidean_dist(npt, pt), npt))
@@ -318,7 +368,7 @@ def query_roadmap(screen, dcel, pairlist):
                 for v in pt_list:
                     theta, radius = mfn.car2pol(pt, v)
                     if vcd.check_for_free_path(edge_list, pt, theta, radius):
-                        vlist.append((mfn.euclidean_dist(v, pt),v))
+                        vlist.append((mfn.euclidean_dist(v, pt), v))
                 vlist = sorted(vlist, key=sortkey)
                 nearest_neighbor = vlist[0][1]
                 new_pairs = []
@@ -329,7 +379,7 @@ def query_roadmap(screen, dcel, pairlist):
                     new_pairs.append(pairlist[-1])
                     pairlist.append((seg[1], nearest_neighbor))
                     new_pairs.append(pairlist[-1])
-                    
+
                     pt_set.add(nearest_neighbor)
                     pt_list.append(nearest_neighbor)
                     if nearest_neighbor not in adj_dict:
@@ -356,7 +406,7 @@ def query_roadmap(screen, dcel, pairlist):
                 v1.neighbor_dict[adj_dict[pt]] = False
                 v2.neighbor_dict[adj_dict[nearest_neighbor]] = False
                 # # for v in vlist:
-                pc = [pafn.colors["green"],pafn.colors["red"]]
+                pc = [pafn.colors["green"], pafn.colors["red"]]
                 pafn.frame_draw_cross(screen, pt, pc[len(pt_index)])
                 # pafn.frame_draw_line(screen, (pt,nearest_neighbor), pafn.colors["green"])
                 pygame.display.update()
@@ -382,7 +432,8 @@ def query_roadmap(screen, dcel, pairlist):
                     v.visited = 0
                 pt_index = []
                 pygame.display.update()
-            
+
+
 def find_path(adj_dict, vertex_list, start_pt, target_pt):
     WHITE = 0
     GRAY = 1
@@ -406,7 +457,7 @@ def find_path(adj_dict, vertex_list, start_pt, target_pt):
             stack[-1].neighbor_counter += 1
             if (
                 vertex_dict[
-                    stack[-1].neighbor_dict[stack[-1].neighbor_counter -1]
+                    stack[-1].neighbor_dict[stack[-1].neighbor_counter - 1]
                 ].visited
                 == WHITE
             ):
@@ -424,8 +475,8 @@ def find_path(adj_dict, vertex_list, start_pt, target_pt):
             stack[-1].visited = BLACK
             stack.pop()
     return stack
-    
-                
+
+
 def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)
