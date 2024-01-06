@@ -40,7 +40,6 @@ def draw_last_point(screen, point_list):
     pygame.display.update()
     time.sleep(0.5)
 
-
 def chain2vertex(chain):
     """Unpacks vertices from a chain
 
@@ -76,19 +75,21 @@ def draw_face(screen, dcel, f_id=0):
     face = dcel.face_records[f_id]
     point_list = chain2points(face.get_boundary_chain())
 
-    for p in range(1, len(point_list)):
-        pafn.frame_draw_ray(
-            screen, point_list[p - 1], point_list[p], pafn.colors["magenta"]
-        )
+    # for p in range(1, len(point_list)):
+    #     pafn.frame_draw_ray(
+    #         screen, point_list[p - 1], point_list[p], pafn.colors["magenta"]
+    #     )
 
-        pygame.display.update()
-        time.sleep(0.2)
+    #     pygame.display.update()
+    #     time.sleep(0.2)
+    pafn.frame_draw_filled_polygon(screen,point_list, pafn.colors["white"])
     draw_last_point(screen, point_list)
     pygame.display.update()
 
     for idx, ic in enumerate(face.get_interior_component_chains()):
         ic_point_list = chain2points(ic)
-        draw_shape(screen, ic_point_list, None, idx + 1 * 2)
+        pafn.frame_draw_filled_polygon(screen,ic_point_list, pafn.colors["lightslategray"])
+        # draw_shape(screen, ic_point_list, None, idx + 1 * 2)
         # for p in range(1, len(ic_point_list)):
         #     pafn.frame_draw_ray(
         #         screen, ic_point_list[p - 1], ic_point_list[p], pafn.colors["magenta"]

@@ -371,7 +371,7 @@ class PygameArtFxns:
         Resets the pygame display to a given color
         Returns nothing
         """
-        pygame.Surface.fill(screen, PygameArtFxns.colors["black"])
+        pygame.Surface.fill(screen, PygameArtFxns.colors["lightslategray"])
 
     def draw_lines_between_points(screen, pts, color=(255, 255, 255)):
         """
