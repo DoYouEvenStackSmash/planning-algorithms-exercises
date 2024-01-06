@@ -24,23 +24,6 @@ from test_objects import *
 from collections import deque
 from graph_processing import *
 
-THRES = 1e-8
-xval = lambda m, p: 0 if abs(m) < THRES else m * np.cos(p)
-yval = lambda m, p: 0 if abs(m) < THRES else m * np.sin(p)
-mag = lambda complex_val: np.sqrt(complex_val.real**2 + complex_val.imag**2)
-
-
-def phase(complex_val):
-    checkfxn = lambda x: [0 if abs(x) < THRES else x]
-
-    r, i = checkfxn(complex_val.real), checkfxn(complex_val.imag)
-
-    if r != 0:
-        return np.arctan2(i, r)
-    if i == 0:
-        return 0
-    return [np.pi / 2 if i > 0 else -np.pi / 2]
-
 
 def cart2complex(cart_pt, center=(0, 0)):
     """Transforms a cartesian coordinate into a complex number with a center
@@ -58,26 +41,9 @@ def cart2complex(cart_pt, center=(0, 0)):
     return r * np.exp(1j * theta)
 
 
-def complex2cart(complex_pt, center=(0, 0)):
-    """Transforms a complex number into an x,y coordinate
-
-    Args:
-        complex_pt (_type_): _description_
-        center (tuple, optional): _description_. Defaults to (0,0).
-
-    Returns:
-        _type_: pair of coordinates
-    """
-    m = mag(complex_pt)
-    p = phase(complex_pt)
-    x = xval(m, p) + center[0]
-    y = yval(m, p) + center[1]
-    return x, y
-
-
-def vertical_edge_loop(screen, dcel):
-    # #
-
+def triangulate(screen, dcel):
+    pts = chain2vertex(dcel.construct_global_edge_list())
+    stack = []
     get_adj_succ = lambda p: p.get_half_edge().get_next_half_edge().get_source_vertex()
     get_adj_pred = lambda p: p.get_half_edge().get_prev_half_edge().get_source_vertex()
     v2pt = lambda p: p.get_point_coordinate()
@@ -88,31 +54,46 @@ def vertical_edge_loop(screen, dcel):
         and max(get_rank(edge_vtx(e)), get_rank(get_adj_succ(edge_vtx(e)))) >= rank
     )
     edge_vtx = lambda e: e.get_source_vertex()
+    check_pred_equal = lambda p1, p2: bool(get_rank(get_adj_pred(p1)) == get_rank(p2))
+    check_succ_equal = lambda p1, p2: bool(get_rank(get_adj_succ(p1)) == get_rank(p2))
     norm = lambda cv: cv / abs(cv)
     tang = lambda ang: ang * np.exp(1j * np.pi / 2)
     atang = lambda ang: ang * np.exp(1j * -np.pi / 2)
-    # initialize things
-    vpl = []
-    pts = chain2vertex(dcel.construct_global_edge_list())
-
+    get_rank = lambda v: v.rank
     # sort the points by x coordinate
     sortkey = lambda x: x.get_point_coordinate()[0]
-    pts = sorted(pts, key=sortkey)
-    for p in range(len(pts)):
-        pts[p].rank = p + 1
-
-    # initializers
-    added_ranks = [0]
     angles = [np.pi / 2, -np.pi / 2]
     ranks = set()
     edge_list = []
-
+    pts = sorted(pts, key=sortkey)
+    for p in range(len(pts)):
+        pts[p].rank = p + 1
+    vpl = []
     # visit all points
-    for vtx in pts:
-        vpl.append([])
+    for idx, vtx in enumerate(pts):
+        pt = vtx
         rank = get_rank(vtx)
+        print(vpl)
+        if len(vpl) > 0:
+            for cp,nop in vpl[-1]:
+            
+                print(cp)
+                theta, d = mfn.car2pol(v2pt(pt), nop)
+                if vcd.check_for_free_path(edge_list, v2pt(pt), theta, d):
+                    pafn.frame_draw_line(
+                        screen, (v2pt(pt), nop), pafn.colors["silver"]
+                    )
+            for ranki in range(1, rank-1):
+                theta, d = mfn.car2pol(v2pt(pt), v2pt(pts[ranki]))
+                if vcd.check_for_free_path(edge_list, v2pt(pt), theta, d) and idx > 0:
+                    pafn.frame_draw_line(
+                        screen, (v2pt(pt), v2pt(pts[ranki])), pafn.colors["silver"]
+                    )
+            pygame.display.update()
+        vpl.append([])
+        
 
-        added_ranks.append(get_rank(vtx))
+        # added_ranks.append(get_rank(vtx))
 
         nxt = get_adj_succ(vtx)
         prev = get_adj_pred(vtx)
@@ -137,7 +118,8 @@ def vertical_edge_loop(screen, dcel):
                 alist.append(a)
 
         # find closest edge intersection for valid angles
-        el = []
+        print(vpl)
+
         for a in alist:
             curr_ep = None
             curr_dist = float("inf")
@@ -166,8 +148,25 @@ def vertical_edge_loop(screen, dcel):
             # store the intersection point
             if curr_ep != None:
                 vpl[-1].append((v2pt(pt), curr_ep))
-                # pafn.frame_draw_cross(screen, curr_ep, pafn.colors["magenta"])
-
+                pafn.frame_draw_cross(screen, curr_ep, pafn.colors["magenta"])
+                pt = vtx
+        print(vpl)
+        if len(vpl) > 0:
+            for cp,nop in vpl[-1]:
+            
+                print(cp)
+                theta, d = mfn.car2pol(v2pt(pt), nop)
+                if vcd.check_for_free_path(edge_list, v2pt(pt), theta, d):
+                    pafn.frame_draw_line(
+                        screen, (v2pt(pt), nop), pafn.colors["silver"]
+                    )
+            theta, d = mfn.car2pol(v2pt(pt), v2pt(pts[idx - 1]))
+            if idx > 0 and vcd.check_for_free_path(edge_list, v2pt(pt), theta, d):
+              
+                pafn.frame_draw_line(
+                    screen, (v2pt(pt), v2pt(pts[idx - 1])), pafn.colors["silver"]
+                )
+            pygame.display.update()
         # add new active edges
         if is_active(rank, vtx.get_half_edge()) and vtx.rank not in ranks:
             ranks.add(get_rank(vtx))
@@ -181,92 +180,24 @@ def vertical_edge_loop(screen, dcel):
 
         pygame.display.update()
 
-    return vpl
+    # return vpl
+    # pyga
+    # for diag in diags:
+    #     pafn.frame_draw_line(screen, [v2pt(d) for d in diag], pafn.colors["tangerine"])
+    #     pygame.display.update()
+    #     time.sleep(0.5)
+    time.sleep(5)
 
 
-def refine_roadmap(dcel, vpl):
-    """Given a pointset which covers the input space, constructs
-        a roadmap graph and computes the minimum spanning tree over that
-
-    Args:
-        screen (_type_): _description_
-        dcel (_type_): _description_
-        vpl (_type_): _description_
-    """
-    el = dcel.construct_global_edge_list()
-    pair_list = []
-    for idx in range(len(vpl) - 1):
-        orig_point_set = [gfn.get_midpoint(a, b) for a, b in vpl[idx]]
-
-        for vl in vpl[idx + 1 :]:
-            target_point_set = [gfn.get_midpoint(a, b) for a, b in vl]
-            for m1 in orig_point_set:
-                for m2 in target_point_set:
-                    theta, d = mfn.car2pol(m1, m2)
-                    if vcd.check_for_free_path(el, m1, theta, d):
-                        pair_list.append([m1, m2])
-    keyval = lambda e: e[0]
-    pair_list = set(tuple(sorted([tuple(sorted(p,key=keyval)) for p in pair_list], key=keyval)))
-    pair_list = [Edge(a, b, mfn.euclidean_dist(a, b)) for (a, b) in pair_list]
-    pair_list = [(e.u, e.v, e.weight) for e in kruskal(pair_list)]
-    
-    return pair_list
-
-        
-def draw_roadmap(screen,pair_list,color=pafn.colors["silver"]):
-    for p in pair_list:
-        pafn.frame_draw_bold_line(screen, (p[0],p[1]), color)
-        pygame.display.update()
-        time.sleep(0.05)
-
-def draw_path(screen, pair_list, color = pafn.colors["green"]):
-    for p in pair_list:
-        pafn.frame_draw_ray(screen, p[0],p[1], color,True)
-        pygame.display.update()
-        time.sleep(0.1)
-    
-    
-def draw_shortest_path(screen, pair_list, start=1,end=5):
-    sp = dijkstra(pair_list, start, end)
-    print(start)
-    print(pair_list[0])
-    pafn.frame_draw_dot(screen, end, pafn.colors["cyan"])
-    draw_roadmap(screen, sp,pafn.colors["green"])
-    
 def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    ID, dcel = test_obj_2()
+    ID, dcel = textbook_obj()
     draw_face(screen, dcel, ID)
     pygame.display.update()
-    time.sleep(2)
-    vpl = vertical_edge_loop(screen, dcel)
-    pl = refine_roadmap(dcel, vpl)
-    draw_roadmap(screen, pl)
-    keyval = lambda e: e[0]
-    # pl = sorted(pl, key=keyval)
-    print(len(pl))
-    print(len(vpl))
-
-    # draw_roadmap(screen, pl)
-    el = build_inverted_tree(pl, pl[0][0])
-    # draw_roadmap(screen, el)
-    # draw_shortest_path(screen, pl, pl[0][0], pl[len(pl)-1][1])
-    s,e =  pl[0][0],pl[len(pl)-1][1]
-    
-    el = get_path(el,s,e)
-    pafn.frame_draw_cross(screen, s, pafn.colors["white"])
-    pafn.frame_draw_cross(screen, e, pafn.colors["red"])
-    draw_path(screen, el)
-
-    # draw_roadmap(screen, el, pafn.colors["green"])
-    # pafn.frame_draw_cross(screen, s, pafn.colors["white"])
-    # pafn.frame_draw_cross(screen, e, pafn.colors["red"])
-
-    pygame.display.update()
-    time.sleep(5)
+    triangulate(screen, dcel)
 
 
 if __name__ == "__main__":
