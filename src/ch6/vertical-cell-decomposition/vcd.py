@@ -213,32 +213,26 @@ def refine_roadmap(dcel, vpl):
     return pair_list
 
         
-def draw_roadmap(screen,pair_list,color=pafn.colors["silver"]):
+def draw_roadmap(screen,pair_list,color=pafn.colors["black"]):
     for p in pair_list:
         pafn.frame_draw_bold_line(screen, (p[0],p[1]), color)
         pygame.display.update()
-        time.sleep(0.05)
+        time.sleep(0.01)
 
-def draw_path(screen, pair_list, color = pafn.colors["green"]):
+def draw_path(screen, pair_list, color = pafn.colors["lawngreen"]):
     for p in pair_list:
         pafn.frame_draw_ray(screen, p[0],p[1], color,True)
         pygame.display.update()
         time.sleep(0.1)
     
     
-def draw_shortest_path(screen, pair_list, start=1,end=5):
-    sp = dijkstra(pair_list, start, end)
-    print(start)
-    print(pair_list[0])
-    pafn.frame_draw_dot(screen, end, pafn.colors["cyan"])
-    draw_roadmap(screen, sp,pafn.colors["green"])
-    
 def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    ID, dcel = test_obj_2()
+    ID, dcel = test_obj_1()
+
     draw_face(screen, dcel, ID)
     pygame.display.update()
     time.sleep(2)
@@ -246,24 +240,18 @@ def main():
     pl = refine_roadmap(dcel, vpl)
     draw_roadmap(screen, pl)
     keyval = lambda e: e[0]
-    # pl = sorted(pl, key=keyval)
+
     print(len(pl))
     print(len(vpl))
 
-    # draw_roadmap(screen, pl)
     el = build_inverted_tree(pl, pl[0][0])
-    # draw_roadmap(screen, el)
-    # draw_shortest_path(screen, pl, pl[0][0], pl[len(pl)-1][1])
-    s,e =  pl[0][0],pl[len(pl)-1][1]
+
+    s,e =  pl[0][0],pl[len(pl)-1][0]
     
     el = get_path(el,s,e)
     pafn.frame_draw_cross(screen, s, pafn.colors["white"])
     pafn.frame_draw_cross(screen, e, pafn.colors["red"])
     draw_path(screen, el)
-
-    # draw_roadmap(screen, el, pafn.colors["green"])
-    # pafn.frame_draw_cross(screen, s, pafn.colors["white"])
-    # pafn.frame_draw_cross(screen, e, pafn.colors["red"])
 
     pygame.display.update()
     time.sleep(5)

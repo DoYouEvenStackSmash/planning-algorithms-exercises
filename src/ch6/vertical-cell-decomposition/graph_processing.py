@@ -103,8 +103,6 @@ def build_inverted_tree(pair_list, start):
                 continue
             queue.append(n)
             el.append([vl[n], vl[idx]])
-    
-
     return el
         
 def get_path(el, start, end):
