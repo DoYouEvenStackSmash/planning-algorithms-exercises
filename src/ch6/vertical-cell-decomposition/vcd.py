@@ -75,7 +75,7 @@ def complex2cart(complex_pt, center=(0, 0)):
     return x, y
 
 
-def vertical_edge_loop(screen, dcel):
+def vertical_edge_loop(screen, dcel,VERBOSE=False):
     # #
 
     get_adj_succ = lambda p: p.get_half_edge().get_next_half_edge().get_source_vertex()
@@ -179,7 +179,7 @@ def vertical_edge_loop(screen, dcel):
             ranks.add(get_adj_pred(vtx).rank)
             edge_list.append(get_adj_pred(vtx).get_half_edge())
 
-        pygame.display.update()
+        # pygame.display.update()
 
     return vpl
 
@@ -206,26 +206,18 @@ def refine_roadmap(dcel, vpl):
                     if vcd.check_for_free_path(el, m1, theta, d):
                         pair_list.append([m1, m2])
     keyval = lambda e: e[0]
-    pair_list = set(tuple(sorted([tuple(sorted(p,key=keyval)) for p in pair_list], key=keyval)))
+    pair_list = list(set(tuple(sorted([tuple(sorted(p,key=keyval)) for p in pair_list], key=keyval))))
     pair_list = [Edge(a, b, mfn.euclidean_dist(a, b)) for (a, b) in pair_list]
-    pair_list = [(e.u, e.v, e.weight) for e in kruskal(pair_list)]
+    pair_list = [[e.u, e.v, e.weight] for e in kruskal(pair_list)]
     
     return pair_list
 
-        
-def draw_roadmap(screen,pair_list,color=pafn.colors["black"]):
-    for p in pair_list:
-        pafn.frame_draw_bold_line(screen, (p[0],p[1]), color)
-        pygame.display.update()
-        time.sleep(0.01)
 
-def draw_path(screen, pair_list, color = pafn.colors["lawngreen"]):
-    for p in pair_list:
-        pafn.frame_draw_ray(screen, p[0],p[1], color,True)
-        pygame.display.update()
-        time.sleep(0.1)
+def compute_spanning_roadmap(DCEL,screen=None):
+    vpl = vertical_edge_loop(screen, dcel)
+    pl = refine_roadmap(dcel, vpl)
     
-    
+
 def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)
@@ -237,8 +229,10 @@ def main():
     pygame.display.update()
     time.sleep(2)
     vpl = vertical_edge_loop(screen, dcel)
+    # pl = vpl
     pl = refine_roadmap(dcel, vpl)
     draw_roadmap(screen, pl)
+
     keyval = lambda e: e[0]
 
     print(len(pl))

@@ -40,29 +40,17 @@ def draw_last_point(screen, point_list):
     pygame.display.update()
     time.sleep(0.5)
 
-def chain2vertex(chain):
-    """Unpacks vertices from a chain
+def draw_roadmap(screen,pair_list,color=pafn.colors["black"]):
+    for p in pair_list:
+        pafn.frame_draw_bold_line(screen, (p[0],p[1]), color)
+        pygame.display.update()
+        time.sleep(0.01)
 
-    Args:
-        chain (_type_): list of HalfEdge objects
-
-    Returns:
-        _type_: list of Vertex objects
-    """
-    return [e.get_source_vertex() for e in chain]
-
-
-def chain2points(chain):
-    """Unpacks points from a chain
-
-    Args:
-        chain (_type_): List of Half Edge objects
-
-    Returns:
-        _type_: list of points
-    """
-    return [e.get_point_coordinate() for e in chain2vertex(chain)]
-
+def draw_path(screen, pair_list, color = pafn.colors["lawngreen"]):
+    for p in pair_list:
+        pafn.frame_draw_ray(screen, p[0],p[1], color,True)
+        pygame.display.update()
+        time.sleep(0.1)
 
 def draw_face(screen, dcel, f_id=0):
     """Draws a face on a screen
@@ -97,3 +85,28 @@ def draw_face(screen, dcel, f_id=0):
 
         # draw_last_point(screen, ic_point_list)
         # pygame.display.update()
+
+def chain2vertex(chain):
+    """Unpacks vertices from a chain
+
+    Args:
+        chain (_type_): list of HalfEdge objects
+
+    Returns:
+        _type_: list of Vertex objects
+    """
+    return [e.get_source_vertex() for e in chain]
+
+
+def chain2points(chain):
+    """Unpacks points from a chain
+
+    Args:
+        chain (_type_): List of Half Edge objects
+
+    Returns:
+        _type_: list of points
+    """
+    return [e.get_point_coordinate() for e in chain2vertex(chain)]
+
+
