@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from vcd import *
+
 def edge_region_test(edge, pt):
   a,b,c = cart2complex(pt,edge[0]),cart2complex(pt, edge[1]),cart2complex(edge[1],edge[0])
   if abs(np.angle(a / c)) < np.pi/2 and abs(np.angle(b / (c * np.exp(1j*np.pi)))) < np.pi / 2:
@@ -21,63 +22,62 @@ def get_normal_pt(edge, pt):
   npt = complex2cart(norm(c) * d,edge[0])
   return npt
 
-def get_nearest_vertex(ol, vpt_list, pt):
+def get_nearest_vertex(obstacle_list, vpt_list, pt):
   
-  vl = []
+  vertex_list = []
   vset = set()
-  for i,x in enumerate(vpt_list):
-    a = x
-    if a not in vset:
-      vl.append((mfn.euclidean_dist(a,pt),a,i))
-      vset.add(a)
+  for i,v in enumerate(vpt_list):
+    if v not in vset:
+      vertex_list.append((mfn.euclidean_dist(v,pt),v,i))
+      vset.add(v)
 
   sortkey = lambda e : e[0]
-  vl = sorted(vl,key=sortkey)
-  vc = 0
-  while vc < len(vl):
-    if not check_valid(ol, pt, vl[vc][1]):
-      vc += 1
+  vertex_list = sorted(vertex_list,key=sortkey)
+  vtx_idx = 0
+  while vtx_idx < len(vertex_list):
+    if not check_valid(obstacle_list, pt, vertex_list[vtx_idx][1]):
+      vtx_idx += 1
     else:
-      return vl[vc][1]
+      return vertex_list[vtx_idx][1]
   
-def get_nearest(ol, edge_list, pt,offt=0):
-  el = []
-  vl = []
+def get_nearest(obstacle_list, edges, pt,offt=0):
+  edge_list = []
+  vertex_list = []
   vset = set()
-  for i,x in enumerate(edge_list):
+  for i,x in enumerate(edges):
     a,b = x[0],x[1]
     if a not in vset:
-      vl.append((mfn.euclidean_dist(a,pt),a,i))
+      vertex_list.append((mfn.euclidean_dist(a,pt),a,i))
       vset.add(a)
     if b not in vset:
-      vl.append((mfn.euclidean_dist(b,pt),b,i))
+      vertex_list.append((mfn.euclidean_dist(b,pt),b,i))
       vset.add(b)
     if edge_region_test((a,b), pt):
-      el.append((mfn.euclidean_dist(get_normal_pt((a,b),pt),pt),get_normal_pt((a,b),pt),i))
+      edge_list.append((mfn.euclidean_dist(get_normal_pt((a,b),pt),pt),get_normal_pt((a,b),pt),i))
   sortkey = lambda e : e[0]
   
-  el = sorted(el,key=sortkey)
-  vl = sorted(vl,key=sortkey)
+  edge_list = sorted(edge_list,key=sortkey)
+  vertex_list = sorted(vertex_list,key=sortkey)
   edist = float('Inf')
   vdist = float('Inf')
-  if len(el):
-    edist = el[0][0]
-  vdist = vl[0][0]
-  vc = 0
-  ec = 0
-  while vc < len(vl) or ec < len(el):
-    if vc < len(vl) and vl[vc][0] < edist:
-      if not check_valid(ol, pt, vl[vc][1]):
-        vc += 1
+  if len(edge_list):
+    edist = edge_list[0][0]
+  vdist = vertex_list[0][0]
+  vtx_idx = 0
+  edge_idx = 0
+  while vtx_idx < len(vertex_list) or edge_idx < len(edge_list):
+    if vtx_idx < len(vertex_list) and vertex_list[vtx_idx][0] < edist:
+      if not check_valid(obstacle_list, pt, vertex_list[vtx_idx][1]):
+        vtx_idx += 1
       else:
-        return vl[vc][1]
-    if vc < len(vl) and edist < vl[vc][0]:
-      if not check_valid(ol, pt,el[ec][1]):
-        ec += 1
+        return vertex_list[vtx_idx][1]
+    if vtx_idx < len(vertex_list) and edist < vertex_list[vtx_idx][0]:
+      if not check_valid(obstacle_list, pt,edge_list[edge_idx][1]):
+        edge_idx += 1
       else:
-        return (el[ec][1][0][0],el[ec][1][1][0])
-      if ec < len(el):
-        edist = el[ec][0]
+        return (edge_list[edge_idx][1][0][0],edge_list[edge_idx][1][1][0])
+      if edge_idx < len(edge_list):
+        edist = edge_list[edge_idx][0]
       else: 
         edist = float('Inf')
 

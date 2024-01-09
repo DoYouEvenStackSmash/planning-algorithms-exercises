@@ -37,38 +37,6 @@ def kruskal(edges):
                     tree_id[i] = new_id
     return result
 
-
-def dijkstra(edges, start, end):
-    graph = {}
-    for edge in edges:
-        x, y, w = edge
-        if x not in graph:
-            graph[x] = {}
-        if y not in graph:
-            graph[y] = {}
-        graph[x][y] = w
-        graph[y][x] = w
-
-    heap = [(0, start, [])]
-    visited = set()
-
-    while heap:
-        (cost, current, path) = heapq.heappop(heap)
-
-        if current in visited:
-            continue
-
-        visited.add(current)
-        path = path + [(current, neighbor) for neighbor, _ in graph[current].items()]
-
-        if current == end:
-            return path
-
-        for neighbor, c in graph[current].items():
-            heapq.heappush(heap, (cost + c, neighbor, path))
-
-    return None
-
 class Vtx:
     def __init__(self):
         self.color = 0
@@ -122,7 +90,6 @@ def get_path(el, start, end):
             break
         while el[marker][0] != el[hold][1]:
             marker += 1
-        
         hold = marker
         marker = marker + 1
     path.reverse()
