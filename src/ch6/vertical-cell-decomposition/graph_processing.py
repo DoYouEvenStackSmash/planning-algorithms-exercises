@@ -2,6 +2,7 @@
 from env_init import *
 import heapq
 
+
 class Edge:
     def __init__(self, u, v, weight):
         self.u = u
@@ -38,50 +39,30 @@ def kruskal(edges):
     return result
 
 
-def dijkstra(edges, start, end):
-    graph = {}
-    for edge in edges:
-        x, y, w = edge
-        if x not in graph:
-            graph[x] = {}
-        if y not in graph:
-            graph[y] = {}
-        graph[x][y] = w
-        graph[y][x] = w
-
-    heap = [(0, start, [])]
-    visited = set()
-
-    while heap:
-        (cost, current, path) = heapq.heappop(heap)
-
-        if current in visited:
-            continue
-
-        visited.add(current)
-        path = path + [(current, neighbor) for neighbor, _ in graph[current].items()]
-
-        if current == end:
-            return path
-
-        for neighbor, c in graph[current].items():
-            heapq.heappush(heap, (cost + c, neighbor, path))
-
-    return None
-
 class Vtx:
     def __init__(self):
         self.color = 0
         self.adj = []
 
+
 from collections import deque
 
+
 def build_inverted_tree(pair_list, start):
+    """Given an edge list of pairs, constructs a spanning tree rooted at start
+
+    Args:
+        pair_list (_type_): list of points
+        start (_type_): single point
+
+    Returns:
+        _type_: spanning tree as a list of edges
+    """
     vlist = []
     queue = deque()
     vmap = {}
     for p in pair_list:
-        a,b,_ = p
+        a, b = p[0], p[1]
         if a not in vmap:
             vmap[a] = len(vmap)
             vlist.append(Vtx())
@@ -104,8 +85,20 @@ def build_inverted_tree(pair_list, start):
             queue.append(n)
             el.append([vl[n], vl[idx]])
     return el
-        
+
+
 def get_path(el, start, end):
+    """Given a rooted tree, solves for the shortest path (fewest number of edges
+        between start and end
+
+    Args:
+        el (_type_): edge list as pairs of points
+        start (_type_): single point
+        end (_type_): single point
+
+    Returns:
+        _type_: path, edge list as pairs of points
+    """
     el.reverse()
     c = 0
     while el[c][0] != end:
@@ -114,23 +107,15 @@ def get_path(el, start, end):
     hold = c
     path = []
     while 1:
-        e = [el[hold][1],el[hold][0]]
+        e = [el[hold][1], el[hold][0]]
         path.append(e)
         if el[hold][1] == start:
-            e = [el[hold][1],el[hold][0]]
+            e = [el[hold][1], el[hold][0]]
             path.append(e)
             break
         while el[marker][0] != el[hold][1]:
             marker += 1
-        
         hold = marker
         marker = marker + 1
     path.reverse()
     return path
-        
-        
-        
-    
-    
-        
-    
