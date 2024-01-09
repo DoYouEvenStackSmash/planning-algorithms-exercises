@@ -43,6 +43,7 @@ norm = lambda cv: cv / abs(cv)
 tang = lambda ang: ang * np.exp(1j * np.pi / 2)
 atang = lambda ang: ang * np.exp(1j * -np.pi / 2)
 
+
 def phase(complex_val):
     checkfxn = lambda x: [0 if abs(x) < THRES else x]
 
@@ -88,9 +89,8 @@ def complex2cart(complex_pt, center=(0, 0)):
     return x, y
 
 
-def vertical_cell_decomposition(screen, dcel,VERBOSE=False):
+def vertical_cell_decomposition(screen, dcel, VERBOSE=False):
     # #
-
 
     # initialize things
     vpl = []
@@ -202,13 +202,18 @@ def refine_roadmap(dcel, vpl):
                     theta, d = mfn.car2pol(midpt_1, midpt_2)
                     if vcd.check_for_free_path(el, midpt_1, theta, d):
                         pair_list.append([midpt_1, midpt_2])
-    
+
     keyval = lambda e: e[0]
-    pair_list = list(set(tuple(sorted([tuple(sorted(p,key=keyval)) for p in pair_list], key=keyval))))
+    pair_list = list(
+        set(
+            tuple(sorted([tuple(sorted(p, key=keyval)) for p in pair_list], key=keyval))
+        )
+    )
     pair_list = [Edge(a, b, mfn.euclidean_dist(a, b)) for (a, b) in pair_list]
     pair_list = [[e.u, e.v, e.weight] for e in kruskal(pair_list)]
     pair_list = deque(pair_list)
     return pair_list
+
 
 def main():
     pygame.init()
@@ -216,11 +221,11 @@ def main():
     pafn.clear_frame(screen)
 
     ID, dcel = textbook_obj()
-    
+
     vpl = vertical_cell_decomposition(screen, dcel)
     pair_list = refine_roadmap(dcel, vpl)
-    
-    draw_face(screen, dcel,ID)
+
+    draw_face(screen, dcel, ID)
     draw_roadmap(screen, pair_list)
     # pygame.display.update()
 
@@ -233,10 +238,10 @@ def main():
         for v in e:
             vtx_pt_set.add(v)
     vol = list(vtx_pt_set)
-    start,goal =  pair_list[0][0],pair_list[len(pair_list)-1][0]
+    start, goal = pair_list[0][0], pair_list[len(pair_list) - 1][0]
     obstacle_space = dcel.construct_global_edge_list()
-    
-    while 1:    
+
+    while 1:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 sys.exit()
@@ -244,35 +249,34 @@ def main():
             if goal == last:
                 continue
             last = goal
-        
+
         pafn.clear_frame(screen)
-        draw_face(screen, dcel,ID)
-        
+        draw_face(screen, dcel, ID)
+
         for ed in tree_list:
-            p1,p2 = ed[0],ed[1]
-            pafn.frame_draw_line(screen, (p1,p2), pafn.colors["black"]) 
-            
-        nearest_landmark = get_nearest(obstacle_space,pair_list,goal)
+            p1, p2 = ed[0], ed[1]
+            pafn.frame_draw_line(screen, (p1, p2), pafn.colors["black"])
+
+        nearest_landmark = get_nearest_landmark(obstacle_space, pair_list, goal)
         if nearest_landmark == None:
             pafn.frame_draw_cross(screen, start, pafn.colors["red"])
-            pafn.frame_draw_dot(screen, goal, pafn.colors["red"],True)
+            pafn.frame_draw_dot(screen, goal, pafn.colors["red"], True)
             pygame.display.update()
             continue
-        
+
         nearest_vertex = get_nearest_vertex(obstacle_space, vol, nearest_landmark)
         pair_list.append((nearest_landmark, nearest_vertex))
         pair_list.append((goal, nearest_landmark))
-        
+
         tree_list = build_inverted_tree(pair_list, start)
         path_to_goal = get_path(tree_list, start, goal)
-        
+
         pair_list.pop()
         pair_list.pop()
-        
-        draw_path(screen,path_to_goal,pafn.colors["darker-green"])
+
+        draw_path(screen, path_to_goal, pafn.colors["darker-green"])
         pafn.frame_draw_cross(screen, start, pafn.colors["red"])
         pygame.display.update()
-
 
 
 if __name__ == "__main__":
