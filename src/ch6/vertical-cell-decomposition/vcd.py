@@ -17,6 +17,7 @@ from graph_processing import *
 from cell_decomp_support import VerticalCellDecomposition as vcd
 import numpy as np
 import time
+from goal_search import *
 
 # from V import V
 from aux_functions import *
@@ -28,7 +29,19 @@ THRES = 1e-8
 xval = lambda m, p: 0 if abs(m) < THRES else m * np.cos(p)
 yval = lambda m, p: 0 if abs(m) < THRES else m * np.sin(p)
 mag = lambda complex_val: np.sqrt(complex_val.real**2 + complex_val.imag**2)
-
+get_adj_succ = lambda p: p.get_half_edge().get_next_half_edge().get_source_vertex()
+get_adj_pred = lambda p: p.get_half_edge().get_prev_half_edge().get_source_vertex()
+v2pt = lambda p: p.get_point_coordinate()
+get_rank = lambda v: v.rank
+is_active = (
+    lambda rank, e: min(get_rank(edge_vtx(e)), get_rank(get_adj_succ(edge_vtx(e))))
+    <= rank
+    and max(get_rank(edge_vtx(e)), get_rank(get_adj_succ(edge_vtx(e)))) >= rank
+)
+edge_vtx = lambda e: e.get_source_vertex()
+norm = lambda cv: cv / abs(cv)
+tang = lambda ang: ang * np.exp(1j * np.pi / 2)
+atang = lambda ang: ang * np.exp(1j * -np.pi / 2)
 
 def phase(complex_val):
     checkfxn = lambda x: [0 if abs(x) < THRES else x]
@@ -78,19 +91,7 @@ def complex2cart(complex_pt, center=(0, 0)):
 def vertical_edge_loop(screen, dcel,VERBOSE=False):
     # #
 
-    get_adj_succ = lambda p: p.get_half_edge().get_next_half_edge().get_source_vertex()
-    get_adj_pred = lambda p: p.get_half_edge().get_prev_half_edge().get_source_vertex()
-    v2pt = lambda p: p.get_point_coordinate()
-    get_rank = lambda v: v.rank
-    is_active = (
-        lambda rank, e: min(get_rank(edge_vtx(e)), get_rank(get_adj_succ(edge_vtx(e))))
-        <= rank
-        and max(get_rank(edge_vtx(e)), get_rank(get_adj_succ(edge_vtx(e)))) >= rank
-    )
-    edge_vtx = lambda e: e.get_source_vertex()
-    norm = lambda cv: cv / abs(cv)
-    tang = lambda ang: ang * np.exp(1j * np.pi / 2)
-    atang = lambda ang: ang * np.exp(1j * -np.pi / 2)
+
     # initialize things
     vpl = []
     pts = chain2vertex(dcel.construct_global_edge_list())
@@ -212,43 +213,65 @@ def refine_roadmap(dcel, vpl):
     
     return pair_list
 
-
-def compute_spanning_roadmap(DCEL,screen=None):
-    vpl = vertical_edge_loop(screen, dcel)
-    pl = refine_roadmap(dcel, vpl)
-    
-
 def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    ID, dcel = test_obj_1()
+    ID, dcel = textbook_obj()
 
     draw_face(screen, dcel, ID)
     pygame.display.update()
-    time.sleep(2)
+    # time.sleep(2)
     vpl = vertical_edge_loop(screen, dcel)
     # pl = vpl
     pl = refine_roadmap(dcel, vpl)
+    obstacle_set = dcel.construct_global_edge_list()
+    draw_face(screen, dcel,ID)
     draw_roadmap(screen, pl)
 
     keyval = lambda e: e[0]
-
-    print(len(pl))
-    print(len(vpl))
-
     el = build_inverted_tree(pl, pl[0][0])
-
+    last = None
+    vpls = set()
+    for e in el:
+        for v in e:
+            vpls.add(v)
+    vol = list(vpls)
     s,e =  pl[0][0],pl[len(pl)-1][0]
+    ol = dcel.construct_global_edge_list()
     
-    el = get_path(el,s,e)
-    pafn.frame_draw_cross(screen, s, pafn.colors["white"])
-    pafn.frame_draw_cross(screen, e, pafn.colors["red"])
-    draw_path(screen, el)
+    while 1:    
+      for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            sys.exit()
+        e = tuple(pygame.mouse.get_pos())
+        if e == last:
+            continue
+        last = e
+        pafn.clear_frame(screen)
+        draw_face(screen, dcel,ID)
 
-    pygame.display.update()
-    time.sleep(5)
+        pafn.frame_draw_cross(screen, s, pafn.colors["white"])
+
+        for ed in el:
+              pafn.frame_draw_line(screen, ed, pafn.colors["black"]) 
+        e2 = get_nearest(ol,pl,e)
+        if e2 == None:
+            pafn.frame_draw_dot(screen, e, pafn.colors["red"],True)
+            pygame.display.update()
+            continue
+        vpt = get_nearest_vertex(ol, vol, e2)
+        pl.append((e2, vpt))
+        pl.append((e, e2))
+        ex = build_inverted_tree(pl, s)
+        ep = get_path(ex, s, e)
+        draw_path(screen,ep,pafn.colors["lawngreen"])
+        
+        pl.pop(-1)
+        pl.pop(-1)
+        pygame.display.update()
+
 
 
 if __name__ == "__main__":

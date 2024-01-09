@@ -32,25 +32,20 @@ def draw_shape(screen, bc, maxs=(1000, 1000), val=8):
     """
 
     pafn.frame_draw_filled_polygon(screen, bc, pafn.colors[list(pafn.colors)[val]])
-    pygame.display.update()
 
 
 def draw_last_point(screen, point_list):
     pafn.frame_draw_ray(screen, point_list[-1], point_list[0], pafn.colors["cyan"])
-    pygame.display.update()
-    time.sleep(0.5)
 
 def draw_roadmap(screen,pair_list,color=pafn.colors["black"]):
     for p in pair_list:
         pafn.frame_draw_bold_line(screen, (p[0],p[1]), color)
-        pygame.display.update()
-        time.sleep(0.01)
 
 def draw_path(screen, pair_list, color = pafn.colors["lawngreen"]):
     for p in pair_list:
         pafn.frame_draw_ray(screen, p[0],p[1], color,True)
-        pygame.display.update()
-        time.sleep(0.1)
+        # pygame.display.update()
+        # time.sleep(0.1)
 
 def draw_face(screen, dcel, f_id=0):
     """Draws a face on a screen
@@ -72,7 +67,7 @@ def draw_face(screen, dcel, f_id=0):
     #     time.sleep(0.2)
     pafn.frame_draw_filled_polygon(screen,point_list, pafn.colors["white"])
     draw_last_point(screen, point_list)
-    pygame.display.update()
+    # pygame.display.update()
 
     for idx, ic in enumerate(face.get_interior_component_chains()):
         ic_point_list = chain2points(ic)

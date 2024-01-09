@@ -81,7 +81,7 @@ def build_inverted_tree(pair_list, start):
     queue = deque()
     vmap = {}
     for p in pair_list:
-        a,b,_ = p
+        a,b = p[0],p[1]
         if a not in vmap:
             vmap[a] = len(vmap)
             vlist.append(Vtx())
