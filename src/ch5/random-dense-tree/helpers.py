@@ -103,7 +103,7 @@ def get_intersect_dist(A, B, C, T):
       return -1
 
     eCN = cart2complex(N, C)
-    alpha = abs(ang(eCN / eCT))
+    alpha = ang(eCN / eCT)
     mdist = ndist / np.cos(alpha)
 
     # Calculate the point M and return the intersecting distance
@@ -228,7 +228,8 @@ def check_path(vlist, obs_edge_set, sv_idx, tpt,edge_set):
     vlist.append(npv)
     addV2V(vlist, edge_set, sv_idx, np_idx)
     return flag
-    
+
+
 
 def test_for_intersection(A, B, C, theta):
     """

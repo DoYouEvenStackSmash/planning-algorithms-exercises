@@ -7,7 +7,7 @@ from render_support import PygameArtFxns as pafn
 import time
 import sys
 import numpy as np
-
+from graph_processing import *
 sys.path.append("./support")
 sys.path.append("./DCEL")
 from helpers import *
@@ -31,11 +31,12 @@ def get_rand_sequence(k=32, ub=1000):
 
 
 def ml(screen, start, goal, obs_edge_set):
-    input_points = get_rand_sequence(400)
+    input_points = get_rand_sequence(600)
     vlist = [V(start)]
     edge_set = set()
-    rng = np.random.default_rng(32345)
+    rng = np.random.default_rng(12345)
     rand_val = lambda: (int(rng.uniform(0, 100)))
+    reversed(input_points)
     for i in range(len(input_points)):
         tpt = input_points[i]
         if rand_val() == 1:
@@ -59,7 +60,17 @@ def ml(screen, start, goal, obs_edge_set):
             pafn.frame_draw_line(screen, (p1,p2),pafn.colors["red"])
         pygame.display.update()
         if tpt == goal and flag:
-            print(i)
+            el = list(edge_set)
+            # sortkey = lambda e:e[0]
+            # el = sorted(el, key=sortkey)
+            el = build_inverted_tree(el, 0)
+            print(el)
+            pth = get_path(el, 0, len(vlist)-1)
+            for p in pth:
+                print(p)
+                pafn.frame_draw_ray(screen, vlist[p[0]].pt, vlist[p[1]].pt, pafn.colors["green"])
+            pygame.display.update()
+                
             break
     
         
@@ -69,7 +80,7 @@ v2pt = lambda p: p.get_point_coordinate()
 edge_vtx = lambda e: e.get_source_vertex()
 
 def main():
-    pl = get_rand_sequence(200)
+    pl = get_rand_sequence(300)
 
     pygame.init()
     screen = pafn.create_display(1000, 1000)
@@ -87,9 +98,11 @@ def main():
     # el =
     # screen = pafn.create_display(1000, 1000)
     draw_face(screen, dcel, ID)
+    pygame.display.update()
     s = (330,600)
     g = (700,400)
     ml(screen, g,s,obs_edge_set)
+    
     pafn.frame_draw_cross(screen, g, pafn.colors["green"])
     for p in pl:
         pafn.frame_draw_dot(screen, p, pafn.colors["tangerine"])
