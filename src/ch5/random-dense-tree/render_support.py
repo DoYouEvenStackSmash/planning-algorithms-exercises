@@ -1,7 +1,20 @@
 #!/usr/bin/python3
 import numpy as np
 import pygame
+import pygame.gfxdraw
 import time
+
+
+def adjust_angle(theta):
+    """
+    adjusts some theta to arctan2 interval [0,pi] and [-pi, 0]
+    """
+    if theta > np.pi:
+        theta = theta + -2 * np.pi
+    elif theta < -np.pi:
+        theta = theta + 2 * np.pi
+
+    return theta
 
 
 class TransformFxns:
@@ -114,14 +127,14 @@ class MathFxns:
         r = MathFxns.euclidean_dist(origin, pt)
         return (rad, r)
 
-    def pol2car(pt, r, theta):
+    def pol2car(pt, radius, theta):
         """
         Convert polar coordinate to cartesian
         Returns a point
         """
         ox, oy = pt
-        x = r * np.cos(theta)
-        y = r * np.sin(theta)
+        x = radius * np.cos(theta)
+        y = radius * np.sin(theta)
         return (ox + x, oy + y)
 
     def correct_angle(rad_theta):
@@ -132,6 +145,17 @@ class MathFxns:
         if rad_theta <= -np.pi / 2:
             rad_theta = rad_theta + 2 * np.pi
         return rad_theta
+
+    def adjust_angle(theta):
+        """
+        adjusts some theta to arctan2 interval [0,pi] and [-pi, 0]
+        """
+        if theta > np.pi:
+            theta = theta + -2 * np.pi
+        elif theta < -np.pi:
+            theta = theta + 2 * np.pi
+
+        return theta
 
 
 class GeometryFxns:
@@ -240,6 +264,43 @@ class GeometryFxns:
         p1.append(GeometryFxns.lerp(m1[-1], m2[-1], 1))
         return l1, l2, l3, m1, m2, p1
 
+    def get_unit_normal(pt1, pt2):
+        """
+        Accessor for normal vector
+        """
+        theta, r = MathFxns.car2pol(pt1, pt2)
+        theta = adjust_angle(theta + np.pi / 2)
+
+        return theta
+
+    def get_cartesian_quadrant(theta):
+        """
+        Check function for determining the quadrant of the unit vector with angle theta
+             -pi/2
+          +-----+-----+
+          |     |     |
+        - |   3 | 4   | -
+        pi|-----+-----+ 0
+        + |   2 | 1   | +
+          |     |     |
+          +-----+-----+
+               pi/2
+
+        """
+
+        PI_OVER_2 = np.divide(np.pi, 2)
+        if theta == -np.pi:
+            theta = np.pi
+        if 0 < theta and theta <= PI_OVER_2:
+            return 1
+        if PI_OVER_2 < theta and theta <= np.pi:
+            return 2
+        if -np.pi < theta and theta <= -PI_OVER_2:
+            return 3
+        if -PI_OVER_2 < theta and theta < 0:
+            return 4
+        return 1
+
 
 class PygameArtFxns:
     """set of colors"""
@@ -298,7 +359,7 @@ class PygameArtFxns:
         s, e = point_set
         pygame.draw.line(screen, color, s, e, width=4)
 
-    def frame_draw_dot(screen, point, color=(0, 0, 0), width=0, thickness=4):
+    def frame_draw_dot(screen, point, color=(255, 0, 0), width=0, thickness=4):
         """
         Draws a single dot given a point (x, y)
         Returns nothing
@@ -310,7 +371,7 @@ class PygameArtFxns:
         Resets the pygame display to a given color
         Returns nothing
         """
-        pygame.Surface.fill(screen, PygameArtFxns.colors["silver"])
+        pygame.Surface.fill(screen, PygameArtFxns.colors["lightslategray"])
 
     def draw_lines_between_points(screen, pts, color=(255, 255, 255)):
         """
@@ -348,3 +409,23 @@ class PygameArtFxns:
         l2 = [(x, y + sz), (x, y - sz)]
         PygameArtFxns.frame_draw_bold_line(screen, l1, color)
         PygameArtFxns.frame_draw_bold_line(screen, l2, color)
+
+    def frame_draw_ray(screen, pt1, pt2, color, BOLD=False):
+        """
+        Draws a ray from pt1 to pt2
+        Does not return
+        """
+        # print(pt1, pt2)
+        theta, r = MathFxns.car2pol(pt1, pt2)
+        ip = MathFxns.pol2car(pt1, r - 20, theta)
+
+        theta_left = adjust_angle(theta - np.pi / 2)
+        theta_right = adjust_angle(theta + np.pi / 2)
+        lpt = MathFxns.pol2car(ip, 6, theta_left)
+        rpt = MathFxns.pol2car(ip, 6, theta_right)
+        cpt = pt2
+        if BOLD:
+            PygameArtFxns.frame_draw_bold_line(screen, (pt1, pt2), color)
+        else:
+            PygameArtFxns.frame_draw_line(screen, (pt1, pt2), color)
+        PygameArtFxns.frame_draw_filled_polygon(screen, [lpt, cpt, rpt], color)

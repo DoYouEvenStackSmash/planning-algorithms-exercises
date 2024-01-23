@@ -220,7 +220,7 @@ def main():
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    ID, dcel = textbook_obj()
+    ID, dcel = test_obj_1()
 
     vpl = vertical_cell_decomposition(screen, dcel)
     pair_list = refine_roadmap(dcel, vpl)
