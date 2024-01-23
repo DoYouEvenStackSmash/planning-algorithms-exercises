@@ -117,6 +117,7 @@ def textbook_obj():
     ID = dcel.create_face(bc, [obs_1, obs_2])
     return ID, dcel
 
+
 def sq_test_obj():
     bc = [
         (150, 150),
@@ -139,6 +140,6 @@ def sq_test_obj():
     obs_2 = [(419, 482), (528, 541), (505, 591), (622, 576), (561, 386)]
 
     ID = dcel.create_face(
-        bc, [[(308, 609), (257, 591), (323, 424), (199, 619)], x, a, b, c,obs_2]
+        bc, [[(308, 609), (257, 591), (323, 424), (199, 619)], x, a, b, c, obs_2]
     )
     return ID, dcel

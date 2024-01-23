@@ -7,6 +7,7 @@ from render_support import MathFxns as mfn
 from render_support import TransformFxns as tfn
 from render_support import PygameArtFxns as pafn
 
+
 def adjust_angle(theta):
     """
     adjusts some theta to arctan2 interval [0,pi] and [-pi, 0]
