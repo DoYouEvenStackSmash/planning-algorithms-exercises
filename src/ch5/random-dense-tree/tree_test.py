@@ -85,7 +85,7 @@ def main():
     obs_edge_set = set()
     for e in oel:
         obs_edge_set.add((v2pt(edge_vtx(e)), v2pt(get_adj_succ(edge_vtx(e)))))
-    input_points = get_rand_sequence(300)
+    input_points = get_rand_sequence(200)
 
     draw_face(screen, dcel, ID)
     pygame.display.update()
