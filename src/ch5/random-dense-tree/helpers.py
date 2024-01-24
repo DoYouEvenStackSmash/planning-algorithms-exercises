@@ -75,38 +75,19 @@ dist = lambda p1, p2: np.sqrt(np.square(p1[0] - p2[0]) + np.square(p1[1] - p2[1]
 
 
 def addV2E(vlist, edge_set, edge, v_idx):
+    """
+    Adds a vertex to a chosen edge. removes the chosen edge
+    """
     edge_set.remove(edge)
     v1, v2 = edge
     edge_set.add((v1, v_idx))
     edge_set.add((v_idx, v2))
 
-
 def addV2V(vlist, edge_set, sv_idx, v_idx):
-    edge_set.add((sv_idx, v_idx))
-
-
-def edge_region_test(edge, pt):
-    """tests if a point is in an edge region, defined as in voronoi
-
-    Args:
-        edge (_type_): pair of points
-        pt (_type_): single point
-
-    Returns:
-        _type_: true/false
     """
-    a, b, c = (
-        cart2complex(pt, edge[0]),
-        cart2complex(pt, edge[1]),
-        cart2complex(edge[1], edge[0]),
-    )
-    if (
-        abs(np.angle(a / c)) < np.pi / 2
-        and abs(np.angle(b / (norm(c) * exp(1j * np.pi)))) < np.pi / 2
-    ):
-        return True
-    return False
-
+    Adds a new edge between source vertex and new vertex
+    """
+    edge_set.add((sv_idx, v_idx))
 
 def get_normal_pt(edge, pt):
     """Given an edge and a point, calculates the point on the edge which is closest to the target
@@ -133,14 +114,18 @@ def get_normal_pt(edge, pt):
     npt = complex2cart(norm(c) * d, edge[0])
     return npt
 
-
 def get_nearest_feature(vtx_list, edge_set, tpt):
+    """
+    Given a target point, computes the nearest feature in the RDT
+    """
     min_edist = float("Inf")
     min_eidx = -1
     min_vdist = float("Inf")
     min_vidx = -1
-    el = list(edge_set)
-    for i, e in enumerate(el):
+    edge_list = list(edge_set)
+    
+    # find the nearest edge
+    for i, e in enumerate(edge_list):
         p1, p2 = vtx_list[e[0]].pt, vtx_list[e[1]].pt
         n = get_normal_pt((p1, p2), tpt)
         d = dist(n, tpt)
@@ -148,33 +133,45 @@ def get_nearest_feature(vtx_list, edge_set, tpt):
             if d < min_edist:
                 min_edist = d
                 min_eidx = i
+    # find the nearest vertex
     for i, v in enumerate(vtx_list):
         d = dist(v.pt, tpt)
         if d < min_vdist:
             min_vdist = d
             min_vidx = i
+    
+    # return the nearest feature
     if min_vdist < min_edist:
         return [min_vidx]
     else:
-        return el[min_eidx]
+        return edge_list[min_eidx]
 
 
 def check_path(vlist, obs_edge_set, sv_idx, tpt, edge_set):
+    """
+    Given a source point and a target point, computes the closest point between them on the boundary of an obstacle
+    if it exists, otherwise creates the goal point.
+    """
     sv = vlist[sv_idx].pt
     min_st_dist = float("Inf")
-    theta, dp = mfn.car2pol(sv, tpt)
+    theta, d = mfn.car2pol(sv, tpt)
+
+    # check each obstacle edge for intersections
     for e in obs_edge_set:
         p1, p2 = e
         I = VerticalCellDecomposition.get_intersection_pt(p1, p2, sv, theta)
         if test_for_intersection(p1, p2, sv, theta):
             d = dist(I, sv)
             min_st_dist = min(min_st_dist, d)
-
+    
     theta, d = mfn.car2pol(sv, tpt)
+
     flag = False
     if min_st_dist > d:
         min_st_dist = d
         flag = True
+        
+    # create the new vertex
     npt = mfn.pol2car(sv, min_st_dist-1, theta)
     np_idx = len(vlist)
     npv = V(npt)
@@ -203,3 +200,17 @@ def test_for_intersection(A, B, C, theta):
     if max(d1, d2) >= base_d:
         return False
     return True
+
+def get_rand_sequence(k=32, ub=1000):
+    """
+    Generates a random sequence of floats between 0,1000
+    returns a sequence of points
+    """
+    rng = np.random.default_rng(12345)
+    rand_val = lambda: (rng.uniform()) *700 + 130
+    pl = []
+    for i in range(k):
+        x = rand_val()-10
+        y = rand_val()-10
+        pl.append((x, y))
+    return pl
