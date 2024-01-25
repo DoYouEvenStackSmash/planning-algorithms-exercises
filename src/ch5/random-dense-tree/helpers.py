@@ -147,7 +147,7 @@ def get_nearest_feature(vtx_list, edge_set, tpt):
         return edge_list[min_eidx]
 
 
-def check_path(vlist, obs_edge_set, sv_idx, tpt, edge_set):
+def check_path(vlist, obs_edge_set, sv_idx, tpt, edge_set, ovl):
     """
     Given a source point and a target point, computes the closest point between them on the boundary of an obstacle
     if it exists, otherwise creates the goal point.
@@ -158,7 +158,7 @@ def check_path(vlist, obs_edge_set, sv_idx, tpt, edge_set):
 
     # check each obstacle edge for intersections
     for e in obs_edge_set:
-        p1, p2 = e
+        p1, p2 = ovl[e[0]].pt, ovl[e[1]].pt
         I = VerticalCellDecomposition.get_intersection_pt(p1, p2, sv, theta)
         if test_for_intersection(p1, p2, sv, theta):
             d = dist(I, sv)
@@ -187,7 +187,7 @@ def test_for_intersection(A, B, C, theta):
     Returns True/False
     """
     I = VerticalCellDecomposition.get_intersection_pt(A, B, C, theta)
-    T = mfn.pol2car(C, 0.1, theta)
+    T = mfn.pol2car(C, 0.2, theta)
     test_distance = mfn.euclidean_dist(T, I)
     curr_distance = mfn.euclidean_dist(C, I)
 

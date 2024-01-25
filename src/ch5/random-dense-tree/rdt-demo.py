@@ -15,9 +15,9 @@ from test_objects import *
 
 
 rng = np.random.default_rng()
-rand_val = lambda: (int(rng.uniform(0, 10)))
+rand_val = lambda: (int(rng.uniform(0, 3)))
 
-def RDT_loop(screen, start, goal, obs_edge_set, input_points):
+def RDT_loop(screen, start, goal, obs_edge_set, input_points, obstacle_vertex_list):
     """
     Given a start and goal, construct an RDT over the world in search of the goal 
     """
@@ -25,15 +25,27 @@ def RDT_loop(screen, start, goal, obs_edge_set, input_points):
     edge_set = set()
     global rand_val
     el = None
-    
-    for i in range(len(input_points)):
+    # randvals = [rand_val() for _ in range(len(input_points))]
+    i = 0
+    while i < len(input_points):
         tpt = input_points[i]
-        
         # beeline for the goal
         if rand_val() == 1:
             tpt = goal
+            i = i-1
+        else:
+            f2 = get_nearest_feature(obstacle_vertex_list, obs_edge_set, tpt)
+            n = None
+            if len(f2) > 1:
+                n = get_normal_pt((obstacle_vertex_list[f2[0]].pt, obstacle_vertex_list[f2[1]].pt), tpt)
+            else:
+                n = obstacle_vertex_list[f2[0]].pt
+            if dist(tpt, n) < 1:
+                i+=1
+                continue
+        
         f = get_nearest_feature(vlist, edge_set, tpt)
-        oreal = 0
+        # oreal = 0
         
         # nearest feature is an edge
         if len(f) > 1:
@@ -45,30 +57,31 @@ def RDT_loop(screen, start, goal, obs_edge_set, input_points):
             vlist.append(nv)
             # break the edge at the normal point
             addV2E(vlist, edge_set, f, nv_idx)
-            oreal+=1
+            # oreal+=1
             # set nearest feature to the new vertex breaking the edge
             f = [nv_idx]
         
         # set source vertex to the nearest feature
         sv_idx = f[0]
         
-        foreal = len(edge_set)
+        # foreal = len(edge_set)
         # add the new edge if it exists
-        flag = check_path(vlist, obs_edge_set, sv_idx, tpt,edge_set)
-        oreal += foreal - len(edge_set)
-        
-        # render the current tree
-        for e in list(edge_set)[-oreal:]:
-            p1, p2 = vlist[e[0]].pt, vlist[e[1]].pt
-            pafn.frame_draw_line(screen, (p1,p2),pafn.colors["red"])
+        flag = check_path(vlist, obs_edge_set, sv_idx, tpt,edge_set, obstacle_vertex_list)
+        # oreal += foreal - len(edge_set)
+        i+=1
+
             
         # finish
         if tpt == goal and flag:
+                    # render the current tree
+            for e in list(edge_set):
+                p1, p2 = vlist[e[0]].pt, vlist[e[1]].pt
+                pafn.frame_draw_line(screen, (p1,p2),pafn.colors["red"])
             # compute the path between start and goal
             pth = get_path(build_inverted_tree(list(edge_set), 0), 0, len(vlist)-1)
             for j,p in enumerate(pth):
                 pafn.frame_draw_bold_line(screen, [vlist[p[0]].pt, vlist[p[1]].pt], pafn.colors["lawngreen"])                
-            break
+            return
     
         
 get_adj_succ = lambda p: p.get_half_edge().get_next_half_edge().get_source_vertex()
@@ -84,9 +97,17 @@ def main():
 
     ID, dcel = sq_test_obj()
     oel = dcel.construct_global_edge_list()
+    opl = {v2pt(e.get_source_vertex()):i for i,e in enumerate(oel)}
+    ovl = [V(k) for k,v in opl.items()]
+
+    # print(opl[0].pt)
     obs_edge_set = set()
     for e in oel:
-        obs_edge_set.add((v2pt(edge_vtx(e)), v2pt(get_adj_succ(edge_vtx(e)))))
+        val = v2pt(edge_vtx(e))
+        val2 = v2pt(get_adj_succ(edge_vtx(e)))
+        # obs_edge_set.add((v2pt(edge_vtx(e)), v2pt(get_adj_succ(edge_vtx(e)))))
+        if (opl[val2], opl[val]) not in obs_edge_set:
+            obs_edge_set.add((opl[val], opl[val2]))
     
     # sample the input space
     input_points = get_rand_sequence(300)
@@ -94,7 +115,7 @@ def main():
     draw_face(screen, dcel, ID)
     pygame.display.update()
     s = (330,600)
-    g = (700,400)
+    g = (750,400)
     last = None
     time.sleep(3)
     while 1:
@@ -107,7 +128,8 @@ def main():
             last = goal
             pafn.clear_frame(screen)
             draw_face(screen, dcel, ID)
-            RDT_loop(screen, g,goal,obs_edge_set,input_points)
+            RDT_loop(screen, goal,g,obs_edge_set,input_points, ovl)
+            pafn.frame_draw_cross(screen, g, pafn.colors["indigo"])
             pafn.frame_draw_cross(screen, goal, pafn.colors["red"])
             pygame.display.update()
     
