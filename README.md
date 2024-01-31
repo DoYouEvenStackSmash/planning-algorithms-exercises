@@ -12,3 +12,8 @@ Supporting Data Structures: Pointset, Polygon, Doubly Connected Edge List, Rigid
   RRT, RDT, 2D collision detection with Voronoi Regions
 - [Chapter 6: Combinatorial Motion Planning](https://msl.cs.uiuc.edu/planning/ch6.pdf)
   Vertical Cell Decomposition
+
+|           |
+|:---------:|
+| Rapidly exploring random tree ![Screenshot 2024-01-31 134206](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/22f1e8ec-e4b9-41a9-a427-0fcd1994da3f) | 
+| Vertical cell decomposition roadmap ![Screenshot 2024-01-31 133541](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/39452247-46f9-4fee-ba9a-4339eba4a78b) | 
