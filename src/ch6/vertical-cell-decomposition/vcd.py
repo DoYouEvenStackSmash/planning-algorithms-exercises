@@ -220,7 +220,7 @@ def main():
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    ID, dcel = test_obj_1()
+    ID, dcel = textbook_obj()
 
     vpl = vertical_cell_decomposition(screen, dcel)
     pair_list = refine_roadmap(dcel, vpl)
@@ -252,7 +252,7 @@ def main():
 
         pafn.clear_frame(screen)
         draw_face(screen, dcel, ID)
-
+        
         for ed in tree_list:
             p1, p2 = ed[0], ed[1]
             pafn.frame_draw_line(screen, (p1, p2), pafn.colors["black"])
@@ -276,6 +276,7 @@ def main():
 
         draw_path(screen, path_to_goal, pafn.colors["darker-green"])
         pafn.frame_draw_cross(screen, start, pafn.colors["red"])
+        pafn.frame_draw_cross(screen, goal, pafn.colors["red"])
         pygame.display.update()
 
 
