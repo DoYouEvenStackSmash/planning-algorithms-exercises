@@ -5,6 +5,7 @@ from render_support import TransformFxns as tfn
 from render_support import PygameArtFxns as pafn
 from cell_decomp_support import *
 
+
 class V:
     def __init__(self, pt=None):
         self.pt = pt
@@ -79,15 +80,16 @@ def addV2E(vlist, edge_set, edge, v_idx):
     Adds a vertex to a chosen edge. removes the chosen edge
     """
     edge_set.remove(edge)
-    v1, v2 = edge
-    edge_set.add((v1, v_idx))
-    edge_set.add((v_idx, v2))
+    edge_set.add((edge[0], v_idx))
+    edge_set.add((v_idx, edge[1]))
+
 
 def addV2V(vlist, edge_set, sv_idx, v_idx):
     """
     Adds a new edge between source vertex and new vertex
     """
     edge_set.add((sv_idx, v_idx))
+
 
 def get_normal_pt(edge, pt):
     """Given an edge and a point, calculates the point on the edge which is closest to the target
@@ -106,13 +108,14 @@ def get_normal_pt(edge, pt):
     )
     if abs(c) == 0:
         return pt
-        
+
     h = mag(a)
     norm = lambda cv: cv / abs(cv)
     theta = abs(np.angle(a / c))
     d = h * np.cos(theta)
     npt = complex2cart(norm(c) * d, edge[0])
     return npt
+
 
 def get_nearest_feature(vtx_list, edge_set, tpt):
     """
@@ -123,7 +126,7 @@ def get_nearest_feature(vtx_list, edge_set, tpt):
     min_vdist = float("Inf")
     min_vidx = -1
     edge_list = list(edge_set)
-    
+
     # find the nearest edge
     for i, e in enumerate(edge_list):
         p1, p2 = vtx_list[e[0]].pt, vtx_list[e[1]].pt
@@ -139,7 +142,7 @@ def get_nearest_feature(vtx_list, edge_set, tpt):
         if d < min_vdist:
             min_vdist = d
             min_vidx = i
-    
+
     # return the nearest feature
     if min_vdist < min_edist:
         return [min_vidx]
@@ -159,23 +162,25 @@ def check_path(vlist, obs_edge_set, sv_idx, tpt, edge_set, ovl):
     # check each obstacle edge for intersections
     for e in obs_edge_set:
         p1, p2 = ovl[e[0]].pt, ovl[e[1]].pt
-        I = VerticalCellDecomposition.get_intersection_pt(p1, p2, sv, theta)
         if test_for_intersection(p1, p2, sv, theta):
-            d = dist(I, sv)
+            # I = VerticalCellDecomposition.get_intersection_pt(p1, p2, sv, theta)
+            d = dist(
+                VerticalCellDecomposition.get_intersection_pt(p1, p2, sv, theta), sv
+            )
             min_st_dist = min(min_st_dist, d)
-    
+
     theta, d = mfn.car2pol(sv, tpt)
 
     flag = False
     if min_st_dist > d:
         min_st_dist = d
         flag = True
-        
+
     # create the new vertex
-    npt = mfn.pol2car(sv, min_st_dist-1, theta)
+    # npt = mfn.pol2car(sv, min_st_dist-1, theta)
     np_idx = len(vlist)
-    npv = V(npt)
-    vlist.append(npv)
+    # npv = V(npt)
+    vlist.append(V(mfn.pol2car(sv, min_st_dist - 1, theta)))
     addV2V(vlist, edge_set, sv_idx, np_idx)
     return flag
 
@@ -201,16 +206,17 @@ def test_for_intersection(A, B, C, theta):
         return False
     return True
 
+
 def get_rand_sequence(k=32, ub=1000):
     """
     Generates a random sequence of floats between 0,1000
     returns a sequence of points
     """
     rng = np.random.default_rng(12345)
-    rand_val = lambda: (rng.uniform()) *700 + 130
+    rand_val = lambda: (rng.uniform()) * 700 + 130
     pl = []
     for i in range(k):
-        x = rand_val()-10
-        y = rand_val()-10
+        x = rand_val() - 10
+        y = rand_val() - 10
         pl.append((x, y))
     return pl
