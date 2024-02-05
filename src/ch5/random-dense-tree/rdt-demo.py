@@ -88,6 +88,11 @@ def RDT_loop(screen, start, goal, obs_edge_set, input_points, obstacle_vertex_li
                     pafn.frame_draw_line(screen, (p1, p2), pafn.colors["red"])
             # compute the path between start and goal
             pth = get_path(build_inverted_tree(list(edge_set), 0), 0, len(vlist) - 1)
+                
+                
+                
+            # for e in pth:
+                
             for j, p in enumerate(pth):
                 pafn.frame_draw_bold_line(
                     screen, [vlist[p[0]].pt, vlist[p[1]].pt], pafn.colors["lawngreen"]
@@ -95,7 +100,8 @@ def RDT_loop(screen, start, goal, obs_edge_set, input_points, obstacle_vertex_li
             return True
     return False
 
-
+        
+    
 get_adj_succ = lambda p: p.get_half_edge().get_next_half_edge().get_source_vertex()
 get_adj_pred = lambda p: p.get_half_edge().get_prev_half_edge().get_source_vertex()
 v2pt = lambda p: p.get_point_coordinate()
@@ -132,7 +138,7 @@ def main():
             n = get_normal_pt((ovl[f2[0]].pt, ovl[f2[1]].pt), tpt)
         else:
             n = ovl[f2[0]].pt
-        if dist(tpt, n) < 3:
+        if dist(tpt, n) < 5:
             ips.remove(tpt)
     input_points = list(ips)
     
