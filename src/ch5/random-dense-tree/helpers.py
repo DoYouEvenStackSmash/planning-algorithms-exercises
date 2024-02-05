@@ -131,17 +131,15 @@ def get_nearest_feature(vtx_list, edge_set, tpt):
     for i, e in enumerate(edge_list):
         p1, p2 = vtx_list[e[0]].pt, vtx_list[e[1]].pt
         n = get_normal_pt((p1, p2), tpt)
-        d = dist(n, tpt)
         if dist(n, p1) < dist(p1, p2) and dist(n, p2) < dist(p1, p2):
+            d = dist(n, tpt)
             if d < min_edist:
                 min_edist = d
                 min_eidx = i
     # find the nearest vertex
-    for i, v in enumerate(vtx_list):
-        d = dist(v.pt, tpt)
-        if d < min_vdist:
-            min_vdist = d
-            min_vidx = i
+    dlist = np.array([dist(vtx_list[i].pt,tpt) for i in range(len(vtx_list))])
+    min_vidx = np.argmin(dlist)
+    min_vdist = dlist[min_vidx]
 
     # return the nearest feature
     if min_vdist < min_edist:

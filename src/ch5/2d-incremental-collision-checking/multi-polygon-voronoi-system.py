@@ -71,6 +71,7 @@ def pygame_transform_voronoi_system_loop(screen, A, Olist):
           continue
         
         update_world(screen, A, Olist, pts, VERBOSE)
+        pygame.display.update()
         pts = []
 
 
