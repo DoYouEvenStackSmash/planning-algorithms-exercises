@@ -7,7 +7,7 @@ from render_support import PygameArtFxns as pafn
 import numpy as np
 import time
 import random
-
+import sys
 nodecount = 0
 
 
@@ -41,15 +41,13 @@ def build_func(pairs):
     ymin = pairs[ymin][1]
     xmax = pairs[xmax][0]
     ymax = pairs[ymax][1]
-    # p2 = (,)
+    
     split_dim = 0 if xmax - xmin > ymax - ymin else 1
-    # print(split_dim)
     sortkey = lambda p: p[1]
     if split_dim == 0:
         sortkey = lambda p: p[0]
     comparexy = np.array(sorted(pairs, key=sortkey))
-    # comparexy = np.sort(pairs[:],axis=split_dim)
-    print(comparexy)
+    
     if k == 2:
         M1 = TNode(comparexy[1])
         M1.box_pts = [(xmin, ymin), (xmax, ymax)]
@@ -75,7 +73,6 @@ def build_func(pairs):
 
     m = int(np.ceil(k / 2))
 
-    # print(comparexy.shape)
     M = TNode(comparexy[m])
     M.box_pts = [(xmin, ymin), (xmax, ymax)]
     M.cut_dim = split_dim
@@ -95,20 +92,15 @@ boxpts = lambda a, b: [(a[0], a[1]), (b[0], a[1]), (b[0], b[1]), (a[0], b[1])]
 def traverse(screen, root):
     if root != None:
         pafn.frame_draw_dot(screen, root.pt, pafn.colors["red"])
+        if root.left == None or root.right == None:
+            pafn.frame_draw_cross(screen, root.pt, pafn.colors["tangerine"])
+        
         cut_ang = np.pi if root.cut_dim == 0 else np.pi / 2
         if len(root.box_pts):
             pafn.frame_draw_polygon(
                 screen, boxpts(root.box_pts[0], root.box_pts[1]), pafn.colors["yellow"]
             )
-        # pafn.frame_draw_line(screen, (root.pt, mfn.pol2car(root.pt, 1000, cut_ang)), pafn.colors["white"])
-        # pafn.frame_draw_line(screen, (root.pt, mfn.pol2car(root.pt, 1000, np.pi + cut_ang)), pafn.colors["white"])
-        # pygame.display.update()
-        # if root.left != None:
-        #   pafn.frame_draw_ray(screen, root.pt, root.left.pt, pafn.colors["green"])
-        # if root.right != None:
-        #   pafn.frame_draw_ray(screen, root.pt, root.right.pt, pafn.colors["green"])
-        
-        # time.sleep(0.1)
+
         traverse(screen, root.left)
         traverse(screen, root.right)
 
@@ -136,24 +128,114 @@ def convert_to_graphviz(nodelist):
     )  # Saves the output as 'kd.format' and opens it
 
 
-# def search_kd_tree
+THRES = 1e-8
+xval = lambda m, p: 0 if abs(m) < THRES else m * np.cos(p)
+yval = lambda m, p: 0 if abs(m) < THRES else m * np.sin(p)
+mag = lambda complex_val: np.sqrt(complex_val.real**2 + complex_val.imag**2)
 
+
+def phase(complex_val):
+    checkfxn = lambda x: 0 if abs(x) < THRES else x
+
+    r, i = checkfxn(complex_val.real), checkfxn(complex_val.imag)
+
+    if r != 0:
+        return np.arctan2(i, r)
+    if i == 0:
+        return 0
+    return [np.pi / 2 if i > 0 else -np.pi / 2]
+
+
+def cart2complex(cart_pt, center=(0, 0)):
+    """Transforms a cartesian coordinate into a complex number with a center
+
+    Args:
+        cart_pt (_type_): _description_
+        center (tuple, optional): _description_. Defaults to (0,0).
+
+    Returns:
+        _type_: complex exponential
+    """
+    ox, oy = cart_pt[0] - center[0], cart_pt[1] - center[1]
+    r = np.sqrt(ox**2 + oy**2)
+    theta = np.arctan2(oy, ox)
+    return r * np.exp(1j * theta)
+
+
+def complex2cart(complex_pt, center=(0, 0)):
+    """Transforms a complex number into an x,y coordinate
+
+    Args:
+        complex_pt (_type_): _description_
+        center (tuple, optional): _description_. Defaults to (0,0).
+
+    Returns:
+        _type_: pair of coordinates
+    """
+    m = mag(complex_pt)
+    p = phase(complex_pt)
+    x = xval(m, p) + center[0]
+    y = yval(m, p) + center[1]
+    return (x, y)
+
+# Import the NumPy library and define a constant for PI
+PI = np.pi
+
+# Define lambda functions for exponential, angle, and distance calculations using NumPy
+exp = lambda x: np.exp(x)
+ang = lambda x: np.angle(x)
+dist = lambda p1, p2: np.sqrt(np.square(p1[0] - p2[0]) + np.square(p1[1] - p2[1]))
+
+def get_normal_pt(edge, pt):
+    """Given an edge and a point, calculates the point on the edge which is closest to the target
+
+    Args:
+        edge (_type_): pair of points
+        pt (_type_): single point
+
+    Returns:
+        _type_: single point
+    """
+    a, b, c = (
+        cart2complex(pt, edge[0]),
+        cart2complex(pt, edge[1]),
+        cart2complex(edge[1], edge[0]),
+    )
+    if abs(c) == 0:
+        return pt
+
+    h = mag(a)
+    norm = lambda cv: cv / abs(cv)
+    theta = abs(np.angle(a / c))
+    d = h * np.cos(theta)
+    npt = complex2cart(norm(c) * d, edge[0])
+    return npt
 
 def box_distance(p1, corners):
     c1, c2 = corners
-    if c1[0] < p1[0] < c1[0]:
-        return min(abs(p1[1] - c1[1]), abs(p1[1] - c2[1]))
-    if c1[1] < p1[1] < c1[1]:
-        return min(abs(p1[0] - c1[0]), abs(p1[0] - c2[0]))
-    else:
-        d1 = mfn.euclidean_dist(p1, c1)
-        d2 = mfn.euclidean_dist(p1, c2)
-        d3 = mfn.euclidean_dist(p1, (c1[0], c2[1]))
-        d4 = mfn.euclidean_dist(p1, (c2[0], c1[1]))
-        return min(min(d1, d2), min(d3, d4))
-
-
+    c3,c4 = (c1[0],c2[1]),(c2[0],c1[1])
+    xmin = min(c2[0],c1[0])
+    xmax = max(c2[0],c1[0])
+    ymin = min(c2[1],c1[1])
+    ymax = max(c2[1],c1[1])
+    edges = []
+    if xmin < p1[0] < xmax:
+        edges.extend([(c1,c4),(c2,c3)])
+    if ymin < p1[1] < ymax:
+        edges.extend([(c1,c3),(c2,c4)])
+        
+    npts = [get_normal_pt(edge, p1) for edge in edges]
+    npts.extend([c1,c2,c3,c4])
+    
+    npmin = np.min([dist(npt, p1) for npt in npts])
+    return npmin
+    
+search_count = 0
+    
+    
 def search_leaf(node, dbox, dbest, q, p):
+    global search_count
+    search_count +=1
     dist = mfn.euclidean_dist(q, node.pt)
     if dist < dbest[0]:
         p[0] = node.pt
@@ -161,13 +243,16 @@ def search_leaf(node, dbox, dbest, q, p):
 
 
 def search_tree(node, dbox, dbest, q, p):
-    
+    global search_count
+    if node != None:
+        search_count +=1
     if node != None and (node.right == None or node.left == None):
         if node.right != None:
             search_leaf(node.right, dbox, dbest, q, p)
         if node.left != None:
             search_leaf(node.left, dbox, dbest, q, p)
         search_leaf(node, dbox, dbest, q, p)
+    
     
     if node.left != None and node.right != None and dbox < dbest[0]:
         d1 = float("Inf")
@@ -181,8 +266,10 @@ def search_tree(node, dbox, dbest, q, p):
             search_tree(node.left, dbox, dbest, q, p)
             search_tree(node.right, dbox - d1 + d2, dbest, q, p)
         else:
-            search_tree(node.left, dbox, dbest, q, p)
-            search_tree(node.right, dbox - d2 + d1, dbest, q, p)
+            search_tree(node.right, dbox, dbest, q, p)
+            search_tree(node.left, dbox - d2 + d1, dbest, q, p)
+    
+
 
     
 
@@ -203,7 +290,7 @@ def main():
     traverse(screen, tr)
     # convert_to_graphviz(nodelist)
     last = None
-
+    global search_count
     while 1:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -214,36 +301,19 @@ def main():
             last = goal
             pafn.clear_frame(screen)
             init_d = box_distance(goal, tr.box_pts)
-            print(init_d)
+            # print(init_d)
             p = [None]
             dbest = [float("inf")]
             search_tree(tr, init_d, dbest, goal, p)
-            # print(dbest)
+            print(search_count)
+            search_count = 0
+            pafn.frame_draw_ray(screen, goal, p[0], pafn.colors["green"],True)
             pafn.frame_draw_cross(screen, goal, pafn.colors["red"])
-            pafn.frame_draw_cross(screen, p[0], pafn.colors["green"])
             traverse(screen, tr)
             pygame.display.update()
 
-    # s
-    # p1 = (pairs[xmin][0],pairs[ymin][1])
-    # p2 = (pairs[xmax][0],pairs[ymax][1])
-
-    # comparexy = np.argsort(pairs[:,0],axis=0)
-    # compareyx = np.argsort(pairs[:,1], axis=0)
     pygame.display.update()
     time.sleep(1)
-    # for c,i in enumerate(pairs):
-    #   # print(c)
-    #   pafn.frame_draw_dot(screen, pairs[c], pafn.colors["cyan"])
-    #   if not c%10:
-    #     pygame.display.update()
-    #     time.sleep(0.01)
-    # for c,i in enumerate(pairs):
-    #   # print(c)
-    #   pafn.frame_draw_dot(screen, pairs[c], pafn.colors["cyan"])
-    #   if not c%10:
-    #     pygame.display.update()
-    #     time.sleep(0.01)
 
     pygame.display.update()
     time.sleep(3)
@@ -251,11 +321,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# # k points
-# if k == 1:
-#   create single external node containing this point
-
-# else:
-#   compute minimum enclosing rectangle R for the points by
