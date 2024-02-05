@@ -131,17 +131,18 @@ def get_nearest_feature(vtx_list, edge_set, tpt):
     for i, e in enumerate(edge_list):
         p1, p2 = vtx_list[e[0]].pt, vtx_list[e[1]].pt
         n = get_normal_pt((p1, p2), tpt)
-        d = dist(n, tpt)
-        if dist(n, p1) < dist(p1, p2) and dist(n, p2) < dist(p1, p2):
+        pdist = dist(p1, p2)
+        if dist(n, p1) < pdist and dist(n, p2) < pdist:
+            d = dist(n, tpt)
             if d < min_edist:
                 min_edist = d
                 min_eidx = i
     # find the nearest vertex
-    for i, v in enumerate(vtx_list):
-        d = dist(v.pt, tpt)
-        if d < min_vdist:
-            min_vdist = d
-            min_vidx = i
+    
+    sortkey = lambda x: x[0]
+    dlist = sorted([(dist(vtx_list[i].pt,tpt),i) for i in range(len(vtx_list))], key = sortkey)
+    min_vidx = dlist[0][1]
+    min_vdist = dlist[min_vidx][0]
 
     # return the nearest feature
     if min_vdist < min_edist:
@@ -220,3 +221,20 @@ def get_rand_sequence(k=32, ub=1000):
         y = rand_val() - 10
         pl.append((x, y))
     return pl
+
+def check_for_free_path(obs_edge_list, obs_vtx_list, origin_pt, target_pt):
+    """
+    Determines whether vector with origin, angle, of length distance is free of obstacles
+    Returns True/False
+    """
+    distkey = lambda x: x[0]
+    intersections = []
+    d, theta = mfn.car2pol(origin_pt, target_pt)
+    for i,e in enumerate(obs_edge_list):
+        print(e)
+        p1, p2, = obs_vtx_list[e[0]].pt, obs_vtx_list[e[1]].pt
+        if test_for_intersection(p1, p2, origin_pt, theta):
+            npt = get_normal_pt((p1,p2), origin_pt)
+            if dist(npt, origin_pt) < d:
+                return False
+    return True

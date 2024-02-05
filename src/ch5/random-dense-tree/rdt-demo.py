@@ -8,17 +8,17 @@ import time
 import sys
 import numpy as np
 from graph_processing import *
-
+import random
 sys.path.append("./DCEL")
 from helpers import *
 
 from test_objects import *
 
-GOAL_SEEK_PROB = 0.33
+GOAL_SEEK_PROB = 0.02
 rng = np.random.default_rng()
 rand_val = lambda: (int(rng.uniform(0, int(GOAL_SEEK_PROB * 100))))
 
-DEBUG = True
+DEBUG = False
 
 
 def RDT_loop(screen, start, goal, obs_edge_set, input_points, obstacle_vertex_list):
@@ -49,7 +49,7 @@ def RDT_loop(screen, start, goal, obs_edge_set, input_points, obstacle_vertex_li
                 )
             else:
                 n = obstacle_vertex_list[f2[0]].pt
-            if dist(tpt, n) < 1:
+            if dist(tpt, n) < 6:
                 i += 1
                 continue
 
@@ -88,13 +88,17 @@ def RDT_loop(screen, start, goal, obs_edge_set, input_points, obstacle_vertex_li
                     pafn.frame_draw_line(screen, (p1, p2), pafn.colors["red"])
             # compute the path between start and goal
             pth = get_path(build_inverted_tree(list(edge_set), 0), 0, len(vlist) - 1)
+            # for e in pth:
+                
             for j, p in enumerate(pth):
                 pafn.frame_draw_bold_line(
                     screen, [vlist[p[0]].pt, vlist[p[1]].pt], pafn.colors["lawngreen"]
                 )
-            return
+            return True
+    return False
 
-
+        
+    
 get_adj_succ = lambda p: p.get_half_edge().get_next_half_edge().get_source_vertex()
 get_adj_pred = lambda p: p.get_half_edge().get_prev_half_edge().get_source_vertex()
 v2pt = lambda p: p.get_point_coordinate()
@@ -121,8 +125,9 @@ def main():
             obs_edge_set.add((opl[val], opl[val2]))
 
     # sample the input space
-    input_points = get_rand_sequence(300)
+    input_points = get_rand_sequence(400)
     ips = set(input_points)
+    
     for tpt in input_points:
         f2 = get_nearest_feature(ovl, obs_edge_set, tpt)
         n = None
@@ -130,9 +135,10 @@ def main():
             n = get_normal_pt((ovl[f2[0]].pt, ovl[f2[1]].pt), tpt)
         else:
             n = ovl[f2[0]].pt
-        if dist(tpt, n) < 1:
+        if dist(tpt, n) < 5:
             ips.remove(tpt)
     input_points = list(ips)
+    
 
     draw_face(screen, dcel, ID)
     pygame.display.update()
@@ -151,7 +157,9 @@ def main():
             last = goal
             pafn.clear_frame(screen)
             draw_face(screen, dcel, ID)
-            RDT_loop(screen, goal, g, obs_edge_set, input_points, ovl)
+            flag = RDT_loop(screen, goal, g, obs_edge_set, input_points, ovl)
+            if not flag:
+                random.shuffle(input_points)
             pafn.frame_draw_cross(screen, g, pafn.colors["red"])
             pafn.frame_draw_cross(screen, goal, pafn.colors["green"])
             pygame.display.update()
