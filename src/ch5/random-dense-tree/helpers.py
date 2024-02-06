@@ -229,12 +229,14 @@ def check_for_free_path(obs_edge_list, obs_vtx_list, origin_pt, target_pt):
     """
     distkey = lambda x: x[0]
     intersections = []
-    d, theta = mfn.car2pol(origin_pt, target_pt)
+    theta, d = mfn.car2pol(origin_pt,target_pt)
+    # print(d)
     for i,e in enumerate(obs_edge_list):
         print(e)
         p1, p2, = obs_vtx_list[e[0]].pt, obs_vtx_list[e[1]].pt
-        if test_for_intersection(p1, p2, origin_pt, theta):
+        if test_for_intersection(p1, p2, origin_pt, theta) or test_for_intersection(p2, p1, origin_pt, theta):
             npt = get_normal_pt((p1,p2), origin_pt)
             if dist(npt, origin_pt) < d:
                 return False
+                # continue
     return True
