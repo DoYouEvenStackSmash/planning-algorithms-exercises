@@ -49,7 +49,7 @@ def RDT_loop(screen, start, goal, obs_edge_set, input_points, obstacle_vertex_li
                 )
             else:
                 n = obstacle_vertex_list[f2[0]].pt
-            if dist(tpt, n) < 6:
+            if dist(tpt, n) < 1:
                 i += 1
                 continue
 
@@ -87,13 +87,31 @@ def RDT_loop(screen, start, goal, obs_edge_set, input_points, obstacle_vertex_li
                     p1, p2 = vlist[e[0]].pt, vlist[e[1]].pt
                     pafn.frame_draw_line(screen, (p1, p2), pafn.colors["red"])
             # compute the path between start and goal
-            pth = get_path(build_inverted_tree(list(edge_set), 0), 0, len(vlist) - 1)
-            # for e in pth:
+            path = get_path(build_inverted_tree(list(edge_set), 0), 0, len(vlist) - 1)
+            pts = [vlist[path[0][0]].pt]
+            pts.extend([vlist[path[i][1]].pt for i in range(len(path))])
+
+            vals = [pts[0]]
+            k = 1
+            for p in pts:
+                pafn.frame_draw_cross(screen, p, pafn.colors["indigo"])
+            # reversed(pts)
+            while len(vals) < len(pts) and k < len(pts):
+                c = len(pts) - 1
+                while c > k:
+                    if check_for_free_path(obs_edge_set, obstacle_vertex_list, vals[-1] ,pts[c]):
+                        vals.append(pts[c])
+                        k = c + 1
+                        
+                        break
+                    c-=1
                 
-            for j, p in enumerate(pth):
-                pafn.frame_draw_bold_line(
-                    screen, [vlist[p[0]].pt, vlist[p[1]].pt], pafn.colors["lawngreen"]
-                )
+                if c == k:
+                    vals.append(pts[k])
+                    k = k + 1
+            
+            for k in range(1,len(vals)):
+                pafn.frame_draw_ray(screen, vals[k-1],vals[k], pafn.colors["lawngreen"],True)            
             return True
     return False
 
@@ -135,7 +153,7 @@ def main():
             n = get_normal_pt((ovl[f2[0]].pt, ovl[f2[1]].pt), tpt)
         else:
             n = ovl[f2[0]].pt
-        if dist(tpt, n) < 5:
+        if dist(tpt, n) < 1:
             ips.remove(tpt)
     input_points = list(ips)
     
