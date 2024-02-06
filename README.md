@@ -13,8 +13,9 @@ Supporting Data Structures: Pointset, Polygon, Doubly Connected Edge List, Rigid
 - [Chapter 6: Combinatorial Motion Planning](https://msl.cs.uiuc.edu/planning/ch6.pdf)
   Vertical Cell Decomposition
 
+
 |           |
 |:---------:|
 | Rapidly exploring random tree ![Screenshot 2024-01-31 134206](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/22f1e8ec-e4b9-41a9-a427-0fcd1994da3f) | 
-| RRT with path optimization ![image](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/4b2ed443-3a22-418d-9806-151cba74d69b) |
+| Rapidly exploring random tree with path optimization ![Screenshot 2024-02-05 230922](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/42fa4758-7390-4bd3-8d71-9f3a79511874) | 
 | Vertical cell decomposition roadmap ![Screenshot 2024-01-31 133541](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/39452247-46f9-4fee-ba9a-4339eba4a78b) | 
