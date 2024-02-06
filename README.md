@@ -17,5 +17,5 @@ Supporting Data Structures: Pointset, Polygon, Doubly Connected Edge List, Rigid
 |           |
 |:---------:|
 | Rapidly exploring random tree ![Screenshot 2024-01-31 134206](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/22f1e8ec-e4b9-41a9-a427-0fcd1994da3f) | 
-| Rapidly exploring random tree with path optimization ![Screenshot 2024-02-05 230922](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/42fa4758-7390-4bd3-8d71-9f3a79511874) | 
+| Rapidly exploring random tree with path optimization ![image](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/8d423f6e-83e0-49fa-9cd2-d0946e33e78f) | 
 | Vertical cell decomposition roadmap ![Screenshot 2024-01-31 133541](https://github.com/DoYouEvenStackSmash/planning-algorithms-exercises/assets/42816626/39452247-46f9-4fee-ba9a-4339eba4a78b) | 
