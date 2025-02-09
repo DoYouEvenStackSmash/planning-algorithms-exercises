@@ -119,3 +119,50 @@ def get_path(el, start, end):
         marker = marker + 1
     path.reverse()
     return path
+
+def get_vtx_path(vl, start, end):
+    curr = end
+    pl = [curr]
+    while 1:
+        for c in vl[curr].adj:
+            if c < curr:
+                pl.append(c)
+                curr = c
+                break
+        if curr == start:
+            break
+    print(pl)
+    return pl
+
+
+import heapq
+
+def dijkstra(edges, start, end):
+    graph = {}
+    for edge in edges:
+        if edge[0] not in graph:
+            graph[edge[0]] = []
+        graph[edge[0]].append((edge[1], edge[2]))
+        
+    pq = [(0, start, [])]  # Priority queue (distance, node, path)
+    visited = set()
+    
+    while pq:
+        (cost, node, path) = heapq.heappop(pq)
+        if node not in visited:
+            path = path + [node]
+            if node == end:
+                return [(path[i], path[i+1], graph[path[i]][j][1]) for i in range(len(path)-1) for j in range(len(graph[path[i]])) if graph[path[i]][j][0] == path[i+1]]
+            visited.add(node)
+            for neighbor, weight in graph.get(node, []):
+                if neighbor not in visited:
+                    heapq.heappush(pq, (cost + weight, neighbor, path))
+    return None
+
+# # Example usage:
+# edges = [('A', 'B', 2), ('A', 'C', 5), ('B', 'C', 1), ('B', 'D', 6), ('C', 'D', 3)]
+# start_node = 'A'
+# end_node = 'D'
+
+# shortest_path = dijkstra(edges, start_node, end_node)
+# print(shortest_path)

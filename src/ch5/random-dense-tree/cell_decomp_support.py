@@ -55,7 +55,7 @@ class VerticalCellDecomposition:
         """
         M = VerticalCellDecomposition.get_normal_pt(A, B, C)
 
-        T = mfn.pol2car(C, 10, theta)
+        T = mfn.pol2car(C, 1, theta)
 
         gamma = VerticalCellDecomposition.test_get_delta_theta(M, C, T)
         dist = mfn.euclidean_dist(C, M)
