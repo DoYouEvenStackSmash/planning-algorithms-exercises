@@ -4,6 +4,7 @@ from render_support import MathFxns as mfn
 from render_support import TransformFxns as tfn
 from render_support import PygameArtFxns as pafn
 from cell_decomp_support import *
+import random
 
 
 class V:
@@ -80,6 +81,10 @@ def addV2E(vlist, edge_set, edge, v_idx):
     Adds a vertex to a chosen edge. removes the chosen edge
     """
     edge_set.remove(edge)
+    # vlist[edge[1]].adj.remove(edge[0])
+    # vlist[edge[1]].adj.add(v_idx)
+    # vlist[v_idx].adj.add(edge[0])
+    # vlist[v_idx].adj.add(edge[1])
     edge_set.add((edge[0], v_idx))
     edge_set.add((v_idx, edge[1]))
 
@@ -88,7 +93,10 @@ def addV2V(vlist, edge_set, sv_idx, v_idx):
     """
     Adds a new edge between source vertex and new vertex
     """
+    # vlist[sv_idx].adj.add(v_idx)
+    # vlist[v_idx].adj.add(sv_idx)
     edge_set.add((sv_idx, v_idx))
+    
 
 
 def get_normal_pt(edge, pt):
@@ -101,6 +109,7 @@ def get_normal_pt(edge, pt):
     Returns:
         _type_: single point
     """
+    return VerticalCellDecomposition.get_normal_pt(edge[0],edge[1], pt)
     a, b, c = (
         cart2complex(pt, edge[0]),
         cart2complex(pt, edge[1]),
@@ -161,7 +170,7 @@ def check_path(vlist, obs_edge_set, sv_idx, tpt, edge_set, ovl):
     theta, d = mfn.car2pol(sv, tpt)
 
     # check each obstacle edge for intersections
-    for e in obs_edge_set:
+    for i,e in enumerate(obs_edge_set):
         p1, p2 = ovl[e[0]].pt, ovl[e[1]].pt
         if test_for_intersection(p1, p2, sv, theta):
             # I = VerticalCellDecomposition.get_intersection_pt(p1, p2, sv, theta)
@@ -173,7 +182,7 @@ def check_path(vlist, obs_edge_set, sv_idx, tpt, edge_set, ovl):
     theta, d = mfn.car2pol(sv, tpt)
 
     flag = False
-    if min_st_dist > d:
+    if min_st_dist >= d:
         min_st_dist = d
         flag = True
 
@@ -213,7 +222,7 @@ def get_rand_sequence(k=32, ub=1000):
     Generates a random sequence of floats between 0,1000
     returns a sequence of points
     """
-    rng = np.random.default_rng(12345)
+    rng = np.random.default_rng(random.randint(10000,20000))
     rand_val = lambda: (rng.uniform()) * 700 + 130
     pl = []
     for i in range(k):
@@ -232,7 +241,7 @@ def check_for_free_path(obs_edge_list, obs_vtx_list, origin_pt, target_pt):
     theta, d = mfn.car2pol(origin_pt,target_pt)
     # print(d)
     for i,e in enumerate(obs_edge_list):
-        print(e)
+        # print(e)
         p1, p2, = obs_vtx_list[e[0]].pt, obs_vtx_list[e[1]].pt
         if test_for_intersection(p1, p2, origin_pt, theta) or test_for_intersection(p2, p1, origin_pt, theta):
             npt = get_normal_pt((p1,p2), origin_pt)

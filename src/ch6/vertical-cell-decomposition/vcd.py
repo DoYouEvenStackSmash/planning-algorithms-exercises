@@ -215,12 +215,83 @@ def refine_roadmap(dcel, vpl):
     return pair_list
 
 
+# # Define lambda functions for exponential, angle, and distance calculations using NumPy
+# exp = lambda x: np.exp(x)
+# ang = lambda x: np.angle(x)
+dist = lambda p1, p2: np.sqrt(np.square(p1[0] - p2[0]) + np.square(p1[1] - p2[1]))
+
+
+def get_normal_e_pt(edge, pt):
+    """Given an edge and a point, calculates the point on the edge which is closest to the target
+
+    Args:
+        edge (_type_): pair of points
+        pt (_type_): single point
+
+    Returns:
+        _type_: single point
+    """
+    a, b, c = (
+        cart2complex(pt, edge[0]),
+        cart2complex(pt, edge[1]),
+        cart2complex(edge[1], edge[0]),
+    )
+    if abs(c) == 0:
+        return pt
+
+    h = mag(a)
+    norm = lambda cv: cv / abs(cv)
+    theta = abs(np.angle(a / c))
+    d = h * np.cos(theta)
+    npt = complex2cart(norm(c) * d, edge[0])
+    return npt
+
+def test_for_intersection(A, B, C, theta):
+    """
+    Test function for determining whether vector at origin C with angle theta
+    intersects with the segment AB
+    Returns True/False
+    """
+    I = vcd.get_intersection_pt(A, B, C, theta)
+    T = mfn.pol2car(C, 0.2, theta)
+    test_distance = mfn.euclidean_dist(T, I)
+    curr_distance = mfn.euclidean_dist(C, I)
+
+    if test_distance > curr_distance:
+        return False
+
+    d1 = mfn.euclidean_dist(A, I)
+    d2 = mfn.euclidean_dist(B, I)
+    base_d = mfn.euclidean_dist(A, B)
+    if max(d1, d2) >= base_d:
+        return False
+    return True
+
+def alt_check_for_free_path(obs_edge_list, origin_pt, target_pt):
+    """
+    Determines whether vector with origin, angle, of length distance is free of obstacles
+    Returns True/False
+    """
+    distkey = lambda x: x[0]
+    intersections = []
+    theta, d = mfn.car2pol(origin_pt,target_pt)
+    # print(d)
+    for i,e in enumerate(obs_edge_list):
+        # print(e)
+        p1, p2, = e[0], e[1]
+        if test_for_intersection(p1, p2, origin_pt, theta) or test_for_intersection(p2, p1, origin_pt, theta):
+            npt = get_normal_e_pt((p1,p2), origin_pt)
+            if dist(npt, origin_pt) < d:
+                return False
+                # continue
+    return True
+
 def main():
     pygame.init()
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    ID, dcel = textbook_obj()
+    ID, dcel = test_obj_2()
 
     vpl = vertical_cell_decomposition(screen, dcel)
     pair_list = refine_roadmap(dcel, vpl)
@@ -240,7 +311,9 @@ def main():
     vol = list(vtx_pt_set)
     start, goal = pair_list[0][0], pair_list[len(pair_list) - 1][0]
     obstacle_space = dcel.construct_global_edge_list()
-
+    oel = [(v2pt(edge_vtx(e)),v2pt(get_adj_succ(edge_vtx(e)))) for e in obstacle_space]
+    pts = []        
+        
     while 1:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -253,9 +326,9 @@ def main():
         pafn.clear_frame(screen)
         draw_face(screen, dcel, ID)
         
-        for ed in tree_list:
-            p1, p2 = ed[0], ed[1]
-            pafn.frame_draw_line(screen, (p1, p2), pafn.colors["black"])
+        # for ed in tree_list:
+        #     p1, p2 = ed[0], ed[1]
+        #     pafn.frame_draw_line(screen, (p1, p2), pafn.colors["black"])
 
         nearest_landmark = get_nearest_landmark(obstacle_space, pair_list, goal)
         if nearest_landmark == None:
@@ -270,11 +343,38 @@ def main():
 
         tree_list = build_inverted_tree(pair_list, start)
         path_to_goal = get_path(tree_list, start, goal)
-
+        
+        pts = [path_to_goal[0][0]]
+        pts.extend([path_to_goal[i][1] for i in range(len(path_to_goal))])
+        x = len(pts)
+        for i in range(2):
+            vals = [pts[0]]
+            k = 1
+            # for p in pts:
+            #     pafn.frame_draw_cross(screen, p, pafn.colors["indigo"])
+            # reversed(pts)
+            while len(vals) < len(pts) and k < len(pts):
+                c = len(pts) - 1
+                while c > k:
+                    if alt_check_for_free_path(oel, vals[-1] ,pts[c]):
+                        vals.append(pts[c])
+                        k = c + 1
+                        
+                        break
+                    c-=1
+                
+                if c == k:
+                    vals.append(pts[k])
+                    k = k + 1
+            pts = vals
+        print(x - len(pts))
         pair_list.pop()
         pair_list.pop()
-
-        draw_path(screen, path_to_goal, pafn.colors["darker-green"])
+        
+        # draw_path(screen, path_to_goal, pafn.colors["darker-green"])
+        for k in range(1,len(pts)):
+            pafn.frame_draw_cross(screen, vals[k], pafn.colors["white"])
+            pafn.frame_draw_ray(screen, vals[k-1],vals[k], pafn.colors["red"]) 
         pafn.frame_draw_cross(screen, start, pafn.colors["red"])
         pafn.frame_draw_cross(screen, goal, pafn.colors["red"])
         pygame.display.update()

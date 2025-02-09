@@ -112,9 +112,12 @@ def convert_to_graphviz(nodelist):
     graph = Digraph(
         format="png"
     )  # You can choose the output format (e.g., 'png', 'pdf', 'svg', etc.)
+    ptdict = {}
+    for i,n in enumerate(nodelist):
 
+        n.id = i
     for n in nodelist:
-        node_label = f"{n.pt} : c{n.cut_dim}"
+        node_label = f"{n.id}"
         graph.node(str(n.id), label=node_label)
 
         if n.left:
@@ -123,9 +126,11 @@ def convert_to_graphviz(nodelist):
         if n.right:
             graph.edge(str(n.id), str(n.right.id))
 
-    graph.render(
-        filename="kd", cleanup=True, view=True
-    )  # Saves the output as 'kd.format' and opens it
+    # graph.render(
+    #     filename="kd", cleanup=True, view=True
+    # )  # Saves the output as 'kd.format' and opens it
+    graph.render('kd', format='svg')
+
 
 
 THRES = 1e-8
@@ -279,7 +284,7 @@ def main():
     screen = pafn.create_display(1000, 1000)
     pafn.clear_frame(screen)
 
-    T = 30
+    T = 10
     pairs = np.array(
         [(random.randint(1, 1000), random.randint(1, 1000)) for _ in range(T)]
     )
@@ -288,7 +293,8 @@ def main():
     # print(nodecount)
     # print(len(nodelist))
     traverse(screen, tr)
-    # convert_to_graphviz(nodelist)
+    convert_to_graphviz(nodelist)
+    sys.exit()
     last = None
     global search_count
     while 1:
